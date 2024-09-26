@@ -1,0 +1,5 @@
+# Ignore hidden files in backend
+/backend/.*
+
+# Ignore hidden files in frontend
+/frontend/.*
