@@ -3,3 +3,6 @@
 
 # Ignore hidden files in frontend
 /frontend/.*
+
+# Ignore venv
+/.venv
