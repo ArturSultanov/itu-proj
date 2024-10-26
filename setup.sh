@@ -9,6 +9,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 if [[ -f "requirements.txt" ]]; then
+    pip install --upgrade pip
     pip install -r requirements.txt
 else
     echo "requirements.txt not found. Please make sure it is in the current directory."
