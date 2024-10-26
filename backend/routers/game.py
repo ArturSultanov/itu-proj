@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from models import GameState
-from services.game_service import load_game_state, save_game_state
+from backend.gamelogic.models import GameState
+from backend.gamelogic.map_actions import load_game_state, save_game_state
 
 router = APIRouter()
 

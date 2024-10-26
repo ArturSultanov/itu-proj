@@ -8,10 +8,10 @@ class GameState(Enum):
     PAUSED = "paused"
 
 class Gem(Enum):
-    RED = 0
-    YELLOW = 1
-    GREEN = 2
-    BLUE = 3
+    STONE1 = 0
+    STONE2 = 1
+    STONE3 = 2
+    STONE4 = 3
     BOMB = 4
     HEART = 5
 
