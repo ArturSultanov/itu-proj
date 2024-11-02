@@ -1,6 +1,6 @@
 import os
 import json
-from models import Gem, GameState, BoardState
+from backend.app.database.models import Gem, GameState, BoardState
 
 
 def get_file_path(user_id: str) -> str:

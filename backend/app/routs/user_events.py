@@ -1,4 +1,4 @@
-from .models import Gem, GameState, BoardState
+from ..database.models import Gem, GameState, BoardState
 # from backend.utils.board_generator import generate_game_board
 
 # Swap two gems on the board

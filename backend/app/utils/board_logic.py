@@ -1,5 +1,5 @@
 from typing import Tuple, Set, Dict, List
-from models import Gem, GameState, BoardState
+from backend.app.database.models import Gem, GameState, BoardState
 import random
 
 # Check for matches of three or more
