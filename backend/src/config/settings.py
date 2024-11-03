@@ -1,19 +1,13 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DB_PATH: str = "sqlite:///./game.db"  # Relative path to the SQLite database file
+    DATABASE_URL: str = "sqlite+aiosqlite:///./game.db"  # Full URL with async support
     WEB_HOST: str = "127.0.0.1"
     WEB_PORT: int = 8000
     SQL_ALCHEMY_DEBUG: bool = False
-    GAME_DIFFICULTY: str = "normal"  # Уровень сложности: 'easy', 'normal', 'hard'
-
-
-    @property
-    def database_url(self) -> str:
-        return self.DB_PATH
+    GAME_DIFFICULTY: str = "normal"  # Difficulty level: 'easy', 'normal', 'hard'
 
     class Config:
         env_file = ".env"
 
-# Создание экземпляра настроек
 settings = Settings()

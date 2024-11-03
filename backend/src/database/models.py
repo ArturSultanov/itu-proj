@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, text
+from sqlalchemy import Column, Integer, String, ForeignKey, text, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+import datetime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.types import JSON
 from .database import Base, Str256, Str2048
@@ -40,7 +42,7 @@ class GameOrm(Base):
     current_score: Mapped[int] = mapped_column(default=0, nullable=False)  # Current score in the game
     moves_left: Mapped[int] = mapped_column(default=0, nullable=False)  # Remaining moves in the game
     board_status: Mapped[Str2048] = mapped_column(JSON, nullable=False)  # Game board status stored as JSON
-    created_at: Mapped[datetime.datetime] = mapped_column(datetime.datetime, server_default=text("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"), nullable=False)  # Timestamp for game creation
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     gamer_id: Mapped[int] = mapped_column(ForeignKey("players.id", ondelete="CASCADE"))  # Associated player ID
 
     # Relationship with the Player table
