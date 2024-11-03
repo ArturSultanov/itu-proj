@@ -8,7 +8,7 @@ import json
 
 intpk = Annotated[int, mapped_column(primary_key=True, index=True)]
 
-class Player(Base):
+class PlayerOrm(Base):
     """
     Table for storing information about players.
     Each row represents a single player with their associated information.
@@ -27,9 +27,9 @@ class Player(Base):
     current_game: Mapped[int | None] = mapped_column(ForeignKey('games.id'), nullable=True)  # Current game ID (nullable)
 
     # Relationship with the Game table
-    games: Mapped[List["Game"]] = relationship('Game', back_populates='player', order_by="Game.created_at.desc()",)
+    games: Mapped[List["GameOrm"]] = relationship('GameOrm', back_populates='player', order_by="GameOrm.created_at.desc()",)
 
-class Game(Base):
+class GameOrm(Base):
     """
     Table for storing information about games.
     Each row represents a single game with its associated state and metadata.
@@ -44,7 +44,7 @@ class Game(Base):
     gamer_id: Mapped[int] = mapped_column(ForeignKey("players.id", ondelete="CASCADE"))  # Associated player ID
 
     # Relationship with the Player table
-    player: Mapped["Player"] = relationship('Player', back_populates='games')
+    player: Mapped["PlayerOrm"] = relationship('PlayerOrm', back_populates='games')
 
     def set_board_status(self, board_state: List[List[int]]):
         """Set the board status as a JSON-encoded string."""

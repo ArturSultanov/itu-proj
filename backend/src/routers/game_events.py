@@ -1,5 +1,10 @@
+from fastapi import APIRouter
 from ..database.models import Gem, GameState, BoardState
 # from backend.utils.board_generator import generate_game_board
+
+router = APIRouter(
+    prefix="/game",
+)
 
 # Swap two gems on the board
 def swap_gems(board: BoardState, pos1: tuple[int, int], pos2: tuple[int, int]) -> None:

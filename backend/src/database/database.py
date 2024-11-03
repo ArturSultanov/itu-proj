@@ -5,6 +5,16 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 from config.settings import settings
 from src.database.models import Player
 
+engine = create_engine(
+    url=settings.database_url,
+    echo=settings.SQL_ALCHEMY_DEBUG,
+    pool_size=10,
+    max_overflow=10
+)
+
+session_factory = sessionmaker(bind=engine)
+
+
 # Type aliases for convenience
 Str256 = typingAnnotated[str, String(256)]
 Str2048 = typingAnnotated[str, String(2048)]
@@ -15,14 +25,8 @@ class Base(DeclarativeBase):
         Str2048: String(2048)
     }
 
-engine = create_engine(
-    url=settings.database_url,
-    echo=settings.SQL_ALCHEMY_DEBUG,
-    pool_size=10,
-    max_overflow=10
-)
-
-session_factory = sessionmaker(bind=engine)
+def create_all_tables():
+    Base.metadata.create_all(engine)
 
 def get_db_session() -> Generator[Session, None, None]:
     """

@@ -3,33 +3,19 @@ from typing import Dict
 from src.database import Base, engine
 import json
 
-app = FastAPI()
+from contextlib import asynccontextmanager
 
 # In-memory user session storage
 user_sessions: Dict[str, dict] = {}
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+   # Create the database tables on startup
+    Base.metadata.create_all()
+    
+    yield
+
+
 @app.get("/")
-async def print_hello():
-    message = "Hello, what are you looking for here? 🐸"
-    return message
-
-# Enter user_id
-@app.get("/login/{user_id}")
-async def login(user_id: str):
-    pass
-
-# Start new game
-@app.post("/newgame/{user_id}")
-async def newgame(user_id: str):
-    pass
-
-@app.get("/continuegame/{user_id}")
-async def continuegame(user_id: str):
-    pass
-
-
-@app.get("/leaderboard/{page}")
-async def show_leaderboard(page: int):
-    pass
-
-Base.metadata.create_all(engine)
+async def index(request: Request, session: session_dependency):
+    return templates.TemplateResponse("index.html", {"request": request, "user": session.user}, status_code=HTTP_200_OK)
