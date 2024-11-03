@@ -61,14 +61,17 @@ async def get_or_create_player(login: str, db: db_dependency):
     try:
         await db.commit()
         await db.refresh(new_player)
+        
+        result = await db.execute(
+            select(PlayerOrm).where(PlayerOrm.id == new_player.id).options(selectinload(PlayerOrm.games))
+        )
+        loaded_player = result.scalars().first()
 
-        # Ensure the refreshed new player is an instance of PlayerOrm
-        # loaded_player = await db.get(PlayerOrm, new_player.id, options=[selectinload(PlayerOrm.games)])
-        # if not isinstance(loaded_player, PlayerOrm):
-        #     raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
+        if not loaded_player:
+            raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
 
-        # player_dto = PlayerDTO.model_validate(loaded_player)
-        # current_player.load_player(player_dto)
+        player_dto = PlayerDTO.model_validate(loaded_player)
+        current_player.load_player(player_dto)
 
     except IntegrityError:
         await db.rollback()
