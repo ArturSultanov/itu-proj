@@ -1,5 +1,6 @@
 from typing import Tuple, Set, Dict, List
-from backend.app.database.models import Gem, GameState, BoardState
+from schemas.schemas import Gem, BoardState
+
 import random
 
 # Check for matches of three or more
@@ -96,3 +97,25 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Dict[Tuple
         new_gems[(row, col)] = new_gem  # Record the new gem and its position
 
     return new_gems
+
+
+# Generate a game board with no initial matches
+def generate_game_board(size: int = 6) ->  List[List[int]]:
+    def check_gems(board, gem, row, col):
+        if col >= 2 and board[row][col - 1] == gem and board[row][col - 2] == gem:
+            return False
+        if row >= 2 and board[row - 1][col] == gem and board[row - 2][col] == gem:
+            return False
+        return True
+
+    board = [[None for _ in range(size)] for _ in range(size)]
+
+    for row in range(size):
+        for col in range(size):
+            gem: Gem = Gem(random.randint(0, 3))
+            while not check_gems(board, gem, row, col):
+                gem: Gem = Gem(random.randint(0, 3))
+            board[row][col] = int (gem.value)  # Store the integer value instead of the enum object
+
+    # Return the board wrapped in a BoardState instance
+    return board
