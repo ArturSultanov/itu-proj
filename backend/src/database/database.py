@@ -1,9 +1,9 @@
 from typing import Annotated as typingAnnotated
-
 from fastapi import Depends
 from sqlalchemy import create_engine, String
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
-from app.config import settings
+from config.settings import settings
+from src.database.models import Player
 
 engine = create_engine(
     url=settings.database_url,
@@ -11,8 +11,6 @@ engine = create_engine(
     pool_size=10,
     max_overflow=10
 )
-
-session_factory = sessionmaker(bind=engine)
 
 Str256 = typingAnnotated[str, String(256)]
 
@@ -24,13 +22,13 @@ class Base(DeclarativeBase):
         Str2048: String(2048)
     }
 
-# Generator to get a session from the session factory
-# todo
-def get_db() -> Session:
-    db = session_factory()
-    try:
-        yield db
-    finally:
-        db.close()
-
-db_dependency = typingAnnotated[Session, Depends(get_db)]
+class DBSession:
+    def __init__(self) -> None:
+        self.session_factory = sessionmaker(bind=engine)
+    
+    def update_player_login(player_id: int, new_login: Str256):
+        with self.session_factory() as session:
+            player = session.get(Player, player_id)
+            player.login = new_login
+            session.refresh(player)
+            session.commit()

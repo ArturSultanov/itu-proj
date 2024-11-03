@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from typing import Dict
+from src.database import Base, engine
 import json
 
 app = FastAPI()
@@ -31,14 +32,4 @@ async def continuegame(user_id: str):
 async def show_leaderboard(page: int):
     pass
 
-# @app.post("/start_level/{user_id}/{level_id}")
-# async def start_level(user_id: str, level_id: int):
-#     level_data = load_level(level_id)
-#     # Initialize user session
-#     user_sessions[user_id] = {
-#         "current_level": level_id,
-#         "score": 0,
-#         "moves_left": level_data["max_moves"],
-#         "board_state": level_data["initial_board"]
-#     }
-#     return {"message": f"Level {level_id} started for user {user_id}"}
+Base.metadata.create_all(engine)

@@ -1,7 +1,7 @@
 from pydantic import BaseSettings
 
 class Settings(BaseSettings):
-    DB_PATH: str = "sqlite:///./game.db"  # Путь к базе данных SQLite
+    DB_PATH: str = "sqlite:///./game.db"  # Relative path to the SQLite database file
     WEB_HOST: str = "127.0.0.1"
     WEB_PORT: int = 8000
     SQL_ALCHEMY_DEBUG: bool = False
