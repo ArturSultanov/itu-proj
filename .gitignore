@@ -9,4 +9,6 @@
 
 .vscode
 
+*.sql
+
 *__pycache__
