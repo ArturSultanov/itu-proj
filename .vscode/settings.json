@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "app_db",
+            "database": "${workspaceFolder:itu-proj}/backend/game.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}
