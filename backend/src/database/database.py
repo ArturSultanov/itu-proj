@@ -5,14 +5,14 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 from config.settings import settings
 from src.database.models import Player
 
-engine = create_engine(
-    url=settings.database_url,
-    echo=settings.SQL_ALCHEMY_DEBUG,
-    pool_size=10,
-    max_overflow=10
-)
+import asyncio
+from typing import Annotated
 
-session_factory = sessionmaker(bind=engine)
+from sqlalchemy import String, create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from config import settings
 
 
 # Type aliases for convenience
@@ -25,8 +25,14 @@ class Base(DeclarativeBase):
         Str2048: String(2048)
     }
 
-def create_all_tables():
-    Base.metadata.create_all(engine)
+
+async_engine = create_async_engine(
+    url=settings.database_url,
+    echo=settings.SQL_ALCHEMY_DEBUG
+)
+
+session_factory = async_sessionmaker(bind=async_engine)
+
 
 def get_db_session() -> Generator[Session, None, None]:
     """
@@ -40,3 +46,9 @@ def get_db_session() -> Generator[Session, None, None]:
 
 
 db_dependency = typingAnnotated[Session, Depends(get_db_session)]
+
+async def create_tables():
+    # https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#synopsis-core
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
