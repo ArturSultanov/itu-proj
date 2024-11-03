@@ -1,14 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from enum import Enum
+import datetime
 
-# Определение перечисления статусов игры
-class GameStatusEnum(Enum):
-    IN_GAME = "in_game"
-    OUT_GAME = "out_game"
-    PAUSED = "paused"
-
-# Определение перечисления типов драгоценных камней
+# Enum for types of gems
 class Gem(Enum):
     GEM1 = 0
     GEM2 = 1
@@ -17,36 +12,31 @@ class Gem(Enum):
     BOMB = 4
     HEART = 5
 
-# Модель для состояния игрового поля
+# Schema for board state
 class BoardState(BaseModel):
-    board_state: List[List[Gem]]  # Матрица, представляющая игровое поле
-    
-# Схема для модели игрока
-class PlayerBase(BaseModel):
-    login: str
-    highest_score: int
+    board_state: List[List[Gem]]  # Matrix representing the game board
 
-class PlayerCreate(PlayerBase):
-    pass
-
-class PlayerResponse(PlayerBase):
+# Schema for game data transfer object
+class GameDTO(BaseModel):
     id: int
-
-    class Config:
-        orm_mode = True
-
-# Схема для модели игры
-class GameBase(BaseModel):
     current_score: int
     moves_left: int
     board_status: BoardState
-
-class GameCreate(GameBase):
-    gamer_id: int
-
-class GameResponse(GameBase):
-    id: int
-    gamer_id: int
+    created_at: datetime.datetime
+    gamer_id: int  # Should be an int, representing the foreign key to PlayerOrm
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+# Schema for adding a new player
+class PlayerAddDTO(BaseModel):
+    login: str
+
+# Schema for player data transfer object
+class PlayerDTO(PlayerAddDTO):
+    id: int
+    highest_score: int
+    games: Optional[List[GameDTO]]  # Optional list of games associated with the player
+
+    class Config:
+        from_attributes = True

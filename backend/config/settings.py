@@ -4,7 +4,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./game.db"  # Full URL with async support
     WEB_HOST: str = "127.0.0.1"
     WEB_PORT: int = 8000
-    SQL_ALCHEMY_DEBUG: bool = False
+    SQL_ALCHEMY_DEBUG: bool = True
     GAME_DIFFICULTY: str = "normal"  # Difficulty level: 'easy', 'normal', 'hard'
 
     class Config:

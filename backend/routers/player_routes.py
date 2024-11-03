@@ -1,4 +1,3 @@
-# backend/src/routers/player_routes.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -6,8 +5,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from database.models import PlayerOrm
 from database.database import db_dependency
-from schemas.schemas import PlayerResponse
+from schemas.schemas import PlayerDTO, PlayerAddDTO
 from typing import Dict
+from starlette import status
 
 # In-memory cache to store player instances
 player_cache: Dict[str, PlayerOrm] = {}
@@ -18,12 +18,20 @@ player_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
-@player_router.get("/{login}", response_model=PlayerResponse)
-async def get_or_create_player(login: str, db: AsyncSession = Depends(db_dependency)):
+@player_router.get("/test/{login}")
+async def get_or_create_player(login: str, db: db_dependency):
+    return {"login": login}
+
+@player_router.get("/{login}", status_code=status.HTTP_200_OK)
+async def get_or_create_player(login: str, db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
     Cache the player instance in memory after the first retrieval.
     """
+
+
+
+    print("get_or_create_player")
     # Check if the player is already cached
     if login in player_cache:
         return player_cache[login]  # Return the cached player
@@ -38,6 +46,9 @@ async def get_or_create_player(login: str, db: AsyncSession = Depends(db_depende
         # Cache the player instance and return it
         player_cache[login] = player
         return player
+
+
+
 
     # If the player is not found, create a new one
     new_player = PlayerOrm(login=login, highest_score=0)
