@@ -1,11 +1,19 @@
-from contextlib import asynccontextmanager
+import uvicorn
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+from contextlib import asynccontextmanager
+
 from config.settings import settings
 from database.database import create_tables, async_engine
-import uvicorn
+from routers.player_routes import player_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.include_router(player_router)
+
+    #app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
+
     # Initialization logic (e.g., creating tables or setting up connections)
     print("Starting up the app...")
     await create_tables()  # Ensures tables are created at startup

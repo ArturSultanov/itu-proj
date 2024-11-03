@@ -31,7 +31,6 @@ class PlayerCreate(PlayerBase):
 
 class PlayerResponse(PlayerBase):
     id: int
-    current_game: Optional[int]
 
     class Config:
         orm_mode = True
