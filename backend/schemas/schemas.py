@@ -30,12 +30,12 @@ class GameDTO(BaseModel):
 
 # Schema for adding a new player
 class PlayerAddDTO(BaseModel):
-    login: str
+    login: Optional[str]
 
 # Schema for player data transfer object
 class PlayerDTO(PlayerAddDTO):
-    id: int
-    highest_score: int
+    id: Optional[int]
+    highest_score: Optional[int]
     games: Optional[List[GameDTO]]  # Optional list of games associated with the player
 
     class Config:

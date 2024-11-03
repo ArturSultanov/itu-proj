@@ -6,11 +6,9 @@ from sqlalchemy.orm import selectinload
 from database.models import PlayerOrm
 from database.database import db_dependency
 from schemas.schemas import PlayerDTO, PlayerAddDTO
-from typing import Dict
+from typing import Dict, Optional
 from starlette import status
-
-# In-memory cache to store player instances
-player_cache: Dict[str, PlayerOrm] = {}
+from config.state_manager import current_player
 
 player_router = APIRouter(
     prefix="/player",
@@ -18,9 +16,25 @@ player_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
-@player_router.get("/test/{login}")
-async def get_or_create_player(login: str, db: db_dependency):
-    return {"login": login}
+@player_router.get("/current_player", status_code=status.HTTP_200_OK, response_model=Optional[PlayerDTO])
+async def get_current_player():
+    """
+    Retrieve the currently loaded player from memory.
+    """
+    if current_player.data is None:
+        raise HTTPException(status_code=404, detail="No current player is loaded.")
+    return current_player.data
+
+@player_router.get("/all", status_code=status.HTTP_200_OK, response_model=list[PlayerDTO])
+async def get_all_players(db: db_dependency):
+    """
+    Retrieve all players from the database with their associated games.
+    """
+    result = await db.execute(
+        select(PlayerOrm).options(selectinload(PlayerOrm.games))
+    )
+    players = result.scalars().all()
+    return players
 
 @player_router.get("/{login}", status_code=status.HTTP_200_OK)
 async def get_or_create_player(login: str, db: db_dependency):
@@ -28,13 +42,6 @@ async def get_or_create_player(login: str, db: db_dependency):
     Get player by login. If the player does not exist, create a new player and return it.
     Cache the player instance in memory after the first retrieval.
     """
-
-
-
-    print("get_or_create_player")
-    # Check if the player is already cached
-    if login in player_cache:
-        return player_cache[login]  # Return the cached player
 
     # Query the database if the player is not cached
     result = await db.execute(
@@ -44,11 +51,9 @@ async def get_or_create_player(login: str, db: db_dependency):
 
     if player:
         # Cache the player instance and return it
-        player_cache[login] = player
+        player_dto = PlayerDTO.model_validate(player)
+        current_player.load_player(player_dto)
         return player
-
-
-
 
     # If the player is not found, create a new one
     new_player = PlayerOrm(login=login, highest_score=0)
@@ -56,8 +61,15 @@ async def get_or_create_player(login: str, db: db_dependency):
     try:
         await db.commit()
         await db.refresh(new_player)
-        # Cache the newly created player
-        player_cache[login] = new_player
+
+        # Ensure the refreshed new player is an instance of PlayerOrm
+        # loaded_player = await db.get(PlayerOrm, new_player.id, options=[selectinload(PlayerOrm.games)])
+        # if not isinstance(loaded_player, PlayerOrm):
+        #     raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
+
+        # player_dto = PlayerDTO.model_validate(loaded_player)
+        # current_player.load_player(player_dto)
+
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=500, detail="Failed to create new player due to a database error.")

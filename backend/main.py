@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from contextlib import asynccontextmanager
 
-from config.settings import settings
+from config.state_manager import settings
 from database.database import create_tables, async_engine
 from routers.player_routes import player_router
 
@@ -26,12 +26,12 @@ async def lifespan(app: FastAPI):
         await async_engine.dispose()  # Properly close the async engine
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(player_router)
+
 
 
 @app.get("/")
 async def read_root():
-    return {"message": "Hello, world!"}
+    return {"Hello!"}
 
 
 if __name__ == "__main__":
