@@ -18,16 +18,13 @@ class Gem(Enum):
 class BoardState(BaseModel):
     board_state: List[List[Gem]]  # Matrix representing the game board
 
-# Schema for game data transfer object
 class GameDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: NonNegativeInt
-    current_score: NonNegativeInt
-    moves_left: NonNegativeInt
+    current_score: int
+    moves_left: int
     board_status: List[List[int]]
     created_at: datetime.datetime
-    player_id: NonNegativeInt  # Should be an int, representing the foreign key to PlayerOrm
-    player: NonNegativeInt
+
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):

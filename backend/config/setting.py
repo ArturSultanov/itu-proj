@@ -33,29 +33,29 @@ class CurrentPlayer:
         """Check if the current player data is loaded."""
         return self.data is not None
 
-    def update_board(self, new_gems: Dict[Tuple[int, int], Gem]):
-        """Update the current player's game board with new gems."""
-        if not self.is_loaded() or not self.data.games:
-            raise ValueError("No current game data available.")
-
-        current_game = self.data.games[0]  # Assuming only one active game at a time
-        board = current_game.board_status.board_state  # Access the board state
-
-        for (row, col), gem in new_gems.items():
-            board[row][col] = gem
-
-        # Update the modified board in the current player data
-        current_game.board_status.board_state = board
-
-    def sync_with_database(self, db_session):
-        """Sync the current player data with the database."""
-        if not self.is_loaded():
-            raise ValueError("No current player data to sync.")
-
-        # Convert PlayerDTO to the ORM model and save to the database
-        # Example: Logic to update PlayerOrm using `db_session`
-        # TODO
-        pass
+    # def update_board(self, new_gems: Dict[Tuple[int, int], Gem]):
+    #     """Update the current player's game board with new gems."""
+    #     if not self.is_loaded() or not self.data.games:
+    #         raise ValueError("No current game data available.")
+    #
+    #     current_game = self.data.games[0]  # Assuming only one active game at a time
+    #     board = current_game.board_status.board_state  # Access the board state
+    #
+    #     for (row, col), gem in new_gems.items():
+    #         board[row][col] = gem
+    #
+    #     # Update the modified board in the current player data
+    #     current_game.board_status.board_state = board
+    #
+    # def sync_with_database(self, db_session):
+    #     """Sync the current player data with the database."""
+    #     if not self.is_loaded():
+    #         raise ValueError("No current player data to sync.")
+    #
+    #     # Convert PlayerDTO to the ORM model and save to the database
+    #     # Example: Logic to update PlayerOrm using `db_session`
+    #     # TODO
+    #     pass
 
 # Create a singleton-like instance of CurrentPlayer
 current_player = CurrentPlayer()
