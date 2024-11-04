@@ -25,6 +25,7 @@ async def get_current_player():
         raise HTTPException(status_code=404, detail="No current player is loaded.")
     return current_player.data
 
+
 @player_router.get("/all", status_code=status.HTTP_200_OK, response_model=list[PlayerDTO])
 async def get_all_players(db: db_dependency):
     """
@@ -36,6 +37,7 @@ async def get_all_players(db: db_dependency):
     players = result.scalars().all()
     return players
 
+# TODO: return DTO Player type
 @player_router.get("/{login}", status_code=status.HTTP_200_OK)
 async def get_or_create_player(login: str, db: db_dependency):
     """
