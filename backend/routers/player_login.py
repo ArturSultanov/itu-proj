@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from starlette import status
@@ -16,7 +17,7 @@ player_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
-@player_router.post("/", status_code=status.HTTP_200_OK, response_model=PlayerDTO | None)
+@player_router.post("/", status_code=status.HTTP_200_OK, response_model=PlayerDTO)
 async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
@@ -29,40 +30,48 @@ async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
     result = await db.execute(
         select(PlayerOrm).where(PlayerOrm.login == login).options(selectinload(PlayerOrm.last_game))
     )
-    player = result.scalars().first()
+    player_result = result.scalars().first()
 
-    if player:
-        print("Player found:", player)
-        player_dto = PlayerDTO.model_validate(player)
-        print("Player DTO created:", player_dto)
+    if player_result:
+        player_dto = PlayerDTO.model_validate(player_result)
         return player_dto
-    else:
-        print("No player found")
-        return None
 
-    # # If the player is not found, create a new one
-    # new_player = PlayerOrm(login=login, highest_score=0)
-    # db.add(new_player)
-    # try:
-    #     await db.commit()
-    #     await db.refresh(new_player)
-    #
-    #     result = await db.execute(
-    #         select(PlayerOrm).where(PlayerOrm.id == new_player.id).options(selectinload(PlayerOrm.games))
-    #     )
-    #     loaded_player = result.scalars().first()
-    #
-    #     if not loaded_player:
-    #         raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
-    #
-    #     player_dto = PlayerDTO.model_validate(loaded_player)
-    #     current_player.load_player(player_dto)
-    #
-    # except IntegrityError:
-    #     await db.rollback()
-    #     raise HTTPException(status_code=500, detail="Failed to create new player due to a database error.")
-    #
-    # return new_player  # Return the newly created player
+    # If the player is not found, create a new one
+    new_player = PlayerOrm(login=login, highest_score=0)
+    db.add(new_player)
+    try:
+        await db.commit()
+        await db.refresh(new_player)
+        # Select created user because of async engine
+        result = await db.execute(
+            select(PlayerOrm).where(PlayerOrm.id == new_player.id).options(selectinload(PlayerOrm.last_game))
+        )
+
+        player_result = result.scalars().first()
+
+        if not player_result:
+            raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
+
+        player_dto = PlayerDTO.model_validate(player_result)
+        current_player.load_player(player_dto)
+        return player_dto
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create new player due to a database error.")
+
+
+#
+# @player_router.post("/", status_code=status.HTTP_200_OK, response_model=PlayerDTO)
+# async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
+
+
+
+
+
+
+
+
+
 
 
 @player_router.get("/current_player", status_code=status.HTTP_200_OK, response_model=Optional[PlayerDTO])

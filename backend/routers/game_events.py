@@ -36,7 +36,7 @@ async def create_new_game(db: db_dependency):
         moves_left=30,  # Initial number of moves (adjust as needed)
         board_status=new_board,
         created_at=datetime.now(timezone.utc),
-        gamer_id=player_id,
+        player_id=player_id,
     )
     # new_game.set_board_status(new_board)
 

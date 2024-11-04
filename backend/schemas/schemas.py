@@ -26,7 +26,8 @@ class GameDTO(BaseModel):
     moves_left: NonNegativeInt
     board_status: List[List[int]]
     created_at: datetime.datetime
-    gamer_id: NonNegativeInt  # Should be an int, representing the foreign key to PlayerOrm
+    player_id: NonNegativeInt  # Should be an int, representing the foreign key to PlayerOrm
+    player: NonNegativeInt
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):
