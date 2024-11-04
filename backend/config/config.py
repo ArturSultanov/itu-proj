@@ -1,9 +1,8 @@
 from enum import Enum
-from pydantic_settings import BaseSettings
-from typing import List, Optional, Dict, Tuple
-from schemas.schemas import PlayerDTO, BoardState, Gem
-import json
+from typing import Optional, Dict, Tuple
 
+from pydantic_settings import BaseSettings
+from backend.schemas import PlayerDTO, Gem
 
 class Difficulty(Enum):
     EASY = "easy"

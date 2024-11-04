@@ -1,7 +1,9 @@
-from pydantic import BaseModel
-from typing import List, Optional
-from enum import Enum
 import datetime
+from enum import Enum
+from typing import List, Optional, Annotated
+
+from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt
+
 
 # Enum for types of gems
 class Gem(Enum):
@@ -18,25 +20,21 @@ class BoardState(BaseModel):
 
 # Schema for game data transfer object
 class GameDTO(BaseModel):
-    id: int
-    current_score: int
-    moves_left: int
+    model_config = ConfigDict(from_attributes=True)
+    id: NonNegativeInt
+    current_score: NonNegativeInt
+    moves_left: NonNegativeInt
     board_status: List[List[int]]
     created_at: datetime.datetime
-    gamer_id: int  # Should be an int, representing the foreign key to PlayerOrm
-
-    class Config:
-        from_attributes = True
+    gamer_id: NonNegativeInt  # Should be an int, representing the foreign key to PlayerOrm
 
 # Schema for adding a new player
 class PlayerAddDTO(BaseModel):
-    login: str
+    model_config = ConfigDict(from_attributes=True)
+    login: Annotated[str, StringConstraints(max_length=256)]
 
 # Schema for player data transfer object
 class PlayerDTO(PlayerAddDTO):
-    id: int
-    highest_score: int
+    id: NonNegativeInt
+    highest_score: NonNegativeInt
     last_game: Optional[GameDTO]  # Optional list of games associated with the player
-
-    class Config:
-        from_attributes = True

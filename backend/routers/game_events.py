@@ -1,14 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
-from database.models import GameOrm, PlayerOrm
-from database.database import db_dependency
-from schemas.schemas import GameDTO, BoardState
-from utils.board import generate_game_board
-from config.state_manager import current_player
+
+from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, HTTPException, status
+
+from backend.config import current_player
+from backend.database import db_dependency
+from backend.database import GameOrm
+from backend.schemas import GameDTO
+from backend.utils import generate_game_board
 
 # Create a new router for game logic
 game_router = APIRouter(

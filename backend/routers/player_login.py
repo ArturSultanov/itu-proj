@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException
 from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
-from database.models import PlayerOrm
-from database.database import db_dependency
-from schemas.schemas import PlayerDTO, PlayerAddDTO
-from typing import Dict, Optional
 from starlette import status
-from config.state_manager import current_player
+
+from backend.config import current_player
+from backend.database import db_dependency
+from backend.database import PlayerOrm
+from backend.schemas import PlayerDTO, PlayerAddDTO
+
 
 player_router = APIRouter(
     prefix="/player",
@@ -32,7 +33,7 @@ async def get_all_players(db: db_dependency):
     Retrieve all players from the database with their associated games.
     """
     result = await db.execute(
-        select(PlayerOrm).options(selectinload(PlayerOrm.games))
+        select(PlayerOrm).options(selectinload(PlayerOrm.last_game))
     )
     players = result.scalars().all()
     return players
@@ -49,7 +50,7 @@ async def get_or_create_player(player: PlayerAddDTO, db: db_dependency):
 
     # Query the database if the player is not cached
     result = await db.execute(
-        select(PlayerOrm).where(PlayerOrm.login == login).options(selectinload(PlayerOrm.games))
+        select(PlayerOrm).where(PlayerOrm.login == login).options(selectinload(PlayerOrm.last_game))
     )
     player = result.scalars().first()
 

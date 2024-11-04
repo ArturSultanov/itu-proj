@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, text, DateTime, JSON
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .database import Base, Str256
-from typing import List, Annotated, Optional
-import json
 import datetime
+import json
+from typing import List, Annotated, Optional
+
+from sqlalchemy import ForeignKey, text, DateTime, JSON
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from backend.database import Base, Str256
 
 intpk = Annotated[int, mapped_column(primary_key=True, index=True)]
 
@@ -38,10 +40,3 @@ class GameOrm(Base):
     # Relationship with the Player table
     player: Mapped["PlayerOrm"] = relationship('PlayerOrm', back_populates='games')
 
-    def set_board_status(self, board_state: List[List[int]]):
-        """Set the board status as a JSON-encoded string."""
-        self.board_status = json.dumps(board_state)
-
-    def get_board_status(self) -> List[List[int]]:
-        """Get the board status as a Python list."""
-        return json.loads(self.board_status)

@@ -1,19 +1,17 @@
 from typing import Annotated as typingAnnotated, AsyncGenerator
+
 from fastapi import Depends
 from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from config.state_manager import settings
+from sqlalchemy.orm import DeclarativeBase
+
+from backend.config import settings
 
 # Type aliases for convenience
 Str256 = typingAnnotated[str, String(256)]
-Str2048 = typingAnnotated[str, String(2048)]
 
 class Base(DeclarativeBase):
-    type_annotation_map = {
-        Str256: String(256),
-        Str2048: String(2048)
-    }
+    type_annotation_map = {Str256: String(256)}
 
 # Create the async engine with debug echo set based on settings
 async_engine = create_async_engine(settings.DATABASE_URL, echo=settings.SQL_ALCHEMY_DEBUG)

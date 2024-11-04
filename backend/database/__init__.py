@@ -1,4 +1,6 @@
-# backend/src/database/__init__.py
+__all__ = ["Base", "create_tables", "delete_tables", "async_engine", "db_dependency",
+           "PlayerOrm", "GameOrm", "Str256"]
 
-from .database import Base  # Import the base class for models
-from .models import PlayerOrm, GameOrm  # Import the models to register them with Base
+# Import the submodules
+from .database import Base, create_tables, delete_tables, async_engine, db_dependency, Str256
+from .models import PlayerOrm, GameOrm

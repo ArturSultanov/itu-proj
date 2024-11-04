@@ -1,18 +1,18 @@
-import uvicorn
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-
 from contextlib import asynccontextmanager
 
-from config.state_manager import settings
-from database.database import create_tables, async_engine, delete_tables
-from routers.player_login import player_router
-from routers.game_events import game_router
+import uvicorn
+from fastapi import FastAPI
+
+from backend.config import settings
+from backend.database import create_tables, async_engine, delete_tables
+from backend.routers import player_router, game_router
+
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.include_router(player_router)
-    app.include_router(game_router)
+async def lifespan(main: FastAPI):
+    main.include_router(player_router)
+    main.include_router(game_router)
 
     #app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
 

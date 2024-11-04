@@ -1,7 +1,8 @@
-from typing import Tuple, Set, Dict, List
-from schemas.schemas import Gem, BoardState
-
 import random
+from typing import Tuple, Set, Dict, List
+
+from backend.schemas import Gem, BoardState
+
 
 # Check for matches of three or more
 def find_matches(board: BoardState) -> Set[Tuple[int, int]]:
