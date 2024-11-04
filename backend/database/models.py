@@ -1,6 +1,5 @@
 import datetime
-import json
-from typing import List, Annotated, Optional
+from typing import Annotated, Optional
 
 from sqlalchemy import ForeignKey, text, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -38,5 +37,5 @@ class GameOrm(Base):
     gamer_id: Mapped[int] = mapped_column(ForeignKey("players.id", ondelete="CASCADE"))  # Associated player ID
 
     # Relationship with the Player table
-    player: Mapped["PlayerOrm"] = relationship('PlayerOrm', back_populates='games')
+    player: Mapped["PlayerOrm"] = relationship('PlayerOrm', back_populates='last_game')
 

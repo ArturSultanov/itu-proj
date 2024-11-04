@@ -15,5 +15,8 @@ else
     echo "requirements.txt not found. Please make sure it is in the current directory."
 fi
 
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+export PYTHONPATH=$(dirname "$SCRIPT_DIR")
+
 # Keep the virtual environment activated in the current shell
 exec "$SHELL"

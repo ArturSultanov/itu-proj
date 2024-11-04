@@ -29,12 +29,23 @@ class GameDTO(BaseModel):
     gamer_id: NonNegativeInt  # Should be an int, representing the foreign key to PlayerOrm
 
 # Schema for adding a new player
-class PlayerAddDTO(BaseModel):
+class PlayerLoginDTO(BaseModel):
+    """
+        Attributes:
+            login: Annotated[str, StringConstraints(max_length=256)]
+    """
     model_config = ConfigDict(from_attributes=True)
     login: Annotated[str, StringConstraints(max_length=256)]
 
 # Schema for player data transfer object
-class PlayerDTO(PlayerAddDTO):
-    id: NonNegativeInt
-    highest_score: NonNegativeInt
+class PlayerDTO(PlayerLoginDTO):
+    """
+    Attributes:
+        login: Annotated[str, StringConstraints(max_length=256)]
+        id: NonNegativeInt
+        highest_score: NonNegativeInt
+        last_game: Optional[GameDTO]
+    """
+    id: Optional[NonNegativeInt]
+    highest_score: Optional[NonNegativeInt]
     last_game: Optional[GameDTO]  # Optional list of games associated with the player

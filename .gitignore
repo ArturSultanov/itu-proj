@@ -5,10 +5,13 @@
 /frontend/.*
 
 # Ignore venv
-/.venv
-
-.vscode
+*.venv
+*.idea
+*.vscode
 
 *.sql
 
+*.db
+
 *__pycache__
+

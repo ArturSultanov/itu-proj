@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 
 from backend.config import current_player
 from backend.database import db_dependency

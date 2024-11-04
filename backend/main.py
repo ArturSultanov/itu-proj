@@ -30,7 +30,6 @@ async def lifespan(main: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-
 @app.get("/")
 async def read_root():
     return {"Hello!"}
