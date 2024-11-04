@@ -38,7 +38,7 @@ async def get_all_players(db: db_dependency):
     return players
 
 # TODO: return DTO Player type
-@player_router.get("/", status_code=status.HTTP_200_OKs, response_model=PlayerDTO)
+@player_router.get("/", status_code=status.HTTP_200_OK, response_model=PlayerDTO)
 async def get_or_create_player(player: PlayerAddDTO, db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
