@@ -1,7 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
-from starlette import status
 
 from backend.database import PlayerOrm
 from backend.database import current_player

@@ -1,8 +1,6 @@
 from typing import Optional
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.future import select
-from starlette import status
 
 from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
 from backend.schemas import PlayerDTO

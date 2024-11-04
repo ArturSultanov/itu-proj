@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from starlette import status
+from fastapi import APIRouter, status
 
 from backend.database import cp_dependency
 from backend.schemas import PlayerLoginDTO

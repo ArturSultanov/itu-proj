@@ -1,16 +1,17 @@
-import datetime
-from enum import Enum
-from typing import List, Optional, Annotated
-
+from typing import List, Optional, Annotated, Tuple, Set
 from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt
 
-class GameDTO(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+
+class GameBase(BaseModel):
     current_score: int
     moves_left: int
-    board_status: List[List[int]]
-    created_at: datetime.datetime
 
+class BoardUpdateDTO(GameBase):
+    updated_gem: Set[Tuple[int, int, int]]
+
+class GameDTO(GameBase):
+    model_config = ConfigDict(from_attributes=True)
+    board_status: List[List[int]]
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):
