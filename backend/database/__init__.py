@@ -3,5 +3,5 @@ __all__ = ["Base", "create_tables", "delete_tables", "async_engine", "db_depende
 
 # Import the submodules
 from .database import Base, create_tables, delete_tables, async_engine, db_dependency, Str256
-from .models import PlayerOrm
 from .in_memory_player import current_player, cp_dependency
+from .models import PlayerOrm

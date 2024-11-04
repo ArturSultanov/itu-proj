@@ -1,21 +1,29 @@
-from datetime import datetime, timezone
+from fastapi import APIRouter, status
 
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.exc import IntegrityError
-
-from backend.database.in_memory_player import current_player
 from backend.database import db_dependency
 from backend.schemas import GameDTO
-from backend.utils import generate_game_board
+from fastapi import APIRouter, status
+
+from backend.database import db_dependency
+from backend.schemas import GameDTO
 
 # Create a new router for game logic
-game_router = APIRouter(
-    prefix="/game",
-    tags=["game"],
+menu_router = APIRouter(
+    prefix="/menu",
+    tags=["menu"],
     responses={404: {"description": "Not Found"}},
 )
 
-@game_router.post("/new", response_model=GameDTO | None, status_code=status.HTTP_201_CREATED)
+
+
+"""
+NEW GAME
+CONTINUE
+LEADERBOARD
+"""
+
+
+@menu_router.post("/new", response_model=GameDTO | None, status_code=status.HTTP_201_CREATED)
 async def create_new_game(db: db_dependency):
     pass
     return None

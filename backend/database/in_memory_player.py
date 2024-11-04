@@ -1,7 +1,10 @@
-from typing import Optional
-from fastapi import HTTPException, Depends, status
-from backend.schemas import PlayerDTO
 from typing import Annotated
+from typing import Optional
+
+from fastapi import HTTPException, Depends, status
+
+from backend.schemas import PlayerDTO
+
 
 class CurrentPlayer:
     def __init__(self):
