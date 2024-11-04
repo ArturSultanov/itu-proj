@@ -19,7 +19,7 @@ class PlayerOrm(Base):
     highest_score: Mapped[int] = mapped_column(default=0, nullable=False)  # Highest score achieved by the player
 
     # Relationship with the Game table
-    games: Mapped[Optional[List["GameOrm"]]] = relationship('GameOrm', back_populates='player', order_by="GameOrm.created_at.desc()")
+    last_game: Mapped[Optional["GameOrm"]] = relationship('GameOrm', back_populates='player')
 
 class GameOrm(Base):
     """

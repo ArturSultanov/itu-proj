@@ -36,7 +36,7 @@ class PlayerAddDTO(BaseModel):
 class PlayerDTO(PlayerAddDTO):
     id: int
     highest_score: int
-    games: Optional[List[GameDTO]]  # Optional list of games associated with the player
+    last_game: Optional[GameDTO]  # Optional list of games associated with the player
 
     class Config:
         from_attributes = True

@@ -38,12 +38,14 @@ async def get_all_players(db: db_dependency):
     return players
 
 # TODO: return DTO Player type
-@player_router.get("/{login}", status_code=status.HTTP_200_OK)
-async def get_or_create_player(login: str, db: db_dependency):
+@player_router.get("/", status_code=status.HTTP_200_OKs, response_model=PlayerDTO)
+async def get_or_create_player(player: PlayerAddDTO, db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
     Cache the player instance in memory after the first retrieval.
     """
+
+    login = player.login  # Extract the login from PlayerAddDTO
 
     # Query the database if the player is not cached
     result = await db.execute(
@@ -52,31 +54,29 @@ async def get_or_create_player(login: str, db: db_dependency):
     player = result.scalars().first()
 
     if player:
-        # Cache the player instance and return it
         player_dto = PlayerDTO.model_validate(player)
-        current_player.load_player(player_dto)
-        return player
+        return player_dto
 
-    # If the player is not found, create a new one
-    new_player = PlayerOrm(login=login, highest_score=0)
-    db.add(new_player)
-    try:
-        await db.commit()
-        await db.refresh(new_player)
+    # # If the player is not found, create a new one
+    # new_player = PlayerOrm(login=login, highest_score=0)
+    # db.add(new_player)
+    # try:
+    #     await db.commit()
+    #     await db.refresh(new_player)
         
-        result = await db.execute(
-            select(PlayerOrm).where(PlayerOrm.id == new_player.id).options(selectinload(PlayerOrm.games))
-        )
-        loaded_player = result.scalars().first()
+    #     result = await db.execute(
+    #         select(PlayerOrm).where(PlayerOrm.id == new_player.id).options(selectinload(PlayerOrm.games))
+    #     )
+    #     loaded_player = result.scalars().first()
 
-        if not loaded_player:
-            raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
+    #     if not loaded_player:
+    #         raise HTTPException(status_code=500, detail="Failed to load the new player after commit.")
 
-        player_dto = PlayerDTO.model_validate(loaded_player)
-        current_player.load_player(player_dto)
+    #     player_dto = PlayerDTO.model_validate(loaded_player)
+    #     current_player.load_player(player_dto)
 
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to create new player due to a database error.")
+    # except IntegrityError:
+    #     await db.rollback()
+    #     raise HTTPException(status_code=500, detail="Failed to create new player due to a database error.")
 
-    return new_player  # Return the newly created player
+    # return new_player  # Return the newly created player
