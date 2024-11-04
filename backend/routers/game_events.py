@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
-from backend.config import current_player
+from backend.database.in_memory_player import current_player
 from backend.database import db_dependency
 from backend.schemas import GameDTO
 from backend.utils import generate_game_board

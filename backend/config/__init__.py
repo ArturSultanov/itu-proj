@@ -1,5 +1,5 @@
 # Define the __all__ variable
-__all__ = ["current_player", "settings"]
+__all__ = ["settings"]
 
 # Import the submodules
-from .setting import current_player, settings
+from .setting import settings

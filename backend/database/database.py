@@ -1,4 +1,4 @@
-from typing import Annotated as typingAnnotated, AsyncGenerator
+from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 from sqlalchemy import String
@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase
 from backend.config import settings
 
 # Type aliases for convenience
-Str256 = typingAnnotated[str, String(256)]
+Str256 = Annotated[str, String(256)]
 
 class Base(DeclarativeBase):
     type_annotation_map = {Str256: String(256)}
@@ -25,7 +25,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 # Dependency for FastAPI route injection
-db_dependency = typingAnnotated[AsyncSession, Depends(get_db_session)]
+db_dependency = Annotated[AsyncSession, Depends(get_db_session)]
 
 async def create_tables():
     """Create database tables based on the defined models."""
