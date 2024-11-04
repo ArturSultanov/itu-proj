@@ -4,16 +4,21 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy.future import select
 from starlette import status
 
-from backend.database import PlayerOrm
-from backend.database import cp_dependency
-from backend.database import db_dependency
+from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
 from backend.schemas import PlayerDTO
+
 
 tools_router = APIRouter(
     prefix="/tools",
     tags=["tools"],
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
+
+@tools_router.get("/rebootdb")
+async def reboot_db():
+    await delete_tables()
+    await create_tables()
+    return {"detail": "Database rebooted."}
 
 
 @tools_router.post("/sync", status_code=status.HTTP_200_OK)
@@ -61,4 +66,19 @@ async def get_current_player(cp: cp_dependency):
     """
     return cp.data
 
-# exit: sync with DB and clear current_user
+
+@tools_router.post("/exit", status_code=status.HTTP_200_OK)
+async def exit_app(db: db_dependency):
+    # Проверка, есть ли данные текущего игрока перед синхронизацией
+    if current_player and current_player.data:
+        # Синхронизация данных игрока с базой данных
+        await sync_player(current_player, db)
+        # Очистка текущего игрока
+        current_player.data = None  # Очищаем данные игрока, чтобы сбросить текущего пользователя
+        return {"detail": "Player data synchronized and current player cleared."}
+    else:
+        return {"detail": "No current player to synchronize. Current player cleared."}
+
+
+
+

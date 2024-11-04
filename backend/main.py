@@ -36,11 +36,5 @@ app = FastAPI(lifespan=lifespan)
 async def read_root():
     return {"Hello!"}
 
-@app.get("/reboot")
-async def read_root():
-    await delete_tables()
-    await create_tables()
-
-
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.WEB_HOST, port=settings.WEB_PORT, reload=True)
