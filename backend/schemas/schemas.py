@@ -4,20 +4,6 @@ from typing import List, Optional, Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt
 
-
-# Enum for types of gems
-class Gem(Enum):
-    GEM1 = 0
-    GEM2 = 1
-    GEM3 = 2
-    GEM4 = 3
-    BOMB = 4
-    HEART = 5
-
-# Schema for board state
-class BoardState(BaseModel):
-    board_state: List[List[Gem]]  # Matrix representing the game board
-
 class GameDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     current_score: int

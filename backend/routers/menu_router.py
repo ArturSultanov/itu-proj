@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, status
 
 from backend.database import db_dependency
@@ -7,13 +9,15 @@ from fastapi import APIRouter, status
 from backend.database import db_dependency
 from backend.schemas import GameDTO
 
-# Create a new router for game logic
-menu_router = APIRouter(
-    prefix="/menu",
-    tags=["menu"],
-    responses={404: {"description": "Not Found"}},
-)
+from typing import Optional
 
+from fastapi import APIRouter, HTTPException
+from sqlalchemy.future import select
+from starlette import status
+
+from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
+from backend.schemas import PlayerDTO
+from backend.utils import generate_game_board
 
 
 """
@@ -21,43 +25,34 @@ NEW GAME
 CONTINUE
 LEADERBOARD
 """
+menu_router = APIRouter(
+    prefix="/menu",
+    tags=["menu"],
+    responses={404: {"description": "Not Found"}},
+)
 
 
-@menu_router.post("/new", response_model=GameDTO | None, status_code=status.HTTP_201_CREATED)
-async def create_new_game(db: db_dependency):
-    pass
-    return None
-    # """
-    # Create a new game for the current player, store it in the database, and return it.
-    # """
-    # # Ensure a current player is loaded
-    # if not current_player or not current_player.is_loaded():
-    #     raise HTTPException(status_code=400, detail="No current player is loaded.")
-    #
-    # player_id = current_player.data.id
-    #
-    # # Generate a new game board
-    # new_board = generate_game_board()
-    #
-    # # Create a new game instance
-    # new_game = GameDTO(
-    #     current_score=0,
-    #     moves_left=30,  # Initial number of moves (adjust as needed)
-    #     board_status=new_board,
-    #     created_at=datetime.now(timezone.utc),
-    #     player_id=player_id,
-    # )
-    # # new_game.set_board_status(new_board)
-    #
-    # # Add the new game to the database
-    # db.add(new_game)
-    # try:
-    #     await db.commit()
-    #     await db.refresh(new_game)  # Refresh to get the ID and other database-generated fields
-    #
-    #     # Convert the game to GameDTO
-    #     game_dto = GameDTO.model_validate(new_game)
-    #     return game_dto
-    # except IntegrityError:
-    #     await db.rollback()
-    #     raise HTTPException(status_code=500, detail="Failed to create new game due to a database error.")
+# Assuming generate_game_board returns a numpy array
+@menu_router.post("/new_game", response_model=GameDTO | None, status_code=status.HTTP_201_CREATED)
+async def create_new_game(cp: cp_dependency):
+    """
+    Create a new game for the current player, store it in the database, and return it.
+    """
+    # Check if the current player is loaded
+    if not cp or not cp.data:
+        raise HTTPException(status_code=400, detail="Current player not found.")
+
+    # Generate a new game board
+    new_board = generate_game_board()
+
+    # Create a new game instance
+    new_game = GameDTO(
+        current_score=0,
+        moves_left=30,  # Set an initial value for moves_left
+        board_status=new_board,
+        created_at=datetime.now()
+    )
+
+    cp.data.last_game = new_game
+
+    return new_game

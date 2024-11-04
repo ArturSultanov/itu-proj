@@ -1,8 +1,17 @@
 import random
-from typing import Tuple, Set, Dict, List
+from typing import Tuple, Set, Dict, List, Optional
 
-from backend.schemas import Gem, BoardState
+# # Enum for types of gems
+# class int(Enum):
+#     GEM0 = 0
+#     GEM1 = 1
+#     GEM2 = 2
+#     GEM3 = 3
+#     BOMB = 4
+#     HEART = 5
 
+# Schema for board state
+BoardState = List[List[int]]
 
 # Check for matches of three or more
 def find_matches(board: BoardState) -> Set[Tuple[int, int]]:
@@ -16,7 +25,7 @@ def find_matches(board: BoardState) -> Set[Tuple[int, int]]:
         Set[Tuple[int, int]]: A Set of coordinates where matches were found.
     """
     matches = set()  # Use a set to avoid duplicate matches
-    board_state = board.board_state  # Access the matrix directly from the BoardState instance
+    board_state = board # Access the matrix directly from the BoardState instance
 
     # Horizontal matches
     for row in range(len(board_state)):
@@ -34,14 +43,14 @@ def find_matches(board: BoardState) -> Set[Tuple[int, int]]:
 
 
 
-def _is_valid_choice(board: List[List[Gem]], gem: Gem, row: int, col: int) -> bool:
+def _is_valid_choice(board: List[List[int]], gem: int, row: int, col: int) -> bool:
     """
     Checks if placing a gem at the given position does not create a three-in-a-row match
     horizontally or vertically, considering board boundaries.
 
     Parameters:
-        board (List[List[Gem]]): The game board.
-        gem (Gem): The gem to place.
+        board (List[List[int]]): The game board.
+        gem (int): The gem to place.
         row (int): The row index for the placement.
         col (int): The column index for the placement.
 
@@ -71,7 +80,7 @@ def _is_valid_choice(board: List[List[Gem]], gem: Gem, row: int, col: int) -> bo
 
 
 # Update matched gems with new random gems
-def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Dict[Tuple[int, int], Gem]:
+def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Dict[Tuple[int, int], int]:
     """
     Replace the matched gems with new gems.
     Ensures there are no new three-in-a-row matches after replacement.
@@ -81,11 +90,11 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Dict[Tuple
         matches (Set[Tuple[int, int]]): A set of coordinates where matches were found.
 
     Returns:
-        Dict[Tuple[int, int], Gem]: A dictionary where keys are coordinates and values are new gem colors.
+        Dict[Tuple[int, int], int]: A dictionary where keys are coordinates and values are new gem colors.
     """
     board_state = board.board_state
     new_gems = {}  # Dictionary to store new gems by their coordinates
-    gem_types = list(Gem)
+    gem_types = list(int)
 
     # Replace matched gems with new random gems
     for row, col in matches:
@@ -124,22 +133,26 @@ def swap_gems(board: BoardState, pos1: tuple[int, int], pos2: tuple[int, int]) -
     
 
 # Generate a game board with no initial matches
-def generate_game_board(size: int = 6) ->  List[List[int]]:
-    def check_gems(board, gem, row, col):
-        if col >= 2 and board[row][col - 1] == gem and board[row][col - 2] == gem:
+def generate_game_board(size: int = 6) ->  BoardState:
+    def check_gems(c_board: List[List[Optional[int]]], c_gem: int, c_row: int, c_col: int) -> bool:
+        """Check if placing the current gem would create a match of three."""
+        # Check for horizontal matches
+        if c_col >= 2 and c_board[c_row][c_col - 1] == c_gem and c_board[c_row][c_col - 2] == c_gem:
             return False
-        if row >= 2 and board[row - 1][col] == gem and board[row - 2][col] == gem:
+        # Check for vertical matches
+        if c_row >= 2 and c_board[c_row - 1][c_col] == c_gem and c_board[c_row - 2][c_col] == c_gem:
             return False
         return True
 
-    board = [[None for _ in range(size)] for _ in range(size)]
+    # Initialize an empty board
+    board: List[List[Optional[int]]] = [[None for _ in range(size)] for _ in range(size)]
 
+    # Fill the board with gems ensuring no initial matches
     for row in range(size):
         for col in range(size):
-            gem: Gem = Gem(random.randint(0, 3))
+            gem: int = random.randint(0, 3)
             while not check_gems(board, gem, row, col):
-                gem: Gem = Gem(random.randint(0, 3))
-            board[row][col] = int (gem.value)  # Store the integer value instead of the enum object
-
-    # Return the board wrapped in a BoardState instance
+                gem = random.randint(0, 3)
+            board[row][col] = gem
     return board
+

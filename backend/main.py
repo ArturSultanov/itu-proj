@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from backend.config import settings
 from backend.database import create_tables, async_engine, delete_tables
-from backend.routers import board_router, login_router, menu_router, settings_router, tools_router
+from backend.routers import board_router, login_router, menu_router, settings_router, utils_router
 
 
 @asynccontextmanager
@@ -14,7 +14,7 @@ async def lifespan(main: FastAPI):
     main.include_router(login_router)
     main.include_router(menu_router)
     main.include_router(settings_router)
-    main.include_router(tools_router)
+    main.include_router(utils_router)
 
     #app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
 
