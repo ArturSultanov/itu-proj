@@ -6,12 +6,15 @@ class GameBase(BaseModel):
     current_score: int
     moves_left: int
 
+
 class BoardUpdateDTO(GameBase):
     updated_gem: Set[Tuple[int, int, int]]
+
 
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
     board_status: List[List[int]]
+
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):
@@ -21,6 +24,7 @@ class PlayerLoginDTO(BaseModel):
     """
     model_config = ConfigDict(from_attributes=True)
     login: Annotated[str, StringConstraints(max_length=256)]
+
 
 # Schema for player data transfer object
 class PlayerDTO(PlayerLoginDTO):

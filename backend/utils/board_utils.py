@@ -24,38 +24,25 @@ def find_matches(board: BoardState) -> Optional[Set[Tuple[int, int]]]:
     Returns:
         Optional[Set[Tuple[int, int]]]: A set of coordinates where matches were found, or None if no matches.
     """
-    matches: Set[Tuple[int, int]] = set()  # Initialize as a set to avoid duplicate matches
-    board_state = board  # Assuming board_state is a matrix (list of lists) within BoardState
+    matches: Set[Tuple[int, int]] = set()
 
     # Horizontal matches
-    for row in range(len(board_state)):
-        for col in range(len(board_state[0]) - 2):
-            if board_state[row][col] == board_state[row][col + 1] == board_state[row][col + 2] is not None:
+    for row in range(len(board)):
+        for col in range(len(board[0]) - 2):
+            if board[row][col] == board[row][col + 1] == board[row][col + 2] is not None:
                 matches.update({(row, col), (row, col + 1), (row, col + 2)})
 
     # Vertical matches
-    for col in range(len(board_state[0])):
-        for row in range(len(board_state) - 2):
-            if board_state[row][col] == board_state[row + 1][col] == board_state[row + 2][col] is not None:
+    for col in range(len(board[0])):
+        for row in range(len(board) - 2):
+            if board[row][col] == board[row + 1][col] == board[row + 2][col] is not None:
                 matches.update({(row, col), (row + 1, col), (row + 2, col)})
 
     return matches if matches else None
 
 
+# Check for valid gem placement without immediate match
 def _is_valid_choice(board: BoardState, gem: int, row: int, col: int) -> bool:
-    """
-    Checks if placing a gem at the given position does not create a three-in-a-row match
-    horizontally or vertically, considering board boundaries.
-
-    Parameters:
-        board (List[List[int]]): The game board.
-        gem (int): The gem to place.
-        row (int): The row index for the placement.
-        col (int): The column index for the placement.
-
-    Returns:
-        bool: True if the gem can be placed without creating a match, False otherwise.
-    """
     rows, cols = len(board), len(board[0])
 
     # Horizontal check
@@ -76,7 +63,8 @@ def _is_valid_choice(board: BoardState, gem: int, row: int, col: int) -> bool:
 
     return True
 
-# Update matched gems with new random gems
+
+# Replace matched gems with new gems
 def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[int, int, int]]:
     """
     Replace the matched gems with new gems.
@@ -89,48 +77,50 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[
     Returns:
         Set[Tuple[int, int, int]]: A set of tuples with the format (row, col, new_gem).
     """
-    new_gems: Set[Tuple[int, int, int]] = set()  # Set to store new gems by their coordinates and values
+    new_gems: Set[Tuple[int, int, int]] = set()
 
-    # Replace matched gems with new random gems
     for row, col in matches:
-        new_gem: int = random.randint(0, 3)
-        # Ensure the new gem does not immediately form a three-in-a-row
+        new_gem = random.randint(0, 3)
         while not _is_valid_choice(board, new_gem, row, col):
             new_gem = random.randint(0, 3)
 
         board[row][col] = new_gem
-        new_gems.add((row, col, new_gem))  # Record the new gem and its position
+        new_gems.add((row, col, new_gem))
 
     return new_gems
 
+
 # Swap two gems on the board
-def swap_gems(board: BoardState, pos1: tuple[int, int], pos2: tuple[int, int]) -> Optional[Set[Tuple[int, int, int]]]:
+def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[Optional[Set[Tuple[int, int, int]]], int]:
     """
-    Swap two gems on the board.
+    Swap two gems on the board and replace matched gems if any.
 
     Parameters:
-        board (BoardState): The BoardState instance representing the game board.
-        pos1 (Tuple[int, int]): Coordinates of the first gem to swap (row, col).
-        pos2 (Tuple[int, int]): Coordinates of the second gem to swap (row, col).
+        board (BoardState): The board to update.
+        pos1 (Tuple[int, int]): First position (row, col).
+        pos2 (Tuple[int, int]): Second position (row, col).
+
+    Returns:
+        Tuple[Optional[Set[Tuple[int, int, int]]], int]: New gems after replacing matches and count of matches, or (None, 0) if no matches were found.
     """
     (x1, y1), (x2, y2) = pos1, pos2
 
-    # Validate that positions are within board bounds
+    # Ensure positions are within bounds
     if (
-        0 <= x1 < len(board) and 0 <= y1 < len(board[0]) and
-        0 <= x2 < len(board) and 0 <= y2 < len(board[0])
+            0 <= x1 < len(board) and 0 <= y1 < len(board[0]) and
+            0 <= x2 < len(board) and 0 <= y2 < len(board[0])
     ):
-        # Swap the gems at the specified positions
+        # Swap the gems
         board[x1][y1], board[x2][y2] = board[x2][y2], board[x1][y1]
     else:
         raise ValueError("Swap positions are out of board bounds")
 
-    match = find_matches(board)
-    if match:
-        return replace_gems(board, match)
-    
-    return None
-    
+    matches = find_matches(board)
+    if matches:
+        return replace_gems(board, matches), len(matches)
+
+    return None, 0
+
 
 # Generate a game board with no initial matches
 def generate_game_board(size: int = 6) ->  BoardState:
