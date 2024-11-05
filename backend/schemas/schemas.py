@@ -9,7 +9,7 @@ class GemPositionDTO(BaseModel):
 class GemBase(GemPositionDTO):
     type: int
 
-class SwapGemsInDTO(BaseModel):
+class SwapGemsDTO(BaseModel):
     gems: conlist(GemPositionDTO, min_length=2, max_length=2)
 
 class GameBase(BaseModel):

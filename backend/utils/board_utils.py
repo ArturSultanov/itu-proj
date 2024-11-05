@@ -2,7 +2,7 @@ import random
 from enum import Enum
 from typing import Tuple, Set, List, Optional
 
-from backend.schemas import GameDTO, GemPositionDTO, GameUpdateDTO
+from backend.schemas import GameDTO, GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO
 
 
 class GemType(Enum):
@@ -10,12 +10,11 @@ class GemType(Enum):
     GEM1 = 1
     GEM2 = 2
     GEM3 = 3
-    BOMB = 4
-    HEART = 5
+    HEART = 4
+    # BOMB = 5  # DEPRECATED
 
 # Schema for board state
 BoardState = List[List[int]]
-
 
 
 # Check for matches of three or more
@@ -47,7 +46,7 @@ def find_matches(board: BoardState) -> Optional[Set[Tuple[int, int]]]:
 
 
 # Check for valid gem placement without immediate match
-def _is_valid_choice(board: BoardState, gem: int, row: int, col: int) -> bool:
+def _is_valid_choice(board: BoardState, gem: GemType, row: int, col: int) -> bool:
     rows, cols = len(board), len(board[0])
 
     # Horizontal check
@@ -70,7 +69,7 @@ def _is_valid_choice(board: BoardState, gem: int, row: int, col: int) -> bool:
 
 
 # Replace matched gems with new gems
-def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[int, int, GemType]]:
+def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[GemBase]:
     """
     Replace the matched gems with new gems.
     Ensures there are no new three-in-a-row matches after replacement.
@@ -80,7 +79,7 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[
         matches (Set[Tuple[int, int]]): A set of coordinates where matches were found.
 
     Returns:
-        Set[Tuple[int, int, int]]: A set of tuples with the format (row, col, new_gem).
+        Set[GemBase]: A set of tuples with the format (row, col, new_gem).
     """
     new_gems: Set[Tuple[int, int, GemType]] = set()
 
@@ -92,27 +91,38 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[
         board[row][col] = new_gem.value  # Сохраняем числовое значение в board
         new_gems.add((row, col, new_gem))
 
-    return new_gems
+    updated_gems = {GemBase(x=x, y=y, type=gem_type) for x, y, gem_type in new_gems}
+
+    return updated_gems
 
 
 def _update_game():
     pass
 
 
+def _update_game_status(player_data: PlayerDTO, moves: int, matches_number: int, replaced_gems: Set[GemBase])->GameUpdateDTO:
+    player_data.last_game.moves_left += moves
+    player_data.last_game.current_score += matches_number * 10
+
+    if player_data.last_game.current_score > (player_data.data.highest_score or 0):
+        player_data.highest_score = int(player_data.data.last_game.current_score)
+
+    return GameUpdateDTO(
+        current_score=player_data.last_game.current_score,
+        moves_left=player_data.last_game.moves_left,
+        updated_gems=replaced_gems
+    )
+
+
 # Swap two gems on the board
-def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[Optional[Set[Tuple[int, int, GemType]]], int]:
-    """
-    Swap two gems on the board and replace matched gems if any.
+def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUpdateDTO]:
 
-    Parameters:
-        board (BoardState): The board to update.
-        pos1 (Tuple[int, int]): First position (row, col).
-        pos2 (Tuple[int, int]): Second position (row, col).
+    board = player_data.last_game.board
+    replaced_gems = None
+    moves = 0
+    matches_number = 0
 
-    Returns:
-        Tuple[Optional[Set[Tuple[int, int, int]]], int]: New gems after replacing matches and count of matches, or (None, 0) if no matches were found.
-    """
-    (x1, y1), (x2, y2) = pos1, pos2
+    (x1, y1), (x2, y2) = (swap_data.gems[0].x, swap_data.gems[0].y), (swap_data.gems[1].x, swap_data.gems[1].y)
 
     # Ensure positions are within bounds
     if (
@@ -125,28 +135,36 @@ def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -
         raise ValueError("Swap positions are out of board bounds")
 
     matches = find_matches(board)
+
     if matches:
-        return replace_gems(board, matches), len(matches)
+        moves = -1
+        matches_number = len(matches)
+        replaced_gems = replace_gems(board, matches)
 
-    return None, 0
+    if replaced_gems:
+        return _update_game_status(player_data, moves, matches_number, replaced_gems)
+    return None
 
-def click_gem(current_game: GameDTO, pos: GemPositionDTO) -> GameUpdateDTO:
+# User clicked at some gem
+def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdateDTO]:
 
-    board = current_game.board
+    board = player_data.last_game.board
     clicked_gem = board[pos.x][pos.y]
-
+    replaced_gems = None
+    moves = 0
+    matches_number = 0
 
     match clicked_gem:
         case GemType.HEART:
-            updated_gem_set =
-        case GemType.BOMB:
-            print("Bomb gem clicked.")
-
+            moves = 20
+            matches_number = 1
+            replaced_gems = replace_gems(board, {(pos.x, pos.y)})
         case _:
-            print("Unknown gem type clicked.")
+            pass
 
-    #
-
+    if replaced_gems:
+        return _update_game_status(player_data, moves, matches_number, replaced_gems)
+    return None
 
 # Generate a game board with no initial matches
 def generate_game_board(size: int = 6) ->  BoardState:
