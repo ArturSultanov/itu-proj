@@ -1,34 +1,45 @@
-from typing import List, Optional, Annotated, Tuple
-from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conset, conint
+from typing import List, Optional, Annotated
+
+from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conint
+
 from backend.config import Difficulty
+
 
 class DifficultyDTO(BaseModel):
     difficulty: Difficulty
+
 
 class GemPositionDTO(BaseModel):
     x: int
     y: int
 
+
 class GemBase(GemPositionDTO):
     type: int
 
+
 class SwapGemsDTO(BaseModel):
     gems: conlist(GemPositionDTO, min_length=2, max_length=2)
+
 
 class GameBase(BaseModel):
     current_score: int
     moves_left: int
 
+
 class GameUpdateDTO(GameBase):
     updated_gems: List[GemBase]
+
 
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
     board_status: List[List[Annotated[int, conint(ge=0, le=5)]]]
 
+
 class LeaderboardTDO(BaseModel):
     login: str
     highest_score: int
+
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):

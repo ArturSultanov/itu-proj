@@ -1,8 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.future import select
 
-from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
+from fastapi import APIRouter, HTTPException, status
+
+from backend.database import cp_dependency, db_dependency, create_tables, delete_tables, current_player
 from backend.schemas import PlayerDTO
 from backend.utils import synchronize_player
 
@@ -11,6 +11,7 @@ utils_router = APIRouter(
     tags=["utils"],
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
+
 
 @utils_router.get("/reboot_db")
 async def reboot_db():
@@ -44,7 +45,3 @@ async def exit_app(db: db_dependency):
         return {"detail": "Player data synchronized and current player cleared."}
     else:
         return {"detail": "No current player to synchronize. Current player cleared."}
-
-
-
-

@@ -8,11 +8,13 @@ class Difficulty(Enum):
     NORMAL = "normal"
     HARD = "hard"
 
+
 HEART_RECOVERY_MOVES = {
     Difficulty.EASY: 20,
     Difficulty.NORMAL: 10,
     Difficulty.HARD: 5,
 }
+
 
 START_MOVES = {
     Difficulty.EASY: 30,
@@ -20,8 +22,9 @@ START_MOVES = {
     Difficulty.HARD: 20,
 }
 
+
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite+aiosqlite:///./database/game.db"  # Full URL with async support
+    DATABASE_URL: str = "sqlite+aiosqlite:///./database/game.db"
     WEB_HOST: str = "127.0.0.1"
     WEB_PORT: int = 8000
     SQL_ALCHEMY_DEBUG: bool = True
@@ -30,16 +33,21 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
+
 settings = Settings()
+
 
 def get_heart_recovery_moves() -> int:
     return HEART_RECOVERY_MOVES[settings.GAME_DIFFICULTY]
 
+
 def get_start_moves() -> int:
     return START_MOVES[settings.GAME_DIFFICULTY]
 
+
 def set_difficulty(difficulty: Difficulty):
     settings.GAME_DIFFICULTY = difficulty
+
 
 def get_difficulty() -> Difficulty:
     return settings.GAME_DIFFICULTY

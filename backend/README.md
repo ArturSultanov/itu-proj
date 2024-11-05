@@ -1,7 +1,10 @@
-Зачем нужны модели Pydantic и SQLAlchemy?
-Модели SQLAlchemy: используются для определения структуры базы данных, создания таблиц и выполнения операций CRUD (создание, чтение, обновление, удаление) в базе данных.
-Модели Pydantic: используются для валидации данных и обеспечения правильного обмена данными между клиентом и сервером (через API).
-Как связаны SQLAlchemy и Pydantic?
-Модели SQLAlchemy представляют таблицы в базе данных и используются для выполнения операций с данными.
-Модели Pydantic принимают на себя роль схем для валидации входных данных и формирования ответа при работе с API.
-Для удобного взаимодействия между ними используется атрибут Config.orm_mode, который позволяет моделям Pydantic работать с объектами SQLAlchemy и преобразовывать их в JSON-совместимые структуры.
+# Game Application API
+
+This project is a game application API developed with **FastAPI**. It allows users to manage player data, sync game states, adjust game settings, and perform game actions like clicking on gems or swapping them on the game board. The backend uses **SQLAlchemy** with an SQLite database for persistence and supports various levels of game difficulty.
+
+## Features
+
+- **Game Difficulty Adjustment**: Set difficulty levels (Easy, Normal, Hard) that control gameplay parameters.
+- **Game Actions**: Perform in-game actions, including gem clicks and swaps, with appropriate handling for different gem types.
+- **Player Synchronization**: Synchronize player data between in-memory state and the database.
+- **RESTful API Design**: Follows REST principles for ease of use and consistency.

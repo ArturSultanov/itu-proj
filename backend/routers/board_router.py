@@ -1,15 +1,10 @@
-from fastapi import APIRouter, status, HTTPException
-from typing import List, Optional, Annotated, Tuple
-from backend.database import cp_dependency, db_dependency
-from backend.schemas import GameUpdateDTO, SwapGemsDTO, GemBase, GemPositionDTO
-from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.future import select
+from typing import List
 
-from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
-from backend.schemas import PlayerDTO
+from fastapi import APIRouter, HTTPException, status
+
+from backend.database import cp_dependency, db_dependency
+from backend.schemas import GameUpdateDTO, SwapGemsDTO, GemPositionDTO
+from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player
 
 # from backend.utils.board_generator import generate_game_board
 
@@ -34,7 +29,7 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     # Get the current game status
     player_data = cp.data
     # Get updated game
-    updated_game= swap_gems(player_data, swap_data)
+    updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)
     return updated_game if updated_game is not None else None
 
@@ -52,7 +47,7 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
     # Get the current game status
     player_data = cp.data
     # Get updated game
-    updated_game= click_gem(player_data, click)
+    updated_game = click_gem(player_data, click)
     await synchronize_player(cp.data, db)
     return updated_game if updated_game is not None else None
 

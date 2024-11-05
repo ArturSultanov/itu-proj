@@ -1,12 +1,13 @@
 
-from backend.schemas import GameDTO, LeaderboardTDO
+from typing import List
 
 from fastapi import APIRouter, HTTPException, status
-from typing import List, Dict
 from sqlalchemy.future import select
-from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
-from backend.utils import generate_game_board, synchronize_player
+
 from backend.config import get_start_moves
+from backend.database import PlayerOrm, cp_dependency, db_dependency
+from backend.schemas import GameDTO, LeaderboardTDO
+from backend.utils import generate_game_board, synchronize_player
 
 menu_router = APIRouter(
     prefix="/menu",
@@ -52,6 +53,7 @@ async def continue_game(cp: cp_dependency):
 
     return cp.data.last_game
 
+
 @menu_router.delete("/delete_game", status_code=status.HTTP_200_OK)
 async def delete_continue(cp: cp_dependency, db: db_dependency):
     if not cp or not cp.data:
@@ -63,18 +65,16 @@ async def delete_continue(cp: cp_dependency, db: db_dependency):
 
 
 @menu_router.get("/leaderboard", response_model=List[LeaderboardTDO], status_code=status.HTTP_200_OK)
-async def leaderboard(db: db_dependency):
+async def leaderboard(limit: int, db: db_dependency):
     """
     Get the top 5 players based on highest_score, sorted in descending order.
     """
-    # Запрос на выборку 5 лучших игроков по убыванию highest_score
     result = await db.execute(
         select(PlayerOrm.login, PlayerOrm.highest_score)
         .order_by(PlayerOrm.highest_score.desc())
-        .limit(5)
+        .limit(limit)
     )
 
-    # Получаем результаты в виде списка словарей
     top_players = [{"login": row[0], "highest_score": row[1]} for row in result.all()]
 
     return top_players

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException
 
+from backend.config import Difficulty, set_difficulty, get_difficulty
 from backend.database import cp_dependency, db_dependency
 from backend.schemas import PlayerLoginDTO, DifficultyDTO
-from backend.config import Difficulty, set_difficulty, get_difficulty
 from backend.utils import synchronize_player
 
 settings_router = APIRouter(
@@ -22,7 +22,7 @@ async def get_or_create_player(player: PlayerLoginDTO, cp: cp_dependency, db: db
 @settings_router.put("/set_difficulty", response_model=DifficultyDTO, status_code=status.HTTP_200_OK)
 async def set_difficulty_route(data: DifficultyDTO):
     """
-    Обновляет уровень сложности игры.
+    Set the difficulty level
     """
     if data.difficulty not in Difficulty:
         raise HTTPException(

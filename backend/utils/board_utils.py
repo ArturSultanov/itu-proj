@@ -2,8 +2,9 @@ import random
 from enum import Enum
 from typing import Tuple, Set, List, Optional
 
-from backend.schemas import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO
 from backend.config import get_heart_recovery_moves
+from backend.schemas import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO
+
 
 class GemType(Enum):
     GEM0 = 0
@@ -59,15 +60,14 @@ def _is_valid_choice(board: BoardState, gem: GemType, row: int, col: int) -> boo
     Returns:
         bool: True if the gem can be placed without creating a match, False otherwise.
     """
-    # Проверка на уникальность HEART
     if gem == GemType.HEART:
         for r in board:
             if GemType.HEART.value in r:
-                return False  # HEART уже присутствует на доске
+                return False  # HEART exists on the board
 
     rows, cols = len(board), len(board[0])
 
-    # Проверка на горизонтальные совпадения
+    # Horizontal matches check
     if col >= 2 and board[row][col - 1] == gem.value and board[row][col - 2] == gem.value:
         return False
     if col < cols - 2 and board[row][col + 1] == gem.value and board[row][col + 2] == gem.value:
@@ -75,7 +75,7 @@ def _is_valid_choice(board: BoardState, gem: GemType, row: int, col: int) -> boo
     if 0 < col < cols - 1 and board[row][col - 1] == gem.value and board[row][col + 1] == gem.value:
         return False
 
-    # Проверка на вертикальные совпадения
+    # Vertical matches check
     if row >= 2 and board[row - 1][col] == gem.value and board[row - 2][col] == gem.value:
         return False
     if row < rows - 2 and board[row + 1][col] == gem.value and board[row + 2][col] == gem.value:
@@ -109,12 +109,12 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> List[GemBa
         board[row][col] = int(new_gem.value)
         new_gems.add((row, col, new_gem))
 
-    # Используем список вместо множества для хранения объектов GemBase
     updated_gems = [GemBase(x=x, y=y, type=gem_type) for x, y, gem_type in new_gems]
     return updated_gems
 
 
-def _update_game_status(player_data: PlayerDTO, moves: int, matches_number: int, replaced_gems: List[GemBase])->GameUpdateDTO:
+def _update_game_status(player_data: PlayerDTO, moves: int, matches_number: int, replaced_gems: List[GemBase]) \
+        -> GameUpdateDTO:
     player_data.last_game.moves_left += moves
     player_data.last_game.current_score += matches_number * 10
 
@@ -160,6 +160,7 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
     return None
 
 # User clicked at some gem
+
 def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdateDTO]:
 
     board = player_data.last_game.board_status
@@ -197,10 +198,10 @@ def generate_game_board(size: int = 6) -> BoardState:
     # Fill the board with gems ensuring no initial matches
     for row in range(size):
         for col in range(size):
-            new_gem = random.choice(list(GemType))  # Выбираем случайный тип из GemType
+            new_gem = random.choice(list(GemType))
             while not _is_valid_choice(board, new_gem, row, col):
-                new_gem = random.choice(list(GemType))  # Повторно выбираем, если есть совпадение
+                new_gem = random.choice(list(GemType))
 
-            board[row][col] = new_gem.value  # Сохраняем числовое значение в board
+            board[row][col] = new_gem.value
 
     return board

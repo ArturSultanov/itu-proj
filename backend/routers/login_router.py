@@ -13,6 +13,7 @@ login_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
+
 @login_router.post("", status_code=status.HTTP_200_OK, response_model=PlayerDTO | None)
 async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
     """
