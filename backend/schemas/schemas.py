@@ -1,20 +1,31 @@
 from typing import List, Optional, Annotated, Tuple, Set
-from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt
+from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conset
 
+
+class GemPosition(BaseModel):
+    x: int
+    y: int
+
+class GemBase(GemPosition):
+    type: int
+
+class SwapGemsInDTO(BaseModel):
+    gems: conlist(GemPosition, min_length=2, max_length=2)
 
 class GameBase(BaseModel):
     current_score: int
     moves_left: int
 
-
-class BoardUpdateDTO(GameBase):
-    updated_gem: Set[Tuple[int, int, int]]
-
+class GameBoardUpdateDTO(GameBase):
+    updated_gems: Set[GemBase]
 
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
     board_status: List[List[int]]
 
+class LeaderboardTDO(BaseModel):
+    login: str
+    highest_score: int
 
 # Schema for adding a new player
 class PlayerLoginDTO(BaseModel):
