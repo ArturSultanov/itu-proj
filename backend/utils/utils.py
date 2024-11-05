@@ -8,3 +8,5 @@
 # def load_level(level_id):
 #     with open(f"levels/level_{level_id}.json", "r") as f:
 #         return json.load(f)
+
+# Sync function

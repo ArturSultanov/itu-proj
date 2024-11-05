@@ -1,5 +1,5 @@
 __all__ = [
-    "GameDTO", "PlayerLoginDTO", "PlayerDTO", "GameBoardUpdateDTO", "LeaderboardTDO", "SwapGemsInDTO", "GemBase"
+    "GameDTO", "PlayerLoginDTO", "PlayerDTO", "GameUpdateDTO", "LeaderboardTDO", "SwapGemsInDTO", "GemBase", "GemPositionDTO"
 ]
 
-from .schemas import GameDTO, PlayerLoginDTO, PlayerDTO, GameBoardUpdateDTO, LeaderboardTDO, SwapGemsInDTO, GemBase
+from .schemas import GameDTO, PlayerLoginDTO, PlayerDTO, GameUpdateDTO, LeaderboardTDO, SwapGemsInDTO, GemBase, GemPositionDTO

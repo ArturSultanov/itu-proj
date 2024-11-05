@@ -1,27 +1,27 @@
 from typing import List, Optional, Annotated, Tuple, Set
-from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conset
+from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conset, conint
 
 
-class GemPosition(BaseModel):
+class GemPositionDTO(BaseModel):
     x: int
     y: int
 
-class GemBase(GemPosition):
+class GemBase(GemPositionDTO):
     type: int
 
 class SwapGemsInDTO(BaseModel):
-    gems: conlist(GemPosition, min_length=2, max_length=2)
+    gems: conlist(GemPositionDTO, min_length=2, max_length=2)
 
 class GameBase(BaseModel):
     current_score: int
     moves_left: int
 
-class GameBoardUpdateDTO(GameBase):
+class GameUpdateDTO(GameBase):
     updated_gems: Set[GemBase]
 
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
-    board_status: List[List[int]]
+    board_status: List[List[Annotated[int, conint(ge=0, le=5)]]]
 
 class LeaderboardTDO(BaseModel):
     login: str

@@ -1,17 +1,22 @@
 import random
+from enum import Enum
 from typing import Tuple, Set, List, Optional
 
-# # Enum for types of gems
-# class int(Enum):
-#     GEM0 = 0
-#     GEM1 = 1
-#     GEM2 = 2
-#     GEM3 = 3
-#     BOMB = 4
-#     HEART = 5
+from backend.schemas import GameDTO, GemPositionDTO, GameUpdateDTO
+
+
+class GemType(Enum):
+    GEM0 = 0
+    GEM1 = 1
+    GEM2 = 2
+    GEM3 = 3
+    BOMB = 4
+    HEART = 5
 
 # Schema for board state
 BoardState = List[List[int]]
+
+
 
 # Check for matches of three or more
 def find_matches(board: BoardState) -> Optional[Set[Tuple[int, int]]]:
@@ -65,7 +70,7 @@ def _is_valid_choice(board: BoardState, gem: int, row: int, col: int) -> bool:
 
 
 # Replace matched gems with new gems
-def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[int, int, int]]:
+def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[int, int, GemType]]:
     """
     Replace the matched gems with new gems.
     Ensures there are no new three-in-a-row matches after replacement.
@@ -77,21 +82,25 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> Set[Tuple[
     Returns:
         Set[Tuple[int, int, int]]: A set of tuples with the format (row, col, new_gem).
     """
-    new_gems: Set[Tuple[int, int, int]] = set()
+    new_gems: Set[Tuple[int, int, GemType]] = set()
 
     for row, col in matches:
-        new_gem = random.randint(0, 3)
+        new_gem = random.choice(list(GemType))  # Выбираем случайный тип из GemType
         while not _is_valid_choice(board, new_gem, row, col):
-            new_gem = random.randint(0, 3)
+            new_gem = random.choice(list(GemType))  # Повторно выбираем, если есть совпадение
 
-        board[row][col] = new_gem
+        board[row][col] = new_gem.value  # Сохраняем числовое значение в board
         new_gems.add((row, col, new_gem))
 
     return new_gems
 
 
+def _update_game():
+    pass
+
+
 # Swap two gems on the board
-def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[Optional[Set[Tuple[int, int, int]]], int]:
+def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[Optional[Set[Tuple[int, int, GemType]]], int]:
     """
     Swap two gems on the board and replace matched gems if any.
 
@@ -120,6 +129,23 @@ def swap_gems(board: BoardState, pos1: Tuple[int, int], pos2: Tuple[int, int]) -
         return replace_gems(board, matches), len(matches)
 
     return None, 0
+
+def click_gem(current_game: GameDTO, pos: GemPositionDTO) -> GameUpdateDTO:
+
+    board = current_game.board
+    clicked_gem = board[pos.x][pos.y]
+
+
+    match clicked_gem:
+        case GemType.HEART:
+            updated_gem_set =
+        case GemType.BOMB:
+            print("Bomb gem clicked.")
+
+        case _:
+            print("Unknown gem type clicked.")
+
+    #
 
 
 # Generate a game board with no initial matches
