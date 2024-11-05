@@ -31,6 +31,10 @@ class GameUpdateDTO(GameBase):
     updated_gems: List[GemBase]
 
 
+class BordStatusDTO(BaseModel):
+    board_status: List[List[Annotated[int, conint(ge=0, le=5)]]]
+
+
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
     board_status: List[List[Annotated[int, conint(ge=0, le=5)]]]

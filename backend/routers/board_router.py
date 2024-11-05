@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 
 from backend.database import cp_dependency, db_dependency
-from backend.schemas import GameUpdateDTO, SwapGemsDTO, GemPositionDTO
+from backend.schemas import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO
 from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player
 
 # from backend.utils.board_generator import generate_game_board
@@ -52,9 +52,9 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
     return updated_game if updated_game is not None else None
 
 
-@board_router.post("/shuffle", response_model=List[List[int]], status_code=status.HTTP_200_OK)
+@board_router.get("/shuffle", response_model=BordStatusDTO, status_code=status.HTTP_200_OK)
 async def shuffle_board(cp: cp_dependency, db: db_dependency):
     new_board = generate_game_board()
     cp.data.last_game.board_status = new_board
     await synchronize_player(cp.data, db)
-    return new_board
+    return BordStatusDTO(board_status=new_board)
