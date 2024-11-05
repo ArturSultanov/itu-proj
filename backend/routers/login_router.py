@@ -30,6 +30,7 @@ async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
 
     if player_result:
         player_dto = PlayerDTO.model_validate(player_result)
+        current_player.load_player(player_dto)
         return player_dto
 
     # If the player is not found, create a new one
