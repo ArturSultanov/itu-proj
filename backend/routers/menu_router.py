@@ -5,8 +5,8 @@ from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict
 from sqlalchemy.future import select
 from backend.database import PlayerOrm, cp_dependency, db_dependency, create_tables, delete_tables, current_player, CurrentPlayer
-from backend.utils import generate_game_board
-
+from backend.utils import generate_game_board, synchronize_player
+from backend.config import get_start_moves
 
 menu_router = APIRouter(
     prefix="/menu",
@@ -16,8 +16,8 @@ menu_router = APIRouter(
 
 
 # Assuming generate_game_board returns a numpy array
-@menu_router.post("/new_game", response_model=GameDTO | None, status_code=status.HTTP_200_OK)
-async def create_new_game(cp: cp_dependency):
+@menu_router.get("/new_game", response_model=GameDTO | None, status_code=status.HTTP_200_OK)
+async def create_new_game(cp: cp_dependency, db: db_dependency):
     """
     Create a new game for the current player, store it in the database, and return it.
     """
@@ -31,16 +31,17 @@ async def create_new_game(cp: cp_dependency):
     # Create a new game instance
     new_game = GameDTO(
         current_score=0,
-        moves_left=30,  # Set an initial value for moves_left
+        moves_left=get_start_moves(),  # Set an initial value for moves_left
         board_status=new_board
     )
     # Update in-memory player
     cp.data.last_game = new_game
+    await synchronize_player(cp.data, db)
     return new_game
 
 
 # Assuming generate_game_board returns a numpy array
-@menu_router.post("/continue", response_model=GameDTO | None, status_code=status.HTTP_200_OK)
+@menu_router.get("/continue", response_model=GameDTO | None, status_code=status.HTTP_200_OK)
 async def continue_game(cp: cp_dependency):
     """
     Create a new game for the current player, store it in the database, and return it.
@@ -51,12 +52,14 @@ async def continue_game(cp: cp_dependency):
 
     return cp.data.last_game
 
-@menu_router.post("/delete_continue", status_code=status.HTTP_200_OK)
-async def delete_continue(cp: cp_dependency):
+@menu_router.delete("/delete_game", status_code=status.HTTP_200_OK)
+async def delete_continue(cp: cp_dependency, db: db_dependency):
     if not cp or not cp.data:
         raise HTTPException(status_code=404, detail="Current player's last game not found.")
 
     cp.data.last_game = None
+    await synchronize_player(cp.data, db)
+    return {"message": "Game deleted"}
 
 
 @menu_router.get("/leaderboard", response_model=List[LeaderboardTDO], status_code=status.HTTP_200_OK)

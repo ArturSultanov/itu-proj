@@ -1,6 +1,9 @@
-from typing import List, Optional, Annotated, Tuple, Set
+from typing import List, Optional, Annotated, Tuple
 from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conset, conint
+from backend.config import Difficulty
 
+class DifficultyDTO(BaseModel):
+    difficulty: Difficulty
 
 class GemPositionDTO(BaseModel):
     x: int
@@ -17,7 +20,7 @@ class GameBase(BaseModel):
     moves_left: int
 
 class GameUpdateDTO(GameBase):
-    updated_gems: Set[GemBase]
+    updated_gems: List[GemBase]
 
 class GameDTO(GameBase):
     model_config = ConfigDict(from_attributes=True)
