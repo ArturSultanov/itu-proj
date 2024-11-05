@@ -1,5 +1,15 @@
 #!/bin/bash
-find . -type d -name "__pycache__" -exec rm -rf {} +
-export PYTHONPATH=$PWD
-# Run Uvicorn with the correct module path to the app instance
-uvicorn backend.main:app --host 0.0.0.0 --reload
+
+IMAGE_NAME="itu-fastapi-app"
+
+echo "Building Docker image..."
+docker build -t $IMAGE_NAME .
+
+# Check if the build was successful
+if [ $? -ne 0 ]; then
+    echo "Docker build failed. Exiting."
+    exit 1
+fi
+
+echo "Running Docker container..."
+docker run -p 8000:8000 $IMAGE_NAME

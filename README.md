@@ -8,3 +8,30 @@ This project is a game application API developed with **FastAPI**. It allows use
 - **Game Actions**: Perform in-game actions, including gem clicks and swaps, with appropriate handling for different gem types.
 - **Player Synchronization**: Synchronize player data between in-memory state and the database.
 - **RESTful API Design**: Follows REST principles for ease of use and consistency.
+
+## Run Application
+
+To run application for frontend just run the [run_server.sh](run_server.sh) script.
+It will automatically build and run docker image.
+
+### Run command:
+
+```bash
+./run_server.sh
+```
+
+### Expected out:
+
+```bash
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+### Run without Docker
+
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## Documentation for API
+Documentation can be found at [http://0.0.0.0:8000/docs#](http://0.0.0.0:8000/docs#) after application startup.
