@@ -161,6 +161,7 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
 
 # User clicked at some gem
 
+
 def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdateDTO]:
 
     board = player_data.last_game.board_status

@@ -7,6 +7,7 @@ from backend.database import Base, Str256
 
 intpk = Annotated[int, mapped_column(primary_key=True, index=True)]
 
+
 class PlayerOrm(Base):
     """
     Table for storing information about players.

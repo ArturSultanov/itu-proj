@@ -1,5 +1,5 @@
 from enum import Enum
-
+import os
 from pydantic_settings import BaseSettings
 
 
@@ -24,7 +24,7 @@ START_MOVES = {
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite+aiosqlite:///./database/game.db"
+    DATABASE_URL: str = f"sqlite+aiosqlite:///{os.path.abspath('./backend/database/game.db')}"
     WEB_HOST: str = "127.0.0.1"
     WEB_PORT: int = 8000
     SQL_ALCHEMY_DEBUG: bool = True

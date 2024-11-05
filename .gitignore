@@ -1,17 +1,3 @@
-# Ignore hidden files in backend
-/backend/.*
-
-# Ignore hidden files in frontend
-/frontend/.*
-
-# Ignore venv
-*.venv
-*.idea
-*.vscode
-
-*.sql
-
-*.db
-
+.*
 *__pycache__
 
