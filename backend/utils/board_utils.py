@@ -168,7 +168,7 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
 def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdateDTO]:
 
     board = player_data.last_game.board_status
-    clicked_gem = GemType(board[pos.x][pos.y])
+    clicked_gem = GemType(board[pos.y][pos.x])
     replaced_gems: Optional[List[GemBase]] = None
     moves = 0
     matches_number = 0
@@ -177,7 +177,7 @@ def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdat
         case GemType.HEART:
             moves = get_heart_recovery_moves()
             matches_number = 1
-            replaced_gems = replace_gems(board, {(pos.x, pos.y)})
+            replaced_gems = replace_gems(board, {(pos.y, pos.x)})
         case _:
             pass
 
