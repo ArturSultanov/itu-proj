@@ -28,6 +28,9 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
 
     # Get the current game status
     player_data = cp.data
+
+    if player_data.last_game.moves_left == 0:
+        return None
     # Get updated game
     updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)

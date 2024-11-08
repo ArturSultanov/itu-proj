@@ -28,7 +28,7 @@ async def synchronize_player(player_data: PlayerDTO, db: AsyncSession):
         raise HTTPException(status_code=500, detail="Player login not found for synchronization.")
 
     player_result.highest_score = player_data.highest_score if player_data.highest_score is not None else 0
-    player_result.last_game = player_data.last_game.model_dump() if player_data.last_game else {}
+    player_result.last_game = player_data.last_game.model_dump() if player_data.last_game else None
 
     db.add(player_result)
 

@@ -109,7 +109,7 @@ def replace_gems(board: BoardState, matches: Set[Tuple[int, int]]) -> List[GemBa
         board[row][col] = int(new_gem.value)
         new_gems.add((row, col, new_gem))
 
-    updated_gems = [GemBase(x=x, y=y, type=gem_type) for x, y, gem_type in new_gems]
+    updated_gems = [GemBase(x=x, y=y, type=gem_type) for y, x, gem_type in new_gems]
     return updated_gems
 
 
@@ -144,7 +144,7 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
             0 <= x2 < len(board) and 0 <= y2 < len(board[0])
     ):
         # Swap the gems
-        board[x1][y1], board[x2][y2] = board[x2][y2], board[x1][y1]
+        board[y1][x1], board[y2][x2] = board[y2][x2], board[y1][x1]
     else:
         raise ValueError("Swap positions are out of board bounds")
 
@@ -154,6 +154,9 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
         moves = -1
         matches_number = len(matches)
         replaced_gems = replace_gems(board, matches)
+    else:
+        # Swap the gems
+        board[y1][x1], board[y2][x2] = board[y2][x2], board[y1][x1]
 
     if replaced_gems:
         return _update_game_status(player_data, moves, matches_number, replaced_gems)
