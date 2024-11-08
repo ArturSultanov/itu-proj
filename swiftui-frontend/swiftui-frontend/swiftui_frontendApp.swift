@@ -8,10 +8,12 @@
 import SwiftUI
 
 @main
-struct swiftui_frontendApp: App {
+struct GemMatchApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                LoginView()
+            }
         }
     }
 }
