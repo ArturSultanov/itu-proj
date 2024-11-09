@@ -9,15 +9,9 @@ import SwiftUI
 
 struct MainMenuView: View {
     
-    
     var body: some View {
         ZStack{
             VStack(spacing: 20){
-                HStack{
-                    Text ("Hello, ")
-                }
-                .padding()
-                .font(.title2)
                 
                 Button(action: {}) {
                     Text("New Game")
@@ -43,7 +37,6 @@ struct MainMenuView: View {
         }
     }
 }
-
 
 #Preview {
     MainMenuView()

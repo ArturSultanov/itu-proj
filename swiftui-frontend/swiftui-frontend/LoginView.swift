@@ -8,46 +8,45 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State private var player = Player()
-    var body: some View {
-        ZStack{
-            VStack {
-                Text("Welcome \(player.login)!")
-                    .font(.largeTitle)
-                    .fontWeight(.semibold)
-                    .padding(.bottom, 42)
-                LoginInputView()
-                Button(action: {}) {
-                    Text("Login")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .frame(width: 100, height: 50)
-                }
-                .buttonStyle(.bordered)
-                .cornerRadius(20)
-            }
-            
-        }
-        .environment(player)
-    }
-}
-
-
-struct LoginInputView: View {
-    
-    @Environment(Player.self) var player
     
     @State private var loginInput: String = ""
+    @State private var isLoggedIn: Bool = false
+    @Environment(PlayerDataManager.self) var playerDataManager
+    
     
     var body: some View {
-        TextField("You login", text: $loginInput)
-            .padding(.horizontal, 40)
-            .frame(height: 40)
-            .padding()
-            .onChange(of: loginInput) {
-                player.login = loginInput
+        ZStack{
+            NavigationStack{
+                VStack(spacing: 20){
+                    TextField("Your login", text: $loginInput)
+                        .padding()
+                    Button("Login"){
+                        Task{
+                            await login()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .padding()
+                    
+                    
+                }
+                .navigationTitle("Navigation")
+                .navigationDestination(isPresented: $isLoggedIn) {
+                    MainMenuView()
+                }
             }
-        
+            .padding()
+            
+        }
+    }
+    
+    func login() async {
+        do {
+            try await NetworkManager.shared.login(with: loginInput, playerDataManager: playerDataManager)
+            isLoggedIn = true
+        } catch {
+            print("Login failed: \(error)")
+        }
     }
 }
 

@@ -9,20 +9,24 @@ import Foundation
 import SwiftUI
 import Observation
 
-@Observable @MainActor class Player: Identifiable {
-    var login: String = ""
-    var isLoggedIn: Bool = false
-    var highestScore: Int = 0
-    var lastGame: LastGame?
-    
+
+@Observable @MainActor class PlayerDataManager {
+    var playerData: PlayerData?
 }
 
-
-class LastGame: Codable{
-    var currentScore: Int = 0
-    var movesLeft: Int = 0
-    var boardStatus: [Int]?
+class PlayerData: Codable {
+    var id: Int
+    var login: String
+    var highestScore: Int
+    var lastGame: GameSession?
 }
+
+struct GameSession: Codable {
+    let currentScore: Int
+    let movesLeft: Int
+    let boardStatus: [[Int]]
+}
+
 
 class Gem: Identifiable, Codable{
     var color: Int?
@@ -33,7 +37,4 @@ class GemPosition: Codable{
     var x: Int
     var y: Int
 }
-
-
-
 
