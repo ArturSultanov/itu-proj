@@ -8,8 +8,6 @@
 import SwiftUI
 
 
-import SwiftUI
-
 @Observable class GameViewModel {
     var boardStatus: [[Int]]
     var selectedGem: (x: Int, y: Int)?
@@ -44,17 +42,79 @@ import SwiftUI
     }
 }
 
+struct GemView: View {
+    let iconType: IconType
+    let isSelected: Bool
 
-
-struct GameBoardView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Image(systemName: iconType.symbolName)
+            .symbolRenderingMode(.palette)
+            .foregroundStyle(iconType.color)
+            .frame(width: 40, height: 40)
+            .background(isSelected ? Color.yellow.opacity(0.3) : Color.clear)
+            .clipShape(Circle())
+            .overlay(
+                Circle().stroke(Color.yellow, lineWidth: isSelected ? 2 : 0)
+            )
     }
 }
 
-#Preview {
-    GameBoardView()
+
+
+struct GameBoardView: View {
+    @State var viewModel: GameViewModel = GameViewModel(boardStatus: initialBoardStatus)
+
+    var body: some View {
+        VStack {
+            Text("Game Board")
+                .font(.title)
+                .padding()
+
+            ForEach(0..<viewModel.boardStatus.count, id: \.self) { rowIndex in
+                HStack {
+                    ForEach(0..<viewModel.boardStatus[rowIndex].count, id: \.self) { colIndex in
+                        let iconType = IconType.getGemIcon(for: viewModel.boardStatus[rowIndex][colIndex])
+                        let isSelected = viewModel.selectedGem?.x == colIndex && viewModel.selectedGem?.y == rowIndex
+                        GemView(iconType: iconType, isSelected: isSelected)
+                            .onTapGesture {
+                                viewModel.selectGem(at: (x: colIndex, y: rowIndex))
+                            }
+                    }
+                }
+            }
+        }
+    }
 }
+
+
+
+//struct ContentView: View {
+//    @State private var viewModel = GameViewModel(boardStatus: initialBoardStatus)
+//
+//    var body: some View {
+//        GameBoardView(viewModel: viewModel)
+//    }
+//}
+//
+//let initialBoardStatus: [[Int]] = [
+//    [0, 1, 2, 3, 4],
+//    [1, 2, 3, 4, 0],
+//    [2, 3, 4, 0, 1],
+//    [3, 4, 0, 1, 2],
+//    [4, 0, 1, 2, 3]
+//]
+
+
+
+//struct GameBoardView: View {
+//    var body: some View {
+//        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+//    }
+//}
+//
+//#Preview {
+//    GameBoardView()
+//}
 
 
 

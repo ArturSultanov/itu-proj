@@ -38,6 +38,3 @@ async def read_root():
     and perform game actions like clicking on gems or swapping them on the game board. 
     The backend uses SQLAlchemy with an SQLite database for persistence and supports various 
     levels of game difficulty."""}
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host=settings.WEB_HOST, port=settings.WEB_PORT, reload=True)
