@@ -11,9 +11,7 @@ import SwiftUI
 struct GemMatchApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                LoginView()
-            }
+            LoginView()
         }
     }
 }

@@ -2,78 +2,56 @@
 //  LoginView.swift
 //  swiftui-frontend
 //
-//  Created by Artur Sultanov on 08.11.2024.
+//  Created by Artur Sultanov on 09.11.2024.
 //
 
 import SwiftUI
 
-import SwiftUI
-
 struct LoginView: View {
-    @State private var loginText = ""
-    @State private var isLoading = false
-    @State private var showError = false
-    @State private var navigateToMenu = false
-    private var networkManager = NetworkManager.shared
-    @State private var user: User?
-
+    @State private var player = Player()
     var body: some View {
-        VStack {
-            Text("Welcome to Gem Match!")
-                .font(.largeTitle)
-                .padding()
-
-            TextField("Enter your login", text: $loginText)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-
-            if isLoading {
-                ProgressView()
-            } else {
-                Button(action: login) {
+        ZStack{
+            VStack {
+                Text("Welcome \(player.login)!")
+                    .font(.largeTitle)
+                    .fontWeight(.semibold)
+                    .padding(.bottom, 42)
+                LoginInputView()
+                Button(action: {}) {
                     Text("Login")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .frame(width: 100, height: 50)
                 }
-                .padding()
-                .disabled(loginText.isEmpty)
-            }
-
-            if showError {
-                Text("Login failed. Please try again.")
-                    .foregroundColor(.red)
+                .buttonStyle(.bordered)
+                .cornerRadius(20)
             }
             
-            if navigateToMenu {
-                Text("Success")
-                    .foregroundColor(.red)
-            }
-
         }
-        .padding()
-    }
-
-    func login() {
-        Task {
-            isLoading = true
-            do {
-                print("Hello")
-                user = try await networkManager.login(with: loginText)
-                isLoading = false
-                navigateToMenu = true
-            } catch {
-                isLoading = false
-                showError = true
-            }
-        }
+        .environment(player)
     }
 }
 
+
+struct LoginInputView: View {
+    
+    @Environment(Player.self) var player
+    
+    @State private var loginInput: String = ""
+    
+    var body: some View {
+        TextField("You login", text: $loginInput)
+            .padding(.horizontal, 40)
+            .frame(height: 40)
+            .padding()
+            .onChange(of: loginInput) {
+                player.login = loginInput
+            }
+        
+    }
+}
 
 #Preview {
     LoginView()
 }
+

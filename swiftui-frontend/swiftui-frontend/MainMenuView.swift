@@ -2,16 +2,48 @@
 //  MainMenuView.swift
 //  swiftui-frontend
 //
-//  Created by Artur Sultanov on 08.11.2024.
+//  Created by Artur Sultanov on 09.11.2024.
 //
 
 import SwiftUI
 
 struct MainMenuView: View {
+    
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack{
+            VStack(spacing: 20){
+                HStack{
+                    Text ("Hello, ")
+                }
+                .padding()
+                .font(.title2)
+                
+                Button(action: {}) {
+                    Text("New Game")
+                }
+                
+                Button(action: {}) {
+                    Text("Continue")
+                }
+                
+                Button(action: {}) {
+                    Text("Settings")
+                }
+                Button(action: {}) {
+                    Text("Leader board")
+                }
+                Button(action: {}){
+                    Text("Quit Game")
+                }
+                .buttonStyle(.bordered)
+                .padding()
+            }
+            
+        }
     }
 }
+
 
 #Preview {
     MainMenuView()
