@@ -29,7 +29,7 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     player_data = cp.data
 
     if player_data.last_game.moves_left == 0:
-        return None
+        return UpdateMessageDTO(detail="There are no moves left.")
     # Get updated game
     updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)
@@ -70,6 +70,10 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
 
     # Get the current game status
     player_data = cp.data
+
+    if player_data.last_game.moves_left == 0:
+        return UpdateMessageDTO(detail="There are no moves left.")
+
     # Get updated game
     updated_game = click_gem(player_data, click)
     await synchronize_player(cp.data, db)
@@ -78,6 +82,9 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
 
 @board_router.get("/shuffle", response_model=BordStatusDTO, status_code=status.HTTP_200_OK)
 async def shuffle_board(cp: cp_dependency, db: db_dependency):
+    if not cp or not cp.data or not cp.data.last_game:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current game data not found.")
+
     new_board = generate_game_board()
     cp.data.last_game.board_status = new_board
     await synchronize_player(cp.data, db)
