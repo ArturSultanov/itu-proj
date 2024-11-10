@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct LoginView: View {
-    
+    @Environment(PlayerDataManager.self) var playerDataManager
     @State private var loginInput: String = ""
     @State private var isLoggedIn: Bool = false
-    @Environment(PlayerDataManager.self) var playerDataManager
     
     var body: some View {
         ZStack{
@@ -51,5 +50,6 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+        .environment(PlayerDataManager())
 }
 

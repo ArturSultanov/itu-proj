@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MainMenuView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
-
     @State private var isNewGameActive: Bool = false
     @State private var isContunueGameActive: Bool = false
     @State private var isSettingsActive: Bool = false
@@ -17,46 +16,54 @@ struct MainMenuView: View {
     
     var body: some View {
         ZStack{
-            NavigationStack{
-                VStack(spacing: 20){
-                    if let player = playerDataManager.playerData {
-                        Text("Welcome, \(player.login)!")
-                            .font(.title)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(20)
-                    }
-                    
-                    Button("New Game") {
-                        Task {
-                            await newGame()
+            VStack{
+                if let player = playerDataManager.playerData {
+                    Text("Welcome, \(player.login)!")
+                        .font(.title)
+                    Text("Highest Score: \(player.highestScore)")
+                        .font(.subheadline)
+                }
+                NavigationStack{
+                    VStack(spacing: 20){
+                        if let player = playerDataManager.playerData {
+                            Text("Welcome, \(player.login)!")
+                                .font(.title)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(20)
                         }
+                        
+                        Button("New Game") {
+                            Task {
+                                await newGame()
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .padding()
+                        
+                        Button(action: {}) {
+                            Text("Continue")
+                        }
+                        
+                        Button(action: {}) {
+                            Text("Settings")
+                        }
+                        Button(action: {}) {
+                            Text("Leader board")
+                        }
+                        Button(action: {}){
+                            Text("Quit Game")
+                        }
+                        .buttonStyle(.bordered)
+                        .padding()
                     }
-                    .buttonStyle(.bordered)
-                    .padding()
-                    
-                    Button(action: {}) {
-                        Text("Continue")
+                    .navigationTitle("Navigation")
+                    .navigationDestination(isPresented: $isNewGameActive) {
+                        GameBoardView()
                     }
-                                        
-                    Button(action: {}) {
-                        Text("Settings")
-                    }
-                    Button(action: {}) {
-                        Text("Leader board")
-                    }
-                    Button(action: {}){
-                        Text("Quit Game")
-                    }
-                    .buttonStyle(.bordered)
-                    .padding()
                 }
-                .navigationTitle("Navigation")
-                .navigationDestination(isPresented: $isNewGameActive) {
-                    GameBoardView()
-                }
+                .padding()
             }
-            .padding()
         }
     }
     
@@ -71,6 +78,3 @@ struct MainMenuView: View {
     }
 }
 
-#Preview {
-    MainMenuView()
-}

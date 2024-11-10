@@ -4,150 +4,164 @@
 //
 //  Created by Artur Sultanov on 09.11.2024.
 //
+// GameBoardView.swift
+import SwiftUI
 
 import SwiftUI
 
-
-@Observable class GameViewModel {
-    var boardStatus: [[Int]]
-    var selectedGem: (x: Int, y: Int)?
-
-    init(boardStatus: [[Int]]) {
-        self.boardStatus = boardStatus
-    }
-
-    func selectGem(at position: (x: Int, y: Int)) {
-        if let firstSelection = selectedGem {
-            if areAdjacent(firstSelection, position) {
-                swapGems(firstSelection, position)
-                selectedGem = nil
-            } else {
-                selectedGem = position
-            }
-        } else {
-            selectedGem = position
-        }
-    }
-
-    private func areAdjacent(_ first: (x: Int, y: Int), _ second: (x: Int, y: Int)) -> Bool {
-        let dx = abs(first.x - second.x)
-        let dy = abs(first.y - second.y)
-        return (dx == 1 && dy == 0) || (dx == 0 && dy == 1)
-    }
-
-    private func swapGems(_ first: (x: Int, y: Int), _ second: (x: Int, y: Int)) {
-        let temp = boardStatus[first.y][first.x]
-        boardStatus[first.y][first.x] = boardStatus[second.y][second.x]
-        boardStatus[second.y][second.x] = temp
-    }
-}
-
-struct GemView: View {
-    let iconType: IconType
-    let isSelected: Bool
-
-    var body: some View {
-        Image(systemName: iconType.symbolName)
-            .symbolRenderingMode(.palette)
-            .foregroundStyle(iconType.color)
-            .frame(width: 40, height: 40)
-            .background(isSelected ? Color.yellow.opacity(0.3) : Color.clear)
-            .clipShape(Circle())
-            .overlay(
-                Circle().stroke(Color.yellow, lineWidth: isSelected ? 2 : 0)
-            )
-    }
-}
-
-
-
 struct GameBoardView: View {
-    @State var viewModel: GameViewModel = GameViewModel(boardStatus: initialBoardStatus)
+    @Environment(PlayerDataManager.self) var playerDataManager
+
+    @State private var gems: [Gem] = []
+    @State private var swapInProgress = false
+    
+    let gemSize: CGFloat = 50
+    let gridSpacing: CGFloat = 2
 
     var body: some View {
         VStack {
-            Text("Game Board")
-                .font(.title)
-                .padding()
-
-            ForEach(0..<viewModel.boardStatus.count, id: \.self) { rowIndex in
-                HStack {
-                    ForEach(0..<viewModel.boardStatus[rowIndex].count, id: \.self) { colIndex in
-                        let iconType = IconType.getGemIcon(for: viewModel.boardStatus[rowIndex][colIndex])
-                        let isSelected = viewModel.selectedGem?.x == colIndex && viewModel.selectedGem?.y == rowIndex
-                        GemView(iconType: iconType, isSelected: isSelected)
-                            .onTapGesture {
-                                viewModel.selectGem(at: (x: colIndex, y: rowIndex))
-                            }
+            if let lastGame = playerDataManager.playerData?.lastGame {
+                Text("Score: \(lastGame.currentScore)")
+                    .font(.headline)
+                Text("Moves Left: \(lastGame.movesLeft)")
+                    .font(.subheadline)
+            }
+            GeometryReader { geometry in
+                ZStack {
+                    ForEach(gems) { gem in
+                        GemView(gem: gem, swapAction: { direction in
+                            handleSwapAction(gem: gem, direction: direction)
+                        })
+                        .frame(width: gemSize, height: gemSize)
+                        .position(position(for: gem, in: geometry.size))
+                    }
+                }
+                .onAppear {
+                    initializeGems()
+                }
+            }
+        }
+    }
+    
+    func position(for gem: Gem, in size: CGSize) -> CGPoint {
+        let numRows = playerDataManager.playerData?.lastGame?.boardStatus.count ?? 0
+        let numCols = playerDataManager.playerData?.lastGame?.boardStatus.first?.count ?? 0
+        
+        let totalWidth = CGFloat(numCols) * (gemSize + gridSpacing) - gridSpacing
+        let totalHeight = CGFloat(numRows) * (gemSize + gridSpacing) - gridSpacing
+        
+        let startX = (size.width - totalWidth) / 2 + gemSize / 2
+        let startY = (size.height - totalHeight) / 2 + gemSize / 2
+        
+        let xPosition = startX + CGFloat(gem.x) * (gemSize + gridSpacing)
+        let yPosition = startY + CGFloat(gem.y) * (gemSize + gridSpacing)
+        
+        return CGPoint(x: xPosition, y: yPosition)
+    }
+    
+//    func initializeGems() {
+//        if let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus {
+//            if gems.isEmpty {
+//                // Initialize gems array
+//                gems = []
+//                for (rowIndex, row) in boardStatus.enumerated() {
+//                    for (colIndex, type) in row.enumerated() {
+//                        let gem = Gem(type: type, x: colIndex, y: rowIndex)
+//                        gems.append(gem)
+//                    }
+//                }
+//            } else {
+//                // Update existing gems
+//                for gem in gems {
+//                    if let type = playerDataManager.playerData?.lastGame?.boardStatus[gem.y][gem.x] {
+//                        gem.type = type
+//                    }
+//                }
+//            }
+//        }
+//    }
+    
+    func initializeGems() {
+        if let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus {
+            // Clear existing gems and recreate them based on the updated boardStatus
+            gems = []
+            for (rowIndex, row) in boardStatus.enumerated() {
+                for (colIndex, type) in row.enumerated() {
+                    if let existingGem = gems.first(where: { $0.x == colIndex && $0.y == rowIndex }) {
+                        existingGem.type = type
+                    } else {
+                        let gem = Gem(type: type, x: colIndex, y: rowIndex)
+                        gems.append(gem)
                     }
                 }
             }
         }
     }
-}
 
+    
+    func handleSwapAction(gem: Gem, direction: Direction) {
+        if swapInProgress { return }
+        guard let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
+        swapInProgress = true
 
-
-//struct ContentView: View {
-//    @State private var viewModel = GameViewModel(boardStatus: initialBoardStatus)
-//
-//    var body: some View {
-//        GameBoardView(viewModel: viewModel)
-//    }
-//}
-//
-//let initialBoardStatus: [[Int]] = [
-//    [0, 1, 2, 3, 4],
-//    [1, 2, 3, 4, 0],
-//    [2, 3, 4, 0, 1],
-//    [3, 4, 0, 1, 2],
-//    [4, 0, 1, 2, 3]
-//]
-
-
-
-//struct GameBoardView: View {
-//    var body: some View {
-//        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-//    }
-//}
-//
-//#Preview {
-//    GameBoardView()
-//}
-
-
-
-enum IconType: CaseIterable, Equatable {
-    case triangle
-    case circle
-    case square
-    case diamond
-    case heart
-
-    var color: Color {
-        switch self {
-        case .triangle: return .purple
-        case .circle: return .pink
-        case .square: return .orange
-        case .diamond: return .yellow
-        case .heart: return .red
+        // Swap gems in the array
+        withAnimation {
+            // Swap positions
+            let tempX = gem.x
+            let tempY = gem.y
+            gem.x = targetGem.x
+            gem.y = targetGem.y
+            targetGem.x = tempX
+            targetGem.y = tempY
+        }
+        
+        // Send swap request to server
+        Task {
+            do {
+                try await NetworkManager.shared.swapGems(gem1: gem, gem2: targetGem, playerDataManager: playerDataManager)
+                
+                // Update the gems based on response
+                initializeGems()
+                swapInProgress = false
+            } catch let NetworkError.invalidResponse(statusCode) {
+                if statusCode == 406 {
+                    // No matches found, swap back
+                    withAnimation {
+                        let tempX = gem.x
+                        let tempY = gem.y
+                        gem.x = targetGem.x
+                        gem.y = targetGem.y
+                        targetGem.x = tempX
+                        targetGem.y = tempY
+                    }
+                    swapInProgress = false
+                } else {
+                    print("Swap failed with status code: \(statusCode)")
+                    swapInProgress = false
+                }
+            } catch {
+                print("Swap failed: \(error)")
+                swapInProgress = false
+            }
         }
     }
-
-    var symbolName: String {
-        switch self {
-        case .triangle: return "triangle.fill"
-        case .circle: return "circle.fill"
-        case .square: return "square.fill"
-        case .diamond: return "diamond.fill"
-        case .heart: return "heart.fill"
+    
+    func getAdjacentGem(for gem: Gem, in direction: Direction) -> Gem? {
+        let x = gem.x
+        let y = gem.y
+        switch direction {
+        case .up:
+            return gems.first(where: { $0.x == x && $0.y == y - 1 })
+        case .down:
+            return gems.first(where: { $0.x == x && $0.y == y + 1 })
+        case .left:
+            return gems.first(where: { $0.x == x - 1 && $0.y == y })
+        case .right:
+            return gems.first(where: { $0.x == x + 1 && $0.y == y })
         }
-    }
-
-    static func getGemIcon(for typeIndex: Int) -> IconType {
-        let allCases = Array(Self.allCases)
-        return allCases[typeIndex % allCases.count]
     }
 }
 
+enum Direction {
+    case up, down, left, right
+}
