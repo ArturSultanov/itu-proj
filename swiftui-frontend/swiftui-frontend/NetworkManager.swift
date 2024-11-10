@@ -80,6 +80,7 @@ class NetworkManager: ObservableObject {
             throw NetworkError.decodingError
         }
     }
+    
     func swapGems(gem1: Gem, gem2: Gem, playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/board/swap_gems") else {
             throw NetworkError.invalidURL
@@ -109,9 +110,7 @@ class NetworkManager: ObservableObject {
             decoder.keyDecodingStrategy = .convertFromSnakeCase
 
             let swapResponse = try decoder.decode(SwapResponse.self, from: data)
-            await MainActor.run {
-                playerDataManager.updateGameSession(with: swapResponse)
-            }
+            playerDataManager.updateGameSession(with: swapResponse)
         } else {
             throw NetworkError.invalidResponse(statusCode: httpResponse.statusCode)
         }

@@ -13,28 +13,35 @@ struct LoginView: View {
     @State private var isLoggedIn: Bool = false
     
     var body: some View {
-        ZStack{
-            NavigationStack{
-                VStack(spacing: 20){
+        ZStack {
+            VStack {
+                NavigationStack {
+                    Text("Enter your name")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                        .padding(.bottom, 20)
+                    
                     TextField("Your login", text: $loginInput)
                         .padding()
-                    Button("Login"){
-                        Task{
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+                        .shadow(radius: 5, x: 0, y: 3)
+                        .padding(.horizontal, 40)
+                    
+                    Button("Confirm") {
+                        Task {
                             await login()
                         }
                     }
-                    .buttonStyle(.bordered)
-                    .padding()
-                    
-                    
-                }
-                .navigationTitle("Navigation")
-                .navigationDestination(isPresented: $isLoggedIn) {
-                    MainMenuView()
+                    .buttonStyle(LoginButtonStyle())
+                    .padding(.top, 10)
+                    .navigationTitle("Welcome")
+                    .navigationDestination(isPresented: $isLoggedIn) {
+                        MainMenuView()}
                 }
             }
-            .padding()
-            
         }
     }
     
@@ -48,8 +55,27 @@ struct LoginView: View {
     }
 }
 
+struct LoginButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity, minHeight: 50)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.blue, Color.purple]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .foregroundColor(.white)
+            .font(.headline)
+            .cornerRadius(10)
+            .shadow(radius: configuration.isPressed ? 2 : 5, x: 0, y: configuration.isPressed ? 1 : 3)
+            .padding(.horizontal, 40)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+    }
+}
+
 #Preview {
     LoginView()
         .environment(PlayerDataManager())
 }
-

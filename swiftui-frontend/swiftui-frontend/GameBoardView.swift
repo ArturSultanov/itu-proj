@@ -20,12 +20,17 @@ struct GameBoardView: View {
 
     var body: some View {
         VStack {
-            if let lastGame = playerDataManager.playerData?.lastGame {
-                Text("Score: \(lastGame.currentScore)")
-                    .font(.headline)
-                Text("Moves Left: \(lastGame.movesLeft)")
-                    .font(.subheadline)
+            if let playerData = playerDataManager.playerData {
+                HStack {
+                    Text("Currect Score: \(playerData.lastGame!.currentScore)")
+                        .font(.headline)
+                    Spacer()
+                    Text("Moves Left: \(playerData.lastGame!.movesLeft)")
+                        .font(.subheadline)
+                }
+                .padding()
             }
+
             GeometryReader { geometry in
                 ZStack {
                     ForEach(gems) { gem in
@@ -42,6 +47,7 @@ struct GameBoardView: View {
             }
         }
     }
+        
     
     func position(for gem: Gem, in size: CGSize) -> CGPoint {
         let numRows = playerDataManager.playerData?.lastGame?.boardStatus.count ?? 0
@@ -59,27 +65,6 @@ struct GameBoardView: View {
         return CGPoint(x: xPosition, y: yPosition)
     }
     
-//    func initializeGems() {
-//        if let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus {
-//            if gems.isEmpty {
-//                // Initialize gems array
-//                gems = []
-//                for (rowIndex, row) in boardStatus.enumerated() {
-//                    for (colIndex, type) in row.enumerated() {
-//                        let gem = Gem(type: type, x: colIndex, y: rowIndex)
-//                        gems.append(gem)
-//                    }
-//                }
-//            } else {
-//                // Update existing gems
-//                for gem in gems {
-//                    if let type = playerDataManager.playerData?.lastGame?.boardStatus[gem.y][gem.x] {
-//                        gem.type = type
-//                    }
-//                }
-//            }
-//        }
-//    }
     
     func initializeGems() {
         if let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus {

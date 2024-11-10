@@ -7,7 +7,7 @@ from pydantic import constr
 from backend.database import PlayerOrm
 from backend.database import current_player
 from backend.database import db_dependency
-from backend.models import PlayerDTO, PlayerLoginDTO
+from backend.models import PlayerDTO
 
 login_router = APIRouter(
     prefix="/login",
@@ -17,7 +17,7 @@ login_router = APIRouter(
 
 
 @login_router.get("", status_code=status.HTTP_200_OK, response_model=PlayerDTO | None)
-async def get_or_create_player(login: constr(max_length=256), db: db_dependency):
+async def get_or_create_player(login: constr(min_length=1, max_length=256), db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
     Cache the player instance in memory after the first retrieval.

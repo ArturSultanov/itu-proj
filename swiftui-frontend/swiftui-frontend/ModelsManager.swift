@@ -34,7 +34,6 @@ import Observation
             }
         }
     }
-
 }
 
 
@@ -99,6 +98,4 @@ struct SwapResponse: Codable {
     let movesLeft: Int
     let updatedGems: [Gem]
 }
-
-
 

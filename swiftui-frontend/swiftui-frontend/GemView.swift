@@ -62,7 +62,6 @@ struct GemView: View {
     }
 }
 
-
 enum IconType: CaseIterable, Equatable {
     case triangle
     case circle
