@@ -34,7 +34,10 @@ async def swap_gems_fullboard_route(swap_data: SwapGemsDTO, cp: cp_dependency, d
     # Get updated game
     updated_board = swap_gems_fullboard(player_data, swap_data)
     await synchronize_player(cp.data, db)
-    return updated_board if updated_board is not None else UpdateMessageDTO(detail="No board found.")
+    if updated_board is not None:
+        return updated_board
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No board found.")
 
 
 @board_router.post("/click_gem_fullboard", response_model=GameDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
@@ -55,7 +58,14 @@ async def click_gem_fullboard_route(click: GemPositionDTO, cp: cp_dependency, db
     # Get updated game
     updated_board = click_gem_fullboard(player_data, click)
     await synchronize_player(cp.data, db)
-    return updated_board if updated_board is not None else UpdateMessageDTO(detail="No clickable gems found.")
+
+    # return updated_board if updated_board is not None else UpdateMessageDTO(detail="No clickable gems found.")
+
+    if updated_board is not None:
+        return updated_board
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No clickable gems found.")
+
 
 
 @board_router.post("/swap_gems", response_model=GameUpdateDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
@@ -66,9 +76,6 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     and decrease the moves number.
     Return only updated gems.
     """
-
-    # TODO: Fix not updated second gem
-
     if not cp or not cp.data or not cp.data.last_game:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current game data not found.")
 
@@ -77,10 +84,16 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
 
     if player_data.last_game.moves_left == 0:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="No moves left.")
+
     # Get updated game
     updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)
-    return updated_game if updated_game is not None else UpdateMessageDTO(detail="No matches found.")
+
+
+    if updated_game is not None:
+        return updated_game
+    else:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="No matches found.")
 
 
 @board_router.post("/click_gem", response_model=GameUpdateDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
@@ -102,7 +115,10 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
     # Get updated game
     updated_game = click_gem(player_data, click)
     await synchronize_player(cp.data, db)
-    return updated_game if updated_game is not None else UpdateMessageDTO(detail="No clickable gems found.")
+    if updated_game is not None:
+        return updated_game
+    else:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="No clickable gems found.")
 
 
 @board_router.get("/shuffle", response_model=BordStatusDTO, status_code=status.HTTP_200_OK)
