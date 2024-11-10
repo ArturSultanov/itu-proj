@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from backend.database import PlayerOrm
 from backend.database import current_player
 from backend.database import db_dependency
-from backend.schemas import PlayerDTO, PlayerLoginDTO
+from backend.models import PlayerDTO, PlayerLoginDTO
 
 login_router = APIRouter(
     prefix="/login",

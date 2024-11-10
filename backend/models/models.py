@@ -8,6 +8,8 @@ from backend.config import Difficulty
 class DifficultyDTO(BaseModel):
     difficulty: Difficulty
 
+class UpdateMessageDTO(BaseModel):
+    detail: str
 
 class GemPositionDTO(BaseModel):
     x: int

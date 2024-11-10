@@ -1,9 +1,7 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException, status
 
 from backend.database import cp_dependency, db_dependency
-from backend.schemas import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO
+from backend.models import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO, UpdateMessageDTO
 from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player
 
 # from backend.utils.board_generator import generate_game_board
@@ -15,7 +13,7 @@ board_router = APIRouter(
 )
 
 
-@board_router.post("/swap_gems", response_model=GameUpdateDTO | None, status_code=status.HTTP_200_OK)
+@board_router.post("/swap_gems", response_model=GameUpdateDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_dependency):
     """
     Check if there are any matches,
@@ -34,10 +32,10 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     # Get updated game
     updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)
-    return updated_game if updated_game is not None else None
+    return updated_game if updated_game is not None else UpdateMessageDTO(detail="No matches found.")
 
 
-@board_router.post("/click_gem", response_model=GameUpdateDTO | None, status_code=status.HTTP_200_OK)
+@board_router.post("/click_gem", response_model=GameUpdateDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_dependency):
     """
     Check if clicked gem was a Bomb or Heal.
@@ -52,7 +50,7 @@ async def click_gem_route(click: GemPositionDTO, cp: cp_dependency, db: db_depen
     # Get updated game
     updated_game = click_gem(player_data, click)
     await synchronize_player(cp.data, db)
-    return updated_game if updated_game is not None else None
+    return updated_game if updated_game is not None else UpdateMessageDTO(detail="No clickable gems found.")
 
 
 @board_router.get("/shuffle", response_model=BordStatusDTO, status_code=status.HTTP_200_OK)

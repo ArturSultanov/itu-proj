@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, status
 
 from backend.database import cp_dependency, db_dependency, create_tables, delete_tables, current_player
-from backend.schemas import PlayerDTO
+from backend.models import PlayerDTO, UpdateMessageDTO
 from backend.utils import synchronize_player
 
 utils_router = APIRouter(
@@ -13,20 +13,20 @@ utils_router = APIRouter(
 )
 
 
-@utils_router.get("/reboot_db")
+@utils_router.get("/reboot_db", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def reboot_db():
     await delete_tables()
     await create_tables()
-    return {"detail": "Database rebooted."}
+    return UpdateMessageDTO(detail="Database rebooted.")
 
 
-@utils_router.post("/sync", status_code=status.HTTP_200_OK)
+@utils_router.post("/sync", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def sync_player(cp: cp_dependency, db: db_dependency):
     if not cp.data:
         raise HTTPException(status_code=500, detail="No player data found in current player instance.")
 
     await synchronize_player(cp.data, db)
-    return {"detail": "Player data synchronized successfully"}
+    return UpdateMessageDTO(detail="Player data synchronized successfully")
 
 
 @utils_router.get("/current_player", status_code=status.HTTP_200_OK, response_model=Optional[PlayerDTO])
@@ -42,6 +42,7 @@ async def exit_app(db: db_dependency):
     if current_player and current_player.data:
         await synchronize_player(current_player.data, db)
         current_player.data = None
-        return {"detail": "Player data synchronized and current player cleared."}
+
+        return UpdateMessageDTO(detail="Player data synchronized and current player cleared.")
     else:
-        return {"detail": "No current player to synchronize. Current player cleared."}
+        return UpdateMessageDTO(detail="No current player to synchronize. Current player cleared.")

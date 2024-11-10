@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException
 
 from backend.config import Difficulty, set_difficulty, get_difficulty
 from backend.database import cp_dependency, db_dependency
-from backend.schemas import PlayerLoginDTO, DifficultyDTO
+from backend.models import PlayerLoginDTO, DifficultyDTO, UpdateMessageDTO
 from backend.utils import synchronize_player
 
 settings_router = APIRouter(
@@ -12,14 +12,14 @@ settings_router = APIRouter(
 )
 
 
-@settings_router.put("/update_login", status_code=status.HTTP_200_OK)
+@settings_router.put("/update_login", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def get_or_create_player(player: PlayerLoginDTO, cp: cp_dependency, db: db_dependency):
     cp.data.login = player.login  # Update the login of the current player
     await synchronize_player(cp.data, db)
-    return {"msg": f"Player login updated to {cp.data.login}"}
+    return UpdateMessageDTO(detail=f"Player login updated to {cp.data.login}")
 
 
-@settings_router.put("/set_difficulty", response_model=DifficultyDTO, status_code=status.HTTP_200_OK)
+@settings_router.put("/set_difficulty", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def set_difficulty_route(data: DifficultyDTO):
     """
     Set the difficulty level
@@ -31,7 +31,7 @@ async def set_difficulty_route(data: DifficultyDTO):
         )
 
     set_difficulty(data.difficulty)
-    return {"difficulty": get_difficulty()}
+    return UpdateMessageDTO(detail=f"Difficulty set to {data.difficulty}")
 
 
 @settings_router.get("/get_difficulty", response_model=DifficultyDTO, status_code=status.HTTP_200_OK)

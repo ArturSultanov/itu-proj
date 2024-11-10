@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from backend.database import PlayerOrm
-from backend.schemas import PlayerDTO
+from backend.models import PlayerDTO
 
 
 async def synchronize_player(player_data: PlayerDTO, db: AsyncSession):
