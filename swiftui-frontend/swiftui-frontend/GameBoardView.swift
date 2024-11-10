@@ -7,7 +7,6 @@
 // GameBoardView.swift
 import SwiftUI
 
-import SwiftUI
 
 struct GameBoardView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
@@ -19,33 +18,48 @@ struct GameBoardView: View {
     let gridSpacing: CGFloat = 2
 
     var body: some View {
-        VStack {
-            if let playerData = playerDataManager.playerData {
-                HStack {
-                    Text("Currect Score: \(playerData.lastGame!.currentScore)")
-                        .font(.headline)
-                    Spacer()
-                    Text("Moves Left: \(playerData.lastGame!.movesLeft)")
-                        .font(.subheadline)
-                }
-                .padding()
-            }
-
-            GeometryReader { geometry in
-                ZStack {
-                    ForEach(gems) { gem in
-                        GemView(gem: gem, swapAction: { direction in
-                            handleSwapAction(gem: gem, direction: direction)
-                        })
-                        .frame(width: gemSize, height: gemSize)
-                        .position(position(for: gem, in: geometry.size))
+        ZStack {
+            VStack() { // Add spacing between elements in the VStack
+                // Beautifully formatted metrics above the game board
+                if let playerData = playerDataManager.playerData {
+                    VStack {
+                        HStack {
+                            Text("Current Score: \(playerData.lastGame!.currentScore)")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .padding(.trailing)
+                            Text("Moves Left: \(playerData.lastGame!.movesLeft)")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
+                        .background(Color.blue)
+                        .cornerRadius(10)
                     }
                 }
-                .onAppear {
-                    initializeGems()
+                
+                // Game board below the metrics
+                GeometryReader { geometry in
+                    ZStack {
+                        ForEach(gems) { gem in
+                            GemView(gem: gem, swapAction: { direction in
+                                handleSwapAction(gem: gem, direction: direction)
+                            })
+                            .frame(width: gemSize, height: gemSize)
+                            .position(position(for: gem, in: geometry.size))
+                        }
+                    }
+                    .onAppear {
+                        initializeGems()
+                    }
                 }
+                
             }
+            .aspectRatio(1, contentMode: .fit)
+            .padding([.leading, .trailing, .bottom], 20)
         }
+        .navigationTitle("Game Board")
+
     }
         
     

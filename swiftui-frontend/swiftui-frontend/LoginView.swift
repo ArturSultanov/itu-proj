@@ -42,6 +42,8 @@ struct LoginView: View {
                         MainMenuView()}
                 }
             }
+            .aspectRatio(1, contentMode: .fit)
+            .padding([.leading, .trailing, .bottom], 20)
         }
     }
     

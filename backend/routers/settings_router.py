@@ -30,7 +30,7 @@ async def set_difficulty_route(data: DifficultyDTO):
         )
 
     set_difficulty(data.difficulty)
-    return UpdateMessageDTO(detail=f"Difficulty set to {data.difficulty}")
+    return UpdateMessageDTO(detail=f"Difficulty set to {get_difficulty().name}")
 
 
 @settings_router.get("/get_difficulty", response_model=DifficultyDTO, status_code=status.HTTP_200_OK)

@@ -34,45 +34,45 @@ struct MainMenuView: View {
                     .background(Color.blue)
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
-                    .scaleEffect(0.95)
-
-
+                    
+                    
                 }
-                NavigationStack(){
-                        
-                        Button("New Game") {
-                            Task {
-                                await newGame()
-                            }
+                VStack{
+                    Button("New Game") {
+                        Task {
+                            await newGame()
                         }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
-                        .navigationTitle("Navigation")
-                        .navigationDestination(isPresented: $isNewGameActive) {
-                            GameBoardView()
-                        }
-                        
-                        Button(action: {}) {
-                            Text("Continue")
-                        }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
-
-                        Button(action: {}) {
-                            Text("Settings")
-                        }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
-
-                        Button(action: {}) {
-                            Text("Leader board")
-                        }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: Color.yellow))
-
-                        Button(action: {}){
-                            Text("Quit Game")
-                        }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: Color.red))
                     }
-                .padding()
+                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
+                    
+                    
+                    Button(action: {}) {
+                        Text("Continue")
+                    }
+                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
+                    
+                    Button(action: {}) {
+                        Text("Settings")
+                    }
+                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.blue))
+                    
+                    Button(action: {}) {
+                        Text("Leader board")
+                    }
+                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.yellow))
+                    
+                    Button(action: {}){
+                        Text("Quit Game")
+                    }
+                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.red))
+                }
             }
+            .aspectRatio(1, contentMode: .fit)
+            .padding([.leading, .trailing, .bottom], 20)
+        }
+        .navigationTitle("Main Menu")
+        .navigationDestination(isPresented: $isNewGameActive) {
+            GameBoardView()
         }
     }
     

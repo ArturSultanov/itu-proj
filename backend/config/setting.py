@@ -4,15 +4,17 @@ from pydantic_settings import BaseSettings
 
 
 class Difficulty(Enum):
-    EASY = "easy"
-    NORMAL = "normal"
-    HARD = "hard"
+    EASY = 1
+    NORMAL = 2
+    HARD = 3
+    DEBUG = -1
 
 
 HEART_RECOVERY_MOVES = {
     Difficulty.EASY: 20,
     Difficulty.NORMAL: 10,
     Difficulty.HARD: 5,
+    Difficulty.DEBUG: 100,
 }
 
 
@@ -20,6 +22,7 @@ START_MOVES = {
     Difficulty.EASY: 30,
     Difficulty.NORMAL: 25,
     Difficulty.HARD: 20,
+    Difficulty.DEBUG: 100,
 }
 
 
