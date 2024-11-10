@@ -64,8 +64,8 @@ async def delete_continue(cp: cp_dependency, db: db_dependency):
     return UpdateMessageDTO(detail="Last game was deleted.")
 
 
-@menu_router.post("/leaderboard", response_model=List[LeaderboardTDO] | UpdateMessageDTO, status_code=status.HTTP_200_OK)
-async def leaderboard(limit: int, db: db_dependency):
+@menu_router.get("/leaderboard", response_model=List[LeaderboardTDO] | UpdateMessageDTO, status_code=status.HTTP_200_OK)
+async def leaderboard(db: db_dependency, limit: int = 5):
     """
     Get the top 5 players based on highest_score, sorted in descending order.
     """

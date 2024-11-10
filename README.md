@@ -9,6 +9,14 @@ This project is a game application API developed with **FastAPI**. It allows use
 - **Player Synchronization**: Synchronize player data between in-memory state and the database.
 - **RESTful API Design**: Follows REST principles for ease of use and consistency.
 
+## Gem types:
+
+- 0 - Standard gem 0
+- 1 - Standard gem 1 
+- 2 - Standard gem 1 
+- 3 - Standard gem 1 
+- 4 - Heal gem
+
 ## Run Application
 
 To run application for frontend just run the [run_server.sh](run_server.sh) script.

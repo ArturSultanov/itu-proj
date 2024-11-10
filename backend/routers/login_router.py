@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 
+from pydantic import constr
+
 from backend.database import PlayerOrm
 from backend.database import current_player
 from backend.database import db_dependency
@@ -14,14 +16,14 @@ login_router = APIRouter(
 )
 
 
-@login_router.post("", status_code=status.HTTP_200_OK, response_model=PlayerDTO | None)
-async def get_or_create_player(player: PlayerLoginDTO, db: db_dependency):
+@login_router.get("", status_code=status.HTTP_200_OK, response_model=PlayerDTO | None)
+async def get_or_create_player(login: constr(max_length=256), db: db_dependency):
     """
     Get player by login. If the player does not exist, create a new player and return it.
     Cache the player instance in memory after the first retrieval.
     """
 
-    login = player.login  # Extract the login from PlayerAddDTO
+    login = login  # Extract the login from PlayerAddDTO
 
     # Query the database if the player is not cached
     result = await db.execute(

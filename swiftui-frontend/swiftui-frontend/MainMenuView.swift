@@ -38,7 +38,7 @@ struct MainMenuView: View {
                     Button(action: {}) {
                         Text("Continue")
                     }
-                    
+                                        
                     Button(action: {}) {
                         Text("Settings")
                     }

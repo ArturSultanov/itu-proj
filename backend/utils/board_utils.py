@@ -154,6 +154,16 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
         moves = -1
         matches_number = len(matches)
         replaced_gems = replace_gems(board, matches)
+
+        swapped_gem_positions = {(x1, y1), (x2, y2)}
+        existing_positions = {(gem.x, gem.y) for gem in replaced_gems}
+
+        # Добавляем только тот перемещённый гем, которого нет в replaced_gems
+        missing_position = swapped_gem_positions - existing_positions
+        if missing_position:
+            x, y = missing_position.pop()
+            replaced_gems.append(GemBase(x=x, y=y, type=board[y][x]))
+
     else:
         # Swap the gems
         board[y1][x1], board[y2][x2] = board[y2][x2], board[y1][x1]
@@ -161,10 +171,6 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
     if replaced_gems:
         return _update_game_status(player_data, moves, matches_number, replaced_gems)
     return None
-
-def swap_gems_fullboard(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameDTO]:
-    _ = swap_gems(player_data, swap_data)
-    return player_data.last_game
 
 
 # User clicked at some gem
@@ -187,6 +193,16 @@ def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdat
     if replaced_gems:
         return _update_game_status(player_data, moves, matches_number, replaced_gems)
     return None
+
+
+def swap_gems_fullboard(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> GameDTO:
+    _ = swap_gems(player_data, swap_data)
+    return player_data.last_game
+
+
+def click_gem_fullboard(player_data: PlayerDTO, pos: GemPositionDTO) -> GameDTO:
+    _ = click_gem(player_data, pos)
+    return player_data.last_game
 
 
 def generate_game_board(size: int = 6) -> BoardState:

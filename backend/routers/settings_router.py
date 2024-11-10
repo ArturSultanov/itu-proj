@@ -11,15 +11,14 @@ settings_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
-
-@settings_router.put("/update_login", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
-async def get_or_create_player(player: PlayerLoginDTO, cp: cp_dependency, db: db_dependency):
+@settings_router.patch("/update_login", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
+async def update_login(player: PlayerLoginDTO, cp: cp_dependency, db: db_dependency):
     cp.data.login = player.login  # Update the login of the current player
     await synchronize_player(cp.data, db)
     return UpdateMessageDTO(detail=f"Player login updated to {cp.data.login}")
 
 
-@settings_router.put("/set_difficulty", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
+@settings_router.patch("/set_difficulty", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def set_difficulty_route(data: DifficultyDTO):
     """
     Set the difficulty level

@@ -13,7 +13,6 @@ struct LoginView: View {
     @State private var isLoggedIn: Bool = false
     @Environment(PlayerDataManager.self) var playerDataManager
     
-    
     var body: some View {
         ZStack{
             NavigationStack{
