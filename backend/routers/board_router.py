@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
 from backend.database import cp_dependency, db_dependency
-from backend.models import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO, UpdateMessageDTO
-from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player
+from backend.models import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO, UpdateMessageDTO, GameDTO
+from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player, swap_gems_fullboard
 
 # from backend.utils.board_generator import generate_game_board
 
@@ -19,6 +19,7 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     Check if there are any matches,
     then update the player score,
     and decrease the moves number.
+    Return only updated gems.
     """
 
     if not cp or not cp.data or not cp.data.last_game:
@@ -33,6 +34,28 @@ async def swap_gems_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_depe
     updated_game = swap_gems(player_data, swap_data)
     await synchronize_player(cp.data, db)
     return updated_game if updated_game is not None else UpdateMessageDTO(detail="No matches found.")
+
+@board_router.post("/swap_gems_fullboard", response_model=GameDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)
+async def swap_gems_fullboard_route(swap_data: SwapGemsDTO, cp: cp_dependency, db: db_dependency):
+    """
+    Check if there are any matches,
+    then update the player score,
+    and decrease the moves number.
+    Return the whole board.
+    """
+
+    if not cp or not cp.data or not cp.data.last_game:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current game data not found.")
+
+    # Get the current game status
+    player_data = cp.data
+
+    if player_data.last_game.moves_left == 0:
+        return None
+    # Get updated game
+    updated_board = swap_gems_fullboard(player_data, swap_data)
+    await synchronize_player(cp.data, db)
+    return updated_board if updated_board is not None else UpdateMessageDTO(detail="No board found.")
 
 
 @board_router.post("/click_gem", response_model=GameUpdateDTO | UpdateMessageDTO, status_code=status.HTTP_200_OK)

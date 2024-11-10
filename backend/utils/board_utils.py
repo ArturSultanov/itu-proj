@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Tuple, Set, List, Optional
 
 from backend.config import get_heart_recovery_moves
-from backend.models import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO
+from backend.models import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO, BordStatusDTO, GameDTO
 
 
 class GemType(Enum):
@@ -162,9 +162,12 @@ def swap_gems(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameUp
         return _update_game_status(player_data, moves, matches_number, replaced_gems)
     return None
 
+def swap_gems_fullboard(player_data: PlayerDTO, swap_data: SwapGemsDTO) -> Optional[GameDTO]:
+    _ = swap_gems(player_data, swap_data)
+    return player_data.last_game
+
+
 # User clicked at some gem
-
-
 def click_gem(player_data: PlayerDTO, pos: GemPositionDTO) -> Optional[GameUpdateDTO]:
 
     board = player_data.last_game.board_status
