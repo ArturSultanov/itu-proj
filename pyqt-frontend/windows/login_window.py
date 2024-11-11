@@ -1,62 +1,34 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
-from PyQt5.QtCore import Qt
-import requests
-import time
+# frontend/view.py
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit
 
-class LoginWindow(QWidget):
+class LoginScreen(QWidget):
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
-        self.init_ui()
-
-    def init_ui(self):
         self.setWindowTitle("Login")
-        self.setGeometry(200, 200, 600, 500)
 
-        # Login layout
-        login_layout = QWidget()
-        login_vbox = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
-        label = QLabel("Enter your name")
-        label.setAlignment(Qt.AlignCenter)
+        self.label = QLabel("Please log in")
+        self.layout.addWidget(self.label)
 
-        self.name_input = QLineEdit(self)
-        self.name_input.setPlaceholderText("Player1")
-
+        self.username_input = QLineEdit(self)
         
+        self.layout.addWidget(self.username_input)
+        
+        self.login_button = QPushButton("Login", self)
+        self.login_button.clicked.connect(self.on_login_button_click)
+        
+        self.layout.addWidget(self.login_button)
+        
+        self.setLayout(self.layout)
 
-        confirm_button = QPushButton("Confirm")
-        confirm_button.clicked.connect(self.confirm_clicked)
-
-        quit_button = QPushButton("Quit Game")
-        quit_button.clicked.connect(self.close)
-
-        login_vbox.addWidget(label)
-        login_vbox.addWidget(self.name_input)
-        login_vbox.addWidget(confirm_button)
-        login_vbox.addWidget(quit_button)
-
-        login_layout.setLayout(login_vbox)
-
-        # Return the layout to be added to the stacked widget later
-        return login_layout
-
-    def confirm_clicked(self):
-        player_name = self.name_input.text()
-        if player_name:
-            print(f"Player Name: {player_name}")
-            url = "http://localhost:8000/login"
-            headers = {
-                "accept": "application/json",
-            }
-            response = requests.get(url, headers=headers, params={"login": player_name})
-            
-            url = "http://localhost:8000/utils/current_player"
-            headers = {
-                "accept": "application/json",
-            }
-            response = requests.get(url, headers=headers)
-            login = response.json().get("login")
-            print(f"Back Player Name: {login}")
-
-            self.controller.show_main()  # Show main window layout
+    def on_login_button_click(self):
+        username = self.username_input.text()
+        
+        # Send login request to backend
+        response = self.controller.login(username)
+        if response:
+            self.controller.show_main_menu()  # Pass player name to the main menu
+        else:
+            self.label.setText("Login failed! Try again.")

@@ -1,32 +1,70 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy
+from PyQt5.QtCore import Qt
 
-import requests
-
-class MainWindow(QWidget):
+class MainMenuScreen(QWidget):
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
-        self.init_ui()
+        self.setWindowTitle("Main Menu")
 
-    def init_ui(self):
-        self.setWindowTitle("Main Window")
-        self.setGeometry(200, 200, 600, 500)
+        # Set the window size (you can adjust it if needed)
+        self.resize(600, 400)
 
-        # Main layout content
-        main_layout = QWidget()
-        main_vbox = QVBoxLayout()
+        # Create the layout
+        self.layout = QVBoxLayout()
 
-        
-        main_vbox.addWidget(QLabel("Welcome to the main window!"))
-        # Button to start a new game
-        new_game_button = QPushButton("New Game")
-        new_game_button.clicked.connect(self.start_new_game)
-        main_vbox.addWidget(new_game_button)
+        # Create the "Hi, player_name" text label
+        self.greeting_label = QLabel("Hi, Player!", self)
+        self.layout.addWidget(self.greeting_label, alignment=Qt.AlignCenter)
 
-        main_layout.setLayout(main_vbox)
+        # Add spacer to center the widgets vertically
+        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.layout.addItem(spacer)
 
-        return main_layout
+        # Create buttons
+        self.new_game_button = QPushButton("New Game", self)
+        self.new_game_button.clicked.connect(self.on_new_game_button_click)
+        self.layout.addWidget(self.new_game_button)
 
-    def start_new_game(self):
-        # When the button is clicked, switch to the game window
-        self.controller.show_game()
+        self.continue_button = QPushButton("Continue", self)
+        self.continue_button.clicked.connect(self.on_continue_button_click)
+        self.layout.addWidget(self.continue_button)
+
+        self.settings_button = QPushButton("Settings", self)
+        self.settings_button.clicked.connect(self.on_settings_button_click)
+        self.layout.addWidget(self.settings_button)
+
+        self.leaderboard_button = QPushButton("Leaderboard", self)
+        self.leaderboard_button.clicked.connect(self.on_leaderboard_button_click)
+        self.layout.addWidget(self.leaderboard_button)
+
+        # Add another spacer to push the buttons towards the top, centering them
+        spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.layout.addItem(spacer_bottom)
+
+        # Set the layout for the main window
+        self.setLayout(self.layout)
+
+    def update_player_info(self, player_name):
+        """Update the UI with the current player's name."""
+        self.greeting_label.setText(f"Hi, {player_name}!")
+
+    def on_new_game_button_click(self):
+        """Handle the 'New Game' button click."""
+        print("Starting a new game...")
+        self.controller.show_game_screen()
+
+    def on_continue_button_click(self):
+        """Handle the 'Continue' button click."""
+        print("Continuing the game...")
+        # Implement continue game functionality here
+
+    def on_settings_button_click(self):
+        """Handle the 'Settings' button click."""
+        print("Opening settings...")
+        # Implement settings screen functionality here
+
+    def on_leaderboard_button_click(self):
+        """Handle the 'Leaderboard' button click."""
+        print("Opening leaderboard...")
+        # Implement leaderboard functionality here

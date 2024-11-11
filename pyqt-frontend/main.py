@@ -1,43 +1,59 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QStackedWidget
-from windows.login_window import LoginWindow
-from windows.main_window import MainWindow
-from windows.game_window import GameWindow1
+# frontend/main.py
+from PyQt5.QtWidgets import QApplication, QStackedWidget, QDesktopWidget
+from windows.login_window import LoginScreen
+from windows.main_window import MainMenuScreen
+from windows.game_window import GameScreen
+from utils.api_call import api_request
 
 class AppController:
     def __init__(self):
-        self.app = QApplication(sys.argv)
-        self.main_window = MainWindow(self)
-        self.login_window = None
-        self.game_window = GameWindow1(self)
+        self.app = QApplication([])
 
-    def show_login(self):
-        self.login_window = LoginWindow(self)
-        # Create a stacked widget to manage layouts
-        self.stacked_widget = QStackedWidget()
+        self.window = QStackedWidget()
+
+        self.login_screen = LoginScreen(self)
+        self.main_menu_screen = MainMenuScreen(self)
+        self.game_screen = GameScreen(self)
+
+        self.window.addWidget(self.login_screen)
+        self.window.addWidget(self.main_menu_screen)
+        self.window.addWidget(self.game_screen)
         
-        # Add layouts to stacked widget
-        self.stacked_widget.addWidget(self.login_window.init_ui())
-        self.stacked_widget.addWidget(self.main_window.init_ui())
-        self.stacked_widget.addWidget(self.game_window.init_ui())
+        # Set the default window size
+        self.window.resize(1000, 1000)  # Default size of the window
 
-
-        # Show login layout first
-        self.stacked_widget.setCurrentIndex(0)
+        # Center the window
+        self.center_window()
         
-        self.stacked_widget.show()
-
-    def show_main(self):
-        # Switch to the main window layout
-        self.stacked_widget.setCurrentIndex(1)
-
-    def show_game(self):
-        # Switch to the game window layout
-        self.stacked_widget.setCurrentIndex(2)
+    def center_window(self):
+        """Centers the window on the screen."""
+        screen_geometry = QDesktopWidget().availableGeometry()  # Get screen geometry
+        screen_center = screen_geometry.center()  # Get the center of the screen
+        window_geometry = self.window.frameGeometry()  # Get the geometry of the window
+        window_geometry.moveCenter(screen_center)  # Move window to the center
+        self.window.move(window_geometry.topLeft())  # Move the window to the top-left corner of the geometry
 
     def run(self):
-        self.show_login()
-        sys.exit(self.app.exec_())
+        self.window.setCurrentWidget(self.login_screen)  # Start with login screen
+        self.window.show()
+        self.app.exec_()
+
+    def login(self, username):
+        response = api_request("/login", {"login": username}, method="GET")
+        return response
+
+    def show_main_menu(self):
+        player_name = api_request("/utils/current_player", method="GET")["login"]
+        self.main_menu_screen.update_player_info(player_name)
+        self.window.setCurrentWidget(self.main_menu_screen)
+    
+    def show_game_screen(self):
+        response = api_request("/menu/new_game")
+        print(response["board_status"])
+        self.game_screen.update_score_and_moves(response["current_score"], response["moves_left"])
+        self.game_screen.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+        self.window.setCurrentWidget(self.game_screen)
+
 
 if __name__ == "__main__":
     controller = AppController()
