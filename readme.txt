@@ -5,15 +5,10 @@ Tile Match Game
 ├── backend/
 │   └── ...
 ├── Dockerfile
-│
 ├── README.md
-│
 ├── readme.txt
-│
 ├── requirements.txt
-│
 ├── run_server.sh
-│
 ├── tkinter-frontend/ Author: xmovse00
 │   ├── src/
 │   │   ├── __init__.py
@@ -24,13 +19,12 @@ Tile Match Game
 │   │   ├── difficulty_page.py
 │   │   ├── leader_page.py
 │   │   ├── pause_page.py
-│   │   ├── settings_page.py
+│   │   └── settings_page.py
 │   ├── main.py
-│   │
-│   ├── assets/
-│   │   ├── images/
-│       │   └── ...
-│
-│
+│   ├── README.md
+│   ├── requirements.txt
+│   └── assets/
+│       └── images/
+│           └── ...
 ├── swiftui_frontend/ Author: xsulta01
     ├──
