@@ -22,15 +22,27 @@ struct LeaderboardView: View {
                     .multilineTextAlignment(.center)
                     .padding()
             } else {
-                List(topPlayers) { player in
-                    HStack {
-                        Text(player.login)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Text("\(player.highest_score)")
+                List {
+                    ForEach(Array(topPlayers.enumerated()), id: \.element.id) { index, player in
+                        HStack(spacing: 10) {
+                            if index < 3 {
+                                Image(systemName: "medal")
+                                    .foregroundColor(.yellow)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(player.login)
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                Text("Score: \(player.highest_score)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 5)
                     }
                 }
-                .listStyle(PlainListStyle())
+                .listStyle(InsetListStyle())
             }
         }
         .navigationTitle("Leaderboard")
@@ -41,7 +53,7 @@ struct LeaderboardView: View {
     
     private func loadLeaderboard() async {
         do {
-            let players = try await NetworkManager.shared.fetchLeaderboard()
+            let players = try await NetworkManager.shared.fetchLeaderboard(with: 10)
             await MainActor.run {
                 topPlayers = players
                 isLoading = false
@@ -54,4 +66,5 @@ struct LeaderboardView: View {
         }
     }
 }
+
 

@@ -59,7 +59,7 @@ import Observation
 import Foundation
 import Observation
 
-@Observable class Gem: Identifiable, Codable {
+@Observable class Gem: Identifiable, Codable, Equatable {
     @ObservationIgnored var id = UUID()
     var type: Int
     var x: Int
@@ -70,6 +70,10 @@ import Observation
         self.x = x
         self.y = y
     }
+    
+    static func ==(lhs: Gem, rhs: Gem) -> Bool {
+       return lhs.id == rhs.id
+   }
 
     enum CodingKeys: String, CodingKey {
         case type

@@ -5,8 +5,8 @@
 //  Created by Artur Sultanov on 09.11.2024.
 //
 // GameBoardView.swift
-import SwiftUI
 
+import SwiftUI
 
 struct GameBoardView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
@@ -14,149 +14,177 @@ struct GameBoardView: View {
     @State private var gems: [Gem] = []
     @State private var swapInProgress = false
     
-    let gemSize: CGFloat = 50
-    let gridSpacing: CGFloat = 2
+    private let gemSize: CGFloat = 50
+    private let gridSpacing: CGFloat = 2
 
     var body: some View {
         ZStack {
-            VStack() { // Add spacing between elements in the VStack
-                // Beautifully formatted metrics above the game board
-                if let playerData = playerDataManager.playerData {
-                    VStack {
-                        HStack {
-                            Text("Current Score: \(playerData.lastGame!.currentScore)")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .padding(.trailing)
-                            Text("Moves Left: \(playerData.lastGame!.movesLeft)")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                    }
+            VStack {
+                // Player metrics
+                if let playerData = playerDataManager.playerData,
+                   let lastGame = playerData.lastGame {
+                    gameMetricsView(lastGame: lastGame)
                 }
-                
-                // Game board below the metrics
+
                 GeometryReader { geometry in
                     ZStack {
                         ForEach(gems) { gem in
-                            GemView(gem: gem, swapAction: { direction in
-                                handleSwapAction(gem: gem, direction: direction)
-                            })
+                            GemView(
+                                gem: gem,
+                                swapAction: { direction in handleSwapAction(gem: gem, direction: direction) },
+                                clickAction: { gem in handleClickAction(gem: gem) }
+                            )
                             .frame(width: gemSize, height: gemSize)
                             .position(position(for: gem, in: geometry.size))
+                            .animation(.easeInOut, value: gems) // Animate gem layout changes
                         }
                     }
                     .onAppear {
                         initializeGems()
                     }
                 }
-                
             }
             .aspectRatio(1, contentMode: .fit)
             .padding([.leading, .trailing, .bottom], 20)
         }
         .navigationTitle("Game Board")
-
     }
-        
-    
-    func position(for gem: Gem, in size: CGSize) -> CGPoint {
-        let numRows = playerDataManager.playerData?.lastGame?.boardStatus.count ?? 0
-        let numCols = playerDataManager.playerData?.lastGame?.boardStatus.first?.count ?? 0
-        
-        let totalWidth = CGFloat(numCols) * (gemSize + gridSpacing) - gridSpacing
-        let totalHeight = CGFloat(numRows) * (gemSize + gridSpacing) - gridSpacing
+
+    // MARK: - Subviews
+
+    private func gameMetricsView(lastGame: GameSession) -> some View {
+        HStack {
+            Text("Current Score: \(lastGame.currentScore)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.trailing)
+
+            Text("Moves Left: \(lastGame.movesLeft)")
+                .font(.title2)
+                .fontWeight(.bold)
+        }
+        .frame(maxWidth: .infinity, minHeight: 100)
+        .background(Color.blue)
+        .cornerRadius(10)
+    }
+
+    // MARK: - Positioning
+
+    private func position(for gem: Gem, in size: CGSize) -> CGPoint {
+        guard let rows = playerDataManager.playerData?.lastGame?.boardStatus.count,
+              let cols = playerDataManager.playerData?.lastGame?.boardStatus.first?.count else {
+            return .zero
+        }
+
+        let totalWidth = CGFloat(cols) * (gemSize + gridSpacing) - gridSpacing
+        let totalHeight = CGFloat(rows) * (gemSize + gridSpacing) - gridSpacing
         
         let startX = (size.width - totalWidth) / 2 + gemSize / 2
         let startY = (size.height - totalHeight) / 2 + gemSize / 2
         
-        let xPosition = startX + CGFloat(gem.x) * (gemSize + gridSpacing)
-        let yPosition = startY + CGFloat(gem.y) * (gemSize + gridSpacing)
+        let xPos = startX + CGFloat(gem.x) * (gemSize + gridSpacing)
+        let yPos = startY + CGFloat(gem.y) * (gemSize + gridSpacing)
         
-        return CGPoint(x: xPosition, y: yPosition)
+        return CGPoint(x: xPos, y: yPos)
     }
-    
-    
-    func initializeGems() {
-        if let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus {
-            // Clear existing gems and recreate them based on the updated boardStatus
-            gems = []
-            for (rowIndex, row) in boardStatus.enumerated() {
-                for (colIndex, type) in row.enumerated() {
-                    if let existingGem = gems.first(where: { $0.x == colIndex && $0.y == rowIndex }) {
-                        existingGem.type = type
-                    } else {
-                        let gem = Gem(type: type, x: colIndex, y: rowIndex)
-                        gems.append(gem)
-                    }
-                }
+
+    // MARK: - Initialization & Updates
+
+    private func initializeGems() {
+        guard let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus else { return }
+
+        var updatedGems: [Gem] = []
+        for (rowIndex, row) in boardStatus.enumerated() {
+            for (colIndex, type) in row.enumerated() {
+                let gem = Gem(type: type, x: colIndex, y: rowIndex)
+                updatedGems.append(gem)
             }
         }
+
+        withAnimation(.easeInOut) {
+            gems = updatedGems
+        }
     }
 
-    
-    func handleSwapAction(gem: Gem, direction: Direction) {
-        if swapInProgress { return }
-        guard let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
-        swapInProgress = true
+    // MARK: - Actions
 
-        // Swap gems in the array
-        withAnimation {
-            // Swap positions
-            let tempX = gem.x
-            let tempY = gem.y
-            gem.x = targetGem.x
-            gem.y = targetGem.y
-            targetGem.x = tempX
-            targetGem.y = tempY
-        }
+    private func handleSwapAction(gem: Gem, direction: Direction) {
+        guard !swapInProgress,
+              let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
         
-        // Send swap request to server
+        swapInProgress = true
+        
+        // Animate the initial swap optimistically
+        withAnimation(.easeInOut) {
+            swapPositions(gem, targetGem)
+        }
+
         Task {
             do {
                 try await NetworkManager.shared.swapGems(gem1: gem, gem2: targetGem, playerDataManager: playerDataManager)
-                
-                // Update the gems based on response
-                initializeGems()
+                withAnimation(.easeInOut) {
+                    initializeGems()
+                }
                 swapInProgress = false
             } catch let NetworkError.invalidResponse(statusCode) {
-                if statusCode == 406 {
-                    // No matches found, swap back
-                    withAnimation {
-                        let tempX = gem.x
-                        let tempY = gem.y
-                        gem.x = targetGem.x
-                        gem.y = targetGem.y
-                        targetGem.x = tempX
-                        targetGem.y = tempY
-                    }
-                    swapInProgress = false
-                } else {
-                    print("Swap failed with status code: \(statusCode)")
-                    swapInProgress = false
-                }
+                handleSwapFailure(gem, targetGem, statusCode: statusCode)
             } catch {
                 print("Swap failed: \(error)")
                 swapInProgress = false
             }
         }
     }
-    
-    func getAdjacentGem(for gem: Gem, in direction: Direction) -> Gem? {
+
+    private func handleSwapFailure(_ gem: Gem, _ targetGem: Gem, statusCode: Int) {
+        // If no matches found, revert swap
+        if statusCode == 406 {
+            withAnimation(.easeInOut) {
+                swapPositions(gem, targetGem)
+            }
+        } else {
+            print("Swap failed with status code: \(statusCode)")
+        }
+        swapInProgress = false
+    }
+
+    private func swapPositions(_ gem1: Gem, _ gem2: Gem) {
+        let tempX = gem1.x
+        let tempY = gem1.y
+        gem1.x = gem2.x
+        gem1.y = gem2.y
+        gem2.x = tempX
+        gem2.y = tempY
+    }
+
+    private func getAdjacentGem(for gem: Gem, in direction: Direction) -> Gem? {
         let x = gem.x
         let y = gem.y
+        
         switch direction {
         case .up:
-            return gems.first(where: { $0.x == x && $0.y == y - 1 })
+            return gems.first { $0.x == x && $0.y == y - 1 }
         case .down:
-            return gems.first(where: { $0.x == x && $0.y == y + 1 })
+            return gems.first { $0.x == x && $0.y == y + 1 }
         case .left:
-            return gems.first(where: { $0.x == x - 1 && $0.y == y })
+            return gems.first { $0.x == x - 1 && $0.y == y }
         case .right:
-            return gems.first(where: { $0.x == x + 1 && $0.y == y })
+            return gems.first { $0.x == x + 1 && $0.y == y }
+        }
+    }
+
+    private func handleClickAction(gem: Gem) {
+        let iconType = IconType.getGemIcon(for: gem.type)
+        guard iconType == .heart else { return }
+        
+        Task {
+            do {
+                try await NetworkManager.shared.clickGem(gem: gem, playerDataManager: playerDataManager)
+                withAnimation(.easeInOut) {
+                    initializeGems()
+                }
+            } catch {
+                print("Click gem failed: \(error)")
+            }
         }
     }
 }

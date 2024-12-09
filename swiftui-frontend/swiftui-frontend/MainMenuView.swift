@@ -38,27 +38,21 @@ struct MainMenuView: View {
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
-                    .background(Color.tritanopiaTeal)
+                    .background(Color.tritanopiaPrimaryButton)
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
                     
                     
                 }
-                VStack{
+                VStack(){
                     Button("New Game") {
                         Task {
                             await newGame()
                         }
                     }
-                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaPrimaryButton))
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaBlue))
                     
-//                    Button("Continue") {
-//                        Task {
-//                            await continueGame()
-//                        }
-//                    }
-//                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaPrimaryButton))
-//                    
+                    
                     // Continue + Delete Button
                     HStack {
                         // Continue Button
@@ -67,7 +61,7 @@ struct MainMenuView: View {
                                 await continueGame()
                             }
                         }
-                        .buttonStyle(MainMenuButtonStyle(secondColor: playerDataManager.playerData?.lastGame == nil ? .gray : Color.tritanopiaPrimaryButton))
+                        .buttonStyle(MainMenuButtonStyle(mainColor: playerDataManager.playerData?.lastGame == nil ? .gray : Color.tritanopiaBlue))
                         .disabled(playerDataManager.playerData?.lastGame == nil)
 
                         // Trash Icon
@@ -75,12 +69,13 @@ struct MainMenuView: View {
                             isShowDeleteGameConfirmation = true
                         }) {
                             Image(systemName: "trash")
-                                .padding(.leading, 10)
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .buttonStyle(SecondaryMenuButtonStyle(mainColor: playerDataManager.playerData?.lastGame == nil ? .gray : Color.tritanopiaRed))
                         .disabled(playerDataManager.playerData?.lastGame == nil)
-                        .foregroundColor(playerDataManager.playerData?.lastGame == nil ? .gray : .red)
+
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 1)
 
                     
                     Button(action: {
@@ -88,20 +83,20 @@ struct MainMenuView: View {
                     }) {
                         Text("Settings")
                     }
-                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaPrimaryButton))
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
                     
                     Button(action: {
                         isLeaderboardActive = true
                     }) {
                         Text("Leader board")
                     }
-                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaPrimaryButton))
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
                     
                     
                     Button("Quit Game") {
                         isShowQuitConfirmation = true
                     }
-                    .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaRed))
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaRed))
                 }
             }
             .aspectRatio(1, contentMode: .fit)
@@ -167,16 +162,16 @@ struct MainMenuView: View {
     }
     
     func quitGame() async {
-            do {
-                try await NetworkManager.shared.quitGame()
-                await MainActor.run {
-                    NSApplication.shared.terminate(nil)
-                }
-            } catch {
-                errorMessage = "Failed to quit game: \(error.localizedDescription)"
-                isShowErrorAlert = true
+        do {
+            try await NetworkManager.shared.quitGame()
+            await MainActor.run {
+                NSApplication.shared.terminate(nil)
             }
+        } catch {
+            errorMessage = "Failed to quit game: \(error.localizedDescription)"
+            isShowErrorAlert = true
         }
+    }
     
     func deleteLastGame() async {
         do {
@@ -190,24 +185,4 @@ struct MainMenuView: View {
 
 }
 
-struct MainMenuButtonStyle: ButtonStyle {
-    var secondColor : Color
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .frame(maxWidth: .infinity, minHeight: 50)
-//            .background(
-//                LinearGradient(
-//                    gradient: Gradient(colors: [secondColor, Color.purple]),
-//                    startPoint: .leading,
-//                    endPoint: .trailing
-//                )
-//            )
-            .background(secondColor)
-            .foregroundColor(.white)
-            .font(.headline)
-            .cornerRadius(10)
-            .shadow(radius: configuration.isPressed ? 2 : 5, x: 0, y: configuration.isPressed ? 1 : 3)
-            .padding(.horizontal, 20)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-    }
-}
+

@@ -21,20 +21,26 @@ struct SettingsView: View {
                 ProgressView("Loading…")
             } else {
                 // Show current difficulty at top
-                Text("Current Difficulty: \(difficultyDescription(for: currentDifficulty))")
-                    .font(.headline)
-                    .padding(.bottom, 20)
+                HStack{
+                    Text("Current Difficulty: \(difficultyDescription(for: currentDifficulty))")
+                        .font(.headline)
+                        .padding(.bottom, 20)
+                    Text("Current Login: \(playerDataManager.playerData!.login)")
+                        .font(.headline)
+                        .padding(.bottom, 20)
+                }
+                
                 
                 Button("Change Login") {
                     newLogin = playerDataManager.playerData?.login ?? ""
                     showChangeLoginSheet = true
                 }
-                .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaTeal))
+                .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaTeal))
                 
                 Button("Change Difficulty") {
                     showDifficultyOptions = true
                 }
-                .buttonStyle(MainMenuButtonStyle(secondColor: Color.tritanopiaOrange))
+                .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPink))
             }
         }
         .padding()
@@ -47,31 +53,30 @@ struct SettingsView: View {
             Text(errorMessage ?? "")
         }
         .sheet(isPresented: $showChangeLoginSheet) {
-            NavigationView {
-                VStack {
-                    Text("Enter a new login:")
-                        .font(.headline)
-                    
-                    TextField("New Login", text: $newLogin)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                    
-                    HStack {
+            NavigationStack {
+                Form {
+                    Section(header: Text("Enter a new login:")) {
+                        TextField("New Login", text: $newLogin)
+                    }
+                }
+                .navigationTitle("Change Login")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") {
                             showChangeLoginSheet = false
                         }
-                        Spacer()
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
                             Task {
                                 await changeLogin()
                             }
                         }
                     }
-                    .padding()
                 }
-                .navigationTitle("Change Login")
             }
         }
+
         .confirmationDialog("Select Difficulty", isPresented: $showDifficultyOptions) {
             Button("Easy") { Task { await changeDifficulty(to: 1) } }
             Button("Normal") { Task { await changeDifficulty(to: 2) } }
