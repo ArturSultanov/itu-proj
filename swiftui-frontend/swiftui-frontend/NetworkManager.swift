@@ -75,7 +75,13 @@ class NetworkManager: ObservableObject {
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             
             let newGameSession = try decoder.decode(GameSession.self, from: data)
-            playerDataManager.playerData?.lastGame = newGameSession
+            
+//            playerDataManager.playerData?.lastGame = newGameSession
+            
+            if var player = playerDataManager.playerData {
+                player.lastGame = newGameSession
+                playerDataManager.playerData = player
+            }
         } catch {
             throw NetworkError.decodingError
         }
@@ -254,6 +260,53 @@ extension NetworkManager {
             playerDataManager.playerData?.lastGame = continueGameSession
         } catch {
             throw NetworkError.decodingError
+        }
+    }
+}
+
+
+extension NetworkManager {
+    func quitGame() async throws {
+        let urlComponents = URLComponents(string: "\(baseURL)/utils/exit")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+    }
+}
+
+
+extension NetworkManager {
+    func deleteGame(playerDataManager: PlayerDataManager) async throws {
+        let urlComponents = URLComponents(string: "\(baseURL)/menu/delete_game")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        // Set lastGame to nil after successful deletion
+        if var player = playerDataManager.playerData {
+            player.lastGame = nil
+            playerDataManager.playerData = player
         }
     }
 }
