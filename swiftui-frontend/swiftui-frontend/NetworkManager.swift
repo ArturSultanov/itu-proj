@@ -115,5 +115,145 @@ class NetworkManager: ObservableObject {
             throw NetworkError.invalidResponse(statusCode: httpResponse.statusCode)
         }
     }
+    
+    
 }
 
+
+extension NetworkManager {
+    func fetchLeaderboard() async throws -> [LeaderboardEntry] {
+        let urlComponents = URLComponents(string: "\(baseURL)/menu/leaderboard")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+        
+        // Create a GET request
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let leaderboard = try JSONDecoder().decode([LeaderboardEntry].self, from: data)
+        return leaderboard
+    }
+}
+
+
+
+extension NetworkManager {
+    func updateLogin(newLogin: String, playerDataManager: PlayerDataManager) async throws {
+        let urlComponents = URLComponents(string: "\(baseURL)/settings/update_login")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = ["login": newLogin]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        // Update local player data
+        if var player = playerDataManager.playerData {
+            player.login = newLogin
+            playerDataManager.playerData = player
+        }
+    }
+    
+    func setDifficulty(_ difficulty: Int, playerDataManager: PlayerDataManager) async throws {
+        let urlComponents = URLComponents(string: "\(baseURL)/settings/set_difficulty")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+                
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = ["difficulty": difficulty]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+
+        if var player = playerDataManager.playerData {
+            // Assuming you have a difficulty property in PlayerData
+            player.difficulty = difficulty
+            playerDataManager.playerData = player
+        }
+    }
+}
+
+
+extension NetworkManager {
+    func getDifficulty() async throws -> Int {
+        let urlComponents = URLComponents(string: "\(baseURL)/settings/get_difficulty")
+        
+        guard let url = urlComponents?.url else {
+            throw NetworkError.invalidURL
+        }
+                
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "GET"
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        struct DifficultyResponse: Codable {
+            let difficulty: Int
+        }
+        
+        let difficultyData = try JSONDecoder().decode(DifficultyResponse.self, from: data)
+        return difficultyData.difficulty
+    }
+}
+
+
+extension NetworkManager {
+    func continue_game(playerDataManager: PlayerDataManager) async throws {
+        guard let url = URL(string: "\(baseURL)/menu/continue") else {
+            throw NetworkError.invalidURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.invalidLogin
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            let continueGameSession = try decoder.decode(GameSession.self, from: data)
+            playerDataManager.playerData?.lastGame = continueGameSession
+        } catch {
+            throw NetworkError.decodingError
+        }
+    }
+}

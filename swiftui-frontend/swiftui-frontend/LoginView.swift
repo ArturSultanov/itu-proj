@@ -63,7 +63,7 @@ struct LoginButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity, minHeight: 50)
             .background(
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.blue, Color.purple]),
+                    gradient: Gradient(colors: [Color.tritanopiaRed, Color.tritanopiaTeal]),
                     startPoint: .leading,
                     endPoint: .trailing
                 )

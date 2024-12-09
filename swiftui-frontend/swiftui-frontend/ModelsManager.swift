@@ -43,6 +43,7 @@ class PlayerData: Codable {
     var login: String
     var highestScore: Int
     var lastGame: GameSession?
+    var difficulty: Int?
 }
 
 class GameSession: Codable {
@@ -99,3 +100,10 @@ struct SwapResponse: Codable {
     let updatedGems: [Gem]
 }
 
+
+struct LeaderboardEntry: Codable, Identifiable {
+    // Assign a unique ID for SwiftUI's List
+    var id: UUID { UUID() }
+    let login: String
+    let highest_score: Int
+}
