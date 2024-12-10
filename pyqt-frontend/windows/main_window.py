@@ -7,13 +7,7 @@ class MainMenuScreen(QWidget):
         self.controller = controller
         self.setWindowTitle("Main Menu")
 
-        # Set the window size (you can adjust it if needed)
-        self.resize(600, 400)
-
-        # Create the layout
         self.layout = QVBoxLayout()
-
-        # Create the "Hi, player_name" text label
         self.greeting_label = QLabel("Hi, Player!", self)
         self.layout.addWidget(self.greeting_label, alignment=Qt.AlignCenter)
 

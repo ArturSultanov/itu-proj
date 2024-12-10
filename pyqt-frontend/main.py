@@ -10,11 +10,10 @@ class AppController:
         self.app = QApplication([])
         font_id = QFontDatabase.addApplicationFont("assets/PressStart2P.ttf")
         if font_id == -1:
-            print("Ошибка: шрифт не загружен!")
+            print("Error: font is not found")
         else:
             font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
 
-        # Применение файла стилей
         with open("assets/styles.qss", "r") as style_file:
             self.app.setStyleSheet(style_file.read())
 
@@ -28,22 +27,21 @@ class AppController:
         self.window.addWidget(self.main_menu_screen)
         self.window.addWidget(self.game_screen)
         
-        # Set the default window size
-        self.window.resize(600, 600)  # Default size of the window
-
-        # Center the window
+        # window
+        self.window.resize(1280, 960)
         self.center_window()
         
     def center_window(self):
-        """Centers the window on the screen."""
-        screen_geometry = QDesktopWidget().availableGeometry()  # Get screen geometry
-        screen_center = screen_geometry.center()  # Get the center of the screen
-        window_geometry = self.window.frameGeometry()  # Get the geometry of the window
-        window_geometry.moveCenter(screen_center)  # Move window to the center
-        self.window.move(window_geometry.topLeft())  # Move the window to the top-left corner of the geometry
+        # window centering
+        screen_geometry = QDesktopWidget().availableGeometry()
+        screen_center = screen_geometry.center() 
+        window_geometry = self.window.frameGeometry()
+        window_geometry.moveCenter(screen_center)
+        self.window.move(window_geometry.topLeft())
 
     def run(self):
-        self.window.setCurrentWidget(self.login_screen)  # Start with login screen
+        # login screen
+        self.window.setCurrentWidget(self.login_screen)
         self.window.show()
         self.app.exec_()
 
@@ -62,7 +60,13 @@ class AppController:
         self.game_screen.update_score_and_moves(response["current_score"], response["moves_left"])
         self.game_screen.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
         self.window.setCurrentWidget(self.game_screen)
-
+    def quit_game(self):
+        response = api_request("/utils/exit", method="POST")
+        if response and isinstance(response, dict) and "detail" in response:
+            print(response["detail"])
+        else:
+            print("No 'detail' key in the response or the response is invalid:", response)
+        self.app.quit()
 
 if __name__ == "__main__":
     controller = AppController()
