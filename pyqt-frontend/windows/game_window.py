@@ -13,9 +13,9 @@ class GameScreen(QWidget):
         self.cell_size = 50  # Fixed cell size in pixels
         self.clicked_cells = []  # Track clicked cells
 
-        grid_width = self.cols * self.cell_size
+        grid_width = self.cols * (self.cell_size-10)
         grid_height = self.rows * self.cell_size
-        self.setFixedSize(grid_width + 100, grid_height + 150)  # Extra space for centering and button
+        self.setFixedSize(grid_width + 350, grid_height + 350)  # Extra space for centering and button
 
         self.setWindowTitle("Game Screen")
 
@@ -94,11 +94,11 @@ class GameScreen(QWidget):
     def get_item_color(self, item_type):
         """Map item type to color."""
         color_map = {
-            0: 'purple',
+            0: 'pink',
             1: 'red',
             2: 'blue',
             3: 'green',
-            4: 'yellow',
+            4: 'white',
         }
         return color_map.get(item_type, 'gray')
 

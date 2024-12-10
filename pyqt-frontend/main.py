@@ -1,5 +1,5 @@
-# frontend/main.py
 from PyQt5.QtWidgets import QApplication, QStackedWidget, QDesktopWidget
+from PyQt5.QtGui import QFontDatabase
 from windows.login_window import LoginScreen
 from windows.main_window import MainMenuScreen
 from windows.game_window import GameScreen
@@ -8,6 +8,15 @@ from utils.api_call import api_request
 class AppController:
     def __init__(self):
         self.app = QApplication([])
+        font_id = QFontDatabase.addApplicationFont("assets/PressStart2P.ttf")
+        if font_id == -1:
+            print("Ошибка: шрифт не загружен!")
+        else:
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+
+        # Применение файла стилей
+        with open("assets/styles.qss", "r") as style_file:
+            self.app.setStyleSheet(style_file.read())
 
         self.window = QStackedWidget()
 
@@ -20,7 +29,7 @@ class AppController:
         self.window.addWidget(self.game_screen)
         
         # Set the default window size
-        self.window.resize(1000, 1000)  # Default size of the window
+        self.window.resize(600, 600)  # Default size of the window
 
         # Center the window
         self.center_window()

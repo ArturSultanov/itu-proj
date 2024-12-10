@@ -1,4 +1,3 @@
-# frontend/view.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit
 
 class LoginScreen(QWidget):
@@ -9,14 +8,14 @@ class LoginScreen(QWidget):
 
         self.layout = QVBoxLayout()
 
-        self.label = QLabel("Please log in")
+        self.label = QLabel("Enter your name")
         self.layout.addWidget(self.label)
 
         self.username_input = QLineEdit(self)
         
         self.layout.addWidget(self.username_input)
         
-        self.login_button = QPushButton("Login", self)
+        self.login_button = QPushButton("Confirm", self)
         self.login_button.clicked.connect(self.on_login_button_click)
         
         self.layout.addWidget(self.login_button)

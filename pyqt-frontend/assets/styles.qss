@@ -1,0 +1,29 @@
+/* styles.qss */
+
+/* Фон для всех окон */
+QMainWindow, QWidget {
+    background-color: #FFE500;
+    font-family: 'Press Start 2P';
+    font-size: 18px;
+}
+
+/* Стили кнопок */
+QPushButton {
+    color: black;
+    background-color: #ffe135;
+    border: 2px solid black;
+    padding: 5px;
+    min-width: 100px;
+}
+
+QPushButton:hover {
+    background-color: #ffcc00;
+}
+
+/* Стили для полей ввода */
+QLineEdit {
+    background-color: #FFE500;
+    color: black;
+    border: 2px solid black;
+    padding: 5px;
+}
