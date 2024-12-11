@@ -23,6 +23,7 @@ extension Color {
 
 //    public static let tritanopiaBackground: Color = Color(red: 0.13, green: 0.13, blue: 0.13) // #222222
     public static let tritanopiaPrimaryButton: Color = Color(red: 0.13, green: 0.55, blue: 0.7) // #218ab2
+    public static let tritanopiaPrimaryBanner: Color = Color(red: 0.13, green: 0.55, blue: 0.7) // #218ab2
 //    public static let tritanopiaSecondaryButton: Color = Color(red: 1.0, green: 0.43, blue: 0.43) // #FF6D6D
 //    public static let tritanopiaHighlight: Color = Color(red: 1.0, green: 0.76, blue: 0.3) // #FFC14D
 }

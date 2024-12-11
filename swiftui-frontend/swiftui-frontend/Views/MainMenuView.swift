@@ -9,7 +9,8 @@ import SwiftUI
 
 struct MainMenuView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
-    
+    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
+
     // State variables to track view navigation and alerts.
     @State private var isNewGameActive: Bool = false
     @State private var isContinueGameActive: Bool = false
@@ -39,7 +40,7 @@ struct MainMenuView: View {
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
-                    .background(Color.tritanopiaPrimaryButton)
+                    .background(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
                     

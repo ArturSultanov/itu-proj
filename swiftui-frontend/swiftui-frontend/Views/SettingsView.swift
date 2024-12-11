@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data.
+    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
 
     @State private var showChangeLoginSheet = false // Controls the visibility of the change login sheet.
     @State private var newLogin: String = "" // Holds the new login value.
@@ -21,42 +22,47 @@ struct SettingsView: View {
 
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Settings")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
-            if isLoading {
-                ProgressView("Loading…")
-            } else {
-                // Show current difficulty at top
-                HStack{
-                    Text("Current Difficulty: \(difficultyDescription(for: currentDifficulty))")
-                        .font(.headline)
-                        .padding(.bottom, 20)
-                    Text("Current Login: \(playerDataManager.playerData!.login)")
-                        .font(.headline)
-                        .padding(.bottom, 20)
+        ZStack{
+            VStack() {
+                if isLoading {
+                    ProgressView("Loading…")
+                } else {
+//                    Spacer()
+                    
+                        HStack {
+                            Text("Current Difficulty: \(difficultyDescription(for: currentDifficulty))")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .padding(.trailing)
+                            
+                            Text("Current Login: \(playerDataManager.playerData!.login)")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
+                        .background(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                    
+                    Button("Change Login") {
+                        newLogin = playerDataManager.playerData?.login ?? ""
+                        showChangeLoginSheet = true
+                    }
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
+                    
+                    Button("Switch User") {
+                        showSwitchUserConfirmation = true
+                    }
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
+                    
+                    Button("Change Difficulty") {
+                        showDifficultyOptions = true
+                    }
+                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
                 }
-                
-                Button("Change Login") {
-                    newLogin = playerDataManager.playerData?.login ?? ""
-                    showChangeLoginSheet = true
-                }
-                .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
-                
-                Button("Switch User") {
-                    showSwitchUserConfirmation = true
-                }
-                .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
-                
-                Button("Change Difficulty") {
-                    showDifficultyOptions = true
-                }
-                .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
             }
+            .padding([.leading, .trailing, .bottom], 20)
         }
-        .padding()
         .alert("Error", isPresented: Binding<Bool>(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -89,7 +95,6 @@ struct SettingsView: View {
                 }
             }
         }
-
         .confirmationDialog("Select Difficulty", isPresented: $showDifficultyOptions) {
             Button("Easy") { Task { await changeDifficulty(to: 1) } }
             Button("Normal") { Task { await changeDifficulty(to: 2) } }

@@ -10,7 +10,8 @@ import SwiftUI
 // MARK: - Gameboard view
 struct GameBoardView: View {
     @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data.
-    
+    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
+
     @State private var gems: [Gem] = [] // Array of gems displayed on the board.
     @State private var swapInProgress = false // Flag to prevent multiple swaps at the same time.
     
@@ -34,7 +35,7 @@ struct GameBoardView: View {
                             .fontWeight(.bold)
                     }
                     .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
-                    .background(Color.tritanopiaPrimaryButton)
+                    .background(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
                 }
