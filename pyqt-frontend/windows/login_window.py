@@ -17,8 +17,7 @@ class LoginScreen(QWidget):
 
         user_layout = QHBoxLayout()
         user_layout.setObjectName("userLayout")
-        # spacer_left = QSpacerItem(0, 0, QSizePolicy.Minimum)
-        # user_layout.addItem(spacer_left)
+
         self.icon = QSvgWidget("assets/icons/user_icon.svg")
         self.icon.setObjectName("userIcon")
         self.icon.setFixedSize(70, 80)

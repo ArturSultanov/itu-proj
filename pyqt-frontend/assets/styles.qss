@@ -14,13 +14,13 @@ QPushButton {
     text-align: center;
 }
 
-/* ----------------------------- Login window -----------------------------*/
+/* ------------------------------ Login window ----------------------------- */
 
 QLabel#nameTextLabel {
     max-height: 50px;
     max-width: 600px;
     margin-left: 100px;
-    margin-top: 200px;
+    margin-top: 310px;
 }
 
 QLineEdit#usernameInput {
@@ -46,10 +46,25 @@ QPushButton#confirmBtn {
 
 QPushButton#quitBtn {
     max-width: 350px;
-    margin-left: 50px;
+    margin: 30px;
 }
 
 QLabel#loginPic {
     padding-left: 150px;
 }
 
+
+
+QLabel#mainPic {
+}
+
+QLabel#welcomeTextLabel {
+    margin-bottom: 50px;
+    /* border: 3px solid black;
+    background: #03f72c; */
+    text-align: left;
+}
+
+QPushButton#leaderBtn {
+    margin-bottom: 150px;
+}

@@ -3,6 +3,8 @@ from PyQt5.QtGui import QFontDatabase
 from windows.login_window import LoginScreen
 from windows.main_window import MainMenuScreen
 from windows.game_window import GameScreen
+from windows.settings_window import SettingsScreen
+from windows.leaderboard_window import LeaderboardScreen
 from utils.api_call import api_request
 
 class AppController:
@@ -22,10 +24,14 @@ class AppController:
         self.login_screen = LoginScreen(self)
         self.main_menu_screen = MainMenuScreen(self)
         self.game_screen = GameScreen(self)
+        self.settings_screen = SettingsScreen(self)
+        self.leaderboard_screen = LeaderboardScreen(self)
 
         self.window.addWidget(self.login_screen)
         self.window.addWidget(self.main_menu_screen)
         self.window.addWidget(self.game_screen)
+        self.window.addWidget(self.settings_screen)
+        self.window.addWidget(self.leaderboard_screen)
         
         # window
         self.window.resize(1280, 960)
@@ -60,6 +66,13 @@ class AppController:
         self.game_screen.update_score_and_moves(response["current_score"], response["moves_left"])
         self.game_screen.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
         self.window.setCurrentWidget(self.game_screen)
+    
+    def show_settings(self):
+        self.window.setCurrentWidget(self.settings_screen)
+    
+    def show_leaderboard(self):
+        self.window.setCurrentWidget(self.leaderboard_screen)
+    
     def quit_game(self):
         response = api_request("/utils/exit", method="POST")
         if response and isinstance(response, dict) and "detail" in response:
