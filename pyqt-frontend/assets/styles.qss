@@ -7,20 +7,37 @@ QMainWindow, QWidget {
 
 QPushButton {
     color: black;
-    border: 3px solid black;
+    border: 3px solid #FFE500;
     padding: 10px;
-    /* min-width: 150px; */
     font-size: 35px;
     letter-spacing: 2px;
     text-align: center;
 }
 
-QPushButton:hover {
-    background-color: #FFD700;
+/* ----------------------------- Login window -----------------------------*/
+
+QLabel#nameTextLabel {
+    max-height: 50px;
+    max-width: 600px;
+    margin-left: 100px;
+    margin-top: 200px;
+}
+
+QLineEdit#usernameInput {
+    max-width: 480px;
+    color: black;
+    border: 3px solid #FFE500;
+    font-size: 35px;
+    text-align: left;
+    letter-spacing: 2px;
+}
+
+QLabel#underscoreIcon {
+    max-width: 480px;
+    max-height: 10px;
 }
 
 QPushButton#confirmBtn {
-    background-color: #5d55ff;
     max-width: 260px;
     margin-bottom: 300px;
     margin-top: 15px;
@@ -28,49 +45,11 @@ QPushButton#confirmBtn {
 }
 
 QPushButton#quitBtn {
-    background-color: #FF5555;
-    max-width: 370px;
-    margin: 30px;
-}
-
-
-
-QLineEdit {
-    background-color: #50dd25;
-    padding: 10px;
-}
-
-QLabel#nameTextLabel {
-    /* margin-left: 100px;
-    margin-top: 620px; */
-}
-
-/* Icons */
-QSvgWidget#userIcon {
-    border: 3px solid black;
-}
-
-QLabel#underscoreIcon {
-    border: 3px solid black;
-    background-color: #dd25a3;
-    max-height: 10px;
-
+    max-width: 350px;
+    margin-left: 50px;
 }
 
 QLabel#loginPic {
-    border: 3px solid black;
-    margin-top: 320px;
-}
-
-
-/* Настройка для поля ввода */
-QLineEdit#usernameInput {
-    max-width: 500px;
-    color: black;
-    border: 3px solid black;
-    font-size: 35px;
-    text-align: left;
-    letter-spacing: 2px;
-    /* padding-left: -100px; */
+    padding-left: 150px;
 }
 
