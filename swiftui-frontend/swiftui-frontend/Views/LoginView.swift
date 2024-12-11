@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct LoginView: View {
-    @Environment(PlayerDataManager.self) var playerDataManager
-    @State private var loginInput: String = ""
-    @State private var isLoggedIn: Bool = false
-    @State private var isShowQuitConfirmation = false
-    @Environment(\.colorScheme) var colorScheme // Access current system theme
+    @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data manager
+    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
 
+    @State private var loginInput: String = "" // Holds the user's input for the login
+    @State private var isLoggedIn: Bool = false // Tracks whether the user has logged in
+    @State private var isShowQuitConfirmation = false // Tracks whether the quit confirmation alert is shown
     
     var body: some View {
         ZStack {
@@ -27,12 +27,8 @@ struct LoginView: View {
                     
                     TextField("Your login", text: $loginInput)
                         .padding()
-//                        .background(loginInput.isEmpty ? Color.red : Color.gray)
-//                        .foregroundColor(.black)
                         .background(
-                            loginInput.isEmpty
-                            ? (colorScheme == .dark ? Color.red.opacity(0.5) : Color.red.opacity(0.2))
-                            : (colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
+                            (colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
                         )
                         .cornerRadius(10)
                         .shadow(radius: 5, x: 0, y: 3)
@@ -40,7 +36,7 @@ struct LoginView: View {
                     
                     Button("Confirm") {
                         Task {
-                            await login()
+                            await login() // Trigger the login asynchronously
                         }
                     }
                     .buttonStyle(MainMenuButtonStyle(mainColor: loginInput == "" ? .gray : Color.tritanopiaBlue))
@@ -56,14 +52,13 @@ struct LoginView: View {
                     .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaRed))
                 }
             }
-            .aspectRatio(1, contentMode: .fit)
             .padding([.leading, .trailing, .bottom], 20)
         }
         .alert("Quit Game?", isPresented: $isShowQuitConfirmation) {
             VStack {
                 Button("Yes") {
                     Task {
-                        await quitGame()
+                        await quitGame() // Quit the game if the user confirms
                     }
                 }
                 Button("No", role: .cancel) {}

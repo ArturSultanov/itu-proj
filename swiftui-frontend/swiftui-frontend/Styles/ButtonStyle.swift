@@ -1,5 +1,5 @@
 //
-//  MainMenuButtonStyle.swift
+//  ButtonStyle.swift
 //  swiftui-frontend
 //
 //  Created by Artur Sultanov on 09.12.2024.

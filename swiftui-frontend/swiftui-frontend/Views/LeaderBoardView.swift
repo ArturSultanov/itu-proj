@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LeaderboardView: View {
-    @State private var topPlayers: [LeaderboardEntry] = []
+    @State private var topPlayers: [LeaderboardEntry] = [] // Holds the list of top players.
     @State private var isLoading = true
     @State private var errorMessage: String?
     
@@ -29,6 +29,9 @@ struct LeaderboardView: View {
                                 Image(systemName: "medal")
                                     .foregroundColor(.yellow)
                             }
+                            else{
+                                Image(systemName: "medal")
+                            }
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(player.login)
                                     .font(.headline)
@@ -37,9 +40,8 @@ struct LeaderboardView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
-                            Spacer()
+                            .padding(5)
                         }
-                        .padding(.vertical, 5)
                     }
                 }
                 .listStyle(InsetListStyle())
@@ -47,13 +49,14 @@ struct LeaderboardView: View {
         }
         .navigationTitle("Leaderboard")
         .task {
-            await loadLeaderboard()
+            await loadLeaderboard() // Load the leaderboard data when the view appears
         }
     }
     
+    /// Fetches the leaderboard data asynchronously and updates the UI
     private func loadLeaderboard() async {
         do {
-            let players = try await NetworkManager.shared.fetchLeaderboard(with: 10)
+            let players = try await NetworkManager.shared.fetchLeaderboard(with: 15)
             await MainActor.run {
                 topPlayers = players
                 isLoading = false

@@ -10,6 +10,7 @@ import SwiftUI
 struct MainMenuView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
     
+    // State variables to track view navigation and alerts.
     @State private var isNewGameActive: Bool = false
     @State private var isContinueGameActive: Bool = false
     @State private var isContunueGameActive: Bool = false
@@ -42,7 +43,6 @@ struct MainMenuView: View {
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
                     
-                    
                 }
                 VStack(){
                     Button("New Game") {
@@ -52,10 +52,7 @@ struct MainMenuView: View {
                     }
                     .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaBlue))
                     
-                    
-                    // Continue + Delete Button
                     HStack {
-                        // Continue Button
                         Button("Continue") {
                             Task {
                                 await continueGame()
@@ -77,7 +74,6 @@ struct MainMenuView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 1)
 
-                    
                     Button(action: {
                         isSettingsActive = true
                     }) {
@@ -92,14 +88,12 @@ struct MainMenuView: View {
                     }
                     .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
                     
-                    
                     Button("Quit Game") {
                         isShowQuitConfirmation = true
                     }
                     .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaRed))
                 }
             }
-            .aspectRatio(1, contentMode: .fit)
             .padding([.leading, .trailing, .bottom], 20)
         }
         .navigationTitle("Main Menu")
@@ -141,8 +135,10 @@ struct MainMenuView: View {
         }
     }
     
+    // MARK: - Actions
+
+    /// Starts a new game and navigates to the game board
     func newGame() async {
-        
         do {
             try await NetworkManager.shared.newGame(playerDataManager: playerDataManager)
             isNewGameActive = true
@@ -151,8 +147,8 @@ struct MainMenuView: View {
         }
     }
     
+    /// Continues the last game and navigates to the game board
     func continueGame() async {
-        
         do {
             try await NetworkManager.shared.continue_game(playerDataManager: playerDataManager)
             isContinueGameActive = true
@@ -161,6 +157,7 @@ struct MainMenuView: View {
         }
     }
     
+    /// Quits the game by sending a request to the backend and terminating the app
     func quitGame() async {
         do {
             try await NetworkManager.shared.quitGame()
@@ -173,6 +170,7 @@ struct MainMenuView: View {
         }
     }
     
+    /// Deletes the last game session
     func deleteLastGame() async {
         do {
             try await NetworkManager.shared.deleteGame(playerDataManager: playerDataManager)
@@ -181,8 +179,4 @@ struct MainMenuView: View {
             isShowErrorAlert = true
         }
     }
-
-
 }
-
-

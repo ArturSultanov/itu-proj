@@ -9,22 +9,23 @@ import Foundation
 import SwiftUI
 import Observation
 
+/// Manages the player's data and updates game sessions in response to server interactions.
 @Observable @MainActor class PlayerDataManager {
     var playerData: PlayerData?
     
+    /// Updates the game session with the provided response from the server.
+    /// - Parameter response: The server response containing the updated game state.
     func updateGameSession(with response: SwapResponse) {
         guard let playerData = playerData else { return }
 
-        // Update highest score if applicable
+        // Update highest score
         if response.currentScore > playerData.highestScore {
             playerData.highestScore = response.currentScore
         }
-
         // Update last game
         if let lastGame = playerData.lastGame {
             lastGame.currentScore = response.currentScore
             lastGame.movesLeft = response.movesLeft
-
             // Update board status
             for updatedGem in response.updatedGems {
                 if lastGame.boardStatus.indices.contains(updatedGem.y),
@@ -36,8 +37,7 @@ import Observation
     }
 }
 
-
-
+/// Represents the player's data from server
 class PlayerData: Codable {
     var id: Int
     var login: String
@@ -46,21 +46,16 @@ class PlayerData: Codable {
     var difficulty: Int?
 }
 
+/// Represents the details of a game session from server
 class GameSession: Codable {
     var currentScore: Int
     var movesLeft: Int
     var boardStatus: [[Int]]
 }
 
-
-import Foundation
-import Observation
-
-import Foundation
-import Observation
-
+/// Represents a single gem on the game board.
 @Observable class Gem: Identifiable, Codable, Equatable {
-    @ObservationIgnored var id = UUID()
+    @ObservationIgnored var id = UUID() // Unique identifier for SwiftUI's List
     var type: Int
     var x: Int
     var y: Int
@@ -71,10 +66,13 @@ import Observation
         self.y = y
     }
     
+    // Equatable conformance to compare gems by their unique IDs
     static func ==(lhs: Gem, rhs: Gem) -> Bool {
        return lhs.id == rhs.id
    }
 
+    // Codable Conformance
+    
     enum CodingKeys: String, CodingKey {
         case type
         case x
@@ -97,17 +95,22 @@ import Observation
     }
 }
 
-
+/// Represents the response from the server after a gem swap.
 struct SwapResponse: Codable {
     let currentScore: Int
     let movesLeft: Int
     let updatedGems: [Gem]
 }
 
-
+/// Represents an entry in the leaderboard.
 struct LeaderboardEntry: Codable, Identifiable {
     // Assign a unique ID for SwiftUI's List
     var id: UUID { UUID() }
     let login: String
     let highest_score: Int
+}
+
+/// Represents the possible directions for gem swapping.
+enum Direction {
+    case up, down, left, right
 }

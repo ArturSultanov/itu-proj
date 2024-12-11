@@ -17,13 +17,22 @@ enum NetworkError: Error {
     case noData
 }
 
+/// Handles all network interactions for the app.
 @MainActor
 class NetworkManager: ObservableObject {
-    static let shared = NetworkManager()
+    static let shared = NetworkManager() // Singleton instance.
     private init() {}
 
-    private let baseURL = "http://127.0.0.1:8000"
-    
+    private let baseURL = "http://127.0.0.1:8000" // Base URL for API requests.
+}
+
+/// Login request
+extension NetworkManager {
+    /// Logs in a user by their login ID and updates the `PlayerDataManager`.
+    /// - Parameters:
+    ///   - loginID: The login identifier for the user.
+    ///   - playerDataManager: The shared player data manager to update upon successful login.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func login(with loginID: String, playerDataManager: PlayerDataManager) async throws {
         // Construct the URL with query parameters
         var urlComponents = URLComponents(string: "\(baseURL)/login")
@@ -56,7 +65,13 @@ class NetworkManager: ObservableObject {
             throw NetworkError.decodingError
         }
     }
-    
+}
+
+/// New game request
+extension NetworkManager {
+    /// Starts a new game and updates the player's data.
+    /// - Parameter playerDataManager: The shared player data manager to update upon successful game initialization.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func newGame(playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/menu/new_game") else {
             throw NetworkError.invalidURL
@@ -64,19 +79,19 @@ class NetworkManager: ObservableObject {
 
         let (data, response) = try await URLSession.shared.data(from: url)
         
+        // Validate the response
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw NetworkError.invalidLogin
         }
         
+        // Decode the response data
         do {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             
             let newGameSession = try decoder.decode(GameSession.self, from: data)
             
-//            playerDataManager.playerData?.lastGame = newGameSession
-            
-            if var player = playerDataManager.playerData {
+            if let player = playerDataManager.playerData {
                 player.lastGame = newGameSession
                 playerDataManager.playerData = player
             }
@@ -84,16 +99,27 @@ class NetworkManager: ObservableObject {
             throw NetworkError.decodingError
         }
     }
-    
+}
+
+/// Swap gems request
+extension NetworkManager {
+    /// Swaps two gems on the board and updates the game session with the server response.
+    /// - Parameters:
+    ///   - gem1: The first gem to swap.
+    ///   - gem2: The second gem to swap.
+    ///   - playerDataManager: The shared player data manager to update upon successful response.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func swapGems(gem1: Gem, gem2: Gem, playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/board/swap_gems") else {
             throw NetworkError.invalidURL
         }
 
+        // Create the POST request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Prepare the request body
         let body: [String: [[String: Int]]] = [
             "gems": [
                 ["x": gem1.x, "y": gem1.y],
@@ -102,52 +128,67 @@ class NetworkManager: ObservableObject {
         ]
         request.httpBody = try JSONEncoder().encode(body)
 
+        // Perform the network request
         let (data, response) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse(statusCode: 0)
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.invalidResponse(statusCode: (response as? HTTPURLResponse)?.statusCode ?? 0)
         }
 
-        if (200...299).contains(httpResponse.statusCode) {
-            // Proceed with decoding
+        // Decode the response and update the game session
+        do {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
 
             let swapResponse = try decoder.decode(SwapResponse.self, from: data)
             playerDataManager.updateGameSession(with: swapResponse)
+        } catch {
+            throw NetworkError.decodingError
+        }
+    }
+}
+
+/// Click gem request
+extension NetworkManager {
+    /// Sends a click action for a gem to the backend and updates the local game session.
+    /// - Parameters:
+    ///   - gem: The gem that was clicked.
+    ///   - playerDataManager: The shared player data manager.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
+    func clickGem(gem: Gem, playerDataManager: PlayerDataManager) async throws {
+        guard let url = URL(string: "\(baseURL)/board/click_gem") else {
+            throw NetworkError.invalidURL
+        }
+        
+        // Prepare POST request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Int] = ["x": gem.x, "y": gem.y]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse(statusCode: 0)
+        }
+
+        // Decode the response
+        if (200...299).contains(httpResponse.statusCode) {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let clickResponse = try decoder.decode(SwapResponse.self, from: data)
+            playerDataManager.updateGameSession(with: clickResponse)
         } else {
             throw NetworkError.invalidResponse(statusCode: httpResponse.statusCode)
         }
     }
-    
-    
 }
 
-
-//extension NetworkManager {
-//    func fetchLeaderboard(with limit: Int) async throws -> [LeaderboardEntry] {
-//        var urlComponents = URLComponents(string: "\(baseURL)/menu/leaderboard")
-//        urlComponents?.queryItems = [URLQueryItem(name: "limit", value: limit)]
-//        guard let url = urlComponents?.url else {
-//            throw NetworkError.invalidURL
-//        }
-//        
-//        // Create a GET request
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "GET"
-//
-//        
-//        let (data, response) = try await URLSession.shared.data(for: request)
-//        
-//        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//            throw URLError(.badServerResponse)
-//        }
-//        
-//        let leaderboard = try JSONDecoder().decode([LeaderboardEntry].self, from: data)
-//        return leaderboard
-//    }
-//}
-
+/// Leaderboard request
 extension NetworkManager {
     func fetchLeaderboard(with limit: Int) async throws -> [LeaderboardEntry] {
         // Construct the URL with query parameters
@@ -175,9 +216,13 @@ extension NetworkManager {
     }
 }
 
-
-
+/// Update login request
 extension NetworkManager {
+    /// Updates the player's login name in the backend and local player data.
+    /// - Parameters:
+    ///   - newLogin: The new login name to be updated.
+    ///   - playerDataManager: The shared player data manager.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func updateLogin(newLogin: String, playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/update_login")
         
@@ -185,6 +230,7 @@ extension NetworkManager {
             throw NetworkError.invalidURL
         }
         
+        // Prepare PATCH request
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -192,10 +238,11 @@ extension NetworkManager {
         let body = ["login": newLogin]
         request.httpBody = try JSONEncoder().encode(body)
         
+        // Perform the network request
         let (_, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
         
@@ -205,7 +252,15 @@ extension NetworkManager {
             playerDataManager.playerData = player
         }
     }
-    
+}
+
+/// Change difficulty request
+extension NetworkManager {
+    /// Updates the difficulty level in the backend and local player data.
+    /// - Parameters:
+    ///   - difficulty: The new difficulty level to be set.
+    ///   - playerDataManager: The shared player data manager.
+    /// - Throws: Throws a `NetworkError` if the request fails.
     func setDifficulty(_ difficulty: Int, playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/set_difficulty")
         
@@ -213,6 +268,7 @@ extension NetworkManager {
             throw NetworkError.invalidURL
         }
                 
+        // Prepare PATCH request
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -220,23 +276,27 @@ extension NetworkManager {
         let body = ["difficulty": difficulty]
         request.httpBody = try JSONEncoder().encode(body)
         
+        // Perform the network request
         let (_, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
 
+        // Update local player data
         if var player = playerDataManager.playerData {
-            // Assuming you have a difficulty property in PlayerData
             player.difficulty = difficulty
             playerDataManager.playerData = player
         }
     }
 }
 
-
+/// Get diffuculty request
 extension NetworkManager {
+    /// Fetches the current difficulty level from the backend.
+    /// - Returns: The current difficulty level.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func getDifficulty() async throws -> Int {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/get_difficulty")
         
@@ -244,17 +304,18 @@ extension NetworkManager {
             throw NetworkError.invalidURL
         }
                 
+        // Prepare GET request
         var request = URLRequest(url: url)
-        
         request.httpMethod = "GET"
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
         
+        // Decode the response
         struct DifficultyResponse: Codable {
             let difficulty: Int
         }
@@ -264,8 +325,11 @@ extension NetworkManager {
     }
 }
 
-
+/// Continue game request
 extension NetworkManager {
+    /// Continues the last game session and updates the local player data.
+    /// - Parameter playerDataManager: The shared player data manager.
+    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func continue_game(playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/menu/continue") else {
             throw NetworkError.invalidURL
@@ -273,10 +337,12 @@ extension NetworkManager {
 
         let (data, response) = try await URLSession.shared.data(from: url)
         
+        // Validate the response
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw NetworkError.invalidLogin
         }
         
+        // Decode the response
         do {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -289,8 +355,10 @@ extension NetworkManager {
     }
 }
 
-
+/// Quit game handling (syncronization)
 extension NetworkManager {
+    /// Sends a quit request to the backend.
+    /// - Throws: Throws a `NetworkError` if the request fails.
     func quitGame() async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/utils/exit")
         
@@ -298,19 +366,25 @@ extension NetworkManager {
             throw NetworkError.invalidURL
         }
         
+        // Prepare POST request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
+        // Perform the network request
         let (_, response) = try await URLSession.shared.data(for: request)
         
+        // Validate the response
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
     }
 }
 
-
+/// Delete game request
 extension NetworkManager {
+    /// Deletes the last game session and updates the local player data.
+    /// - Parameter playerDataManager: The shared player data manager.
+    /// - Throws: Throws a `NetworkError` if the request fails.
     func deleteGame(playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/menu/delete_game")
         
@@ -318,53 +392,21 @@ extension NetworkManager {
             throw NetworkError.invalidURL
         }
         
+        // Prepare DELETE request
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         
         let (_, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+        // Validate the response
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
         
-        // Set lastGame to nil after successful deletion
+        // Update local player data
         if var player = playerDataManager.playerData {
             player.lastGame = nil
             playerDataManager.playerData = player
-        }
-    }
-}
-
-
-extension NetworkManager {
-    func clickGem(gem: Gem, playerDataManager: PlayerDataManager) async throws {
-        guard let url = URL(string: "\(baseURL)/board/click_gem") else {
-            throw NetworkError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body: [String: Int] = [
-            "x": gem.x,
-            "y": gem.y
-        ]
-        request.httpBody = try JSONEncoder().encode(body)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse(statusCode: 0)
-        }
-
-        if (200...299).contains(httpResponse.statusCode) {
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let clickResponse = try decoder.decode(SwapResponse.self, from: data)
-            playerDataManager.updateGameSession(with: clickResponse)
-        } else {
-            throw NetworkError.invalidResponse(statusCode: httpResponse.statusCode)
         }
     }
 }
