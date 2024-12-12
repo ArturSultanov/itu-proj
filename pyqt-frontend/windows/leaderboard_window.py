@@ -19,7 +19,6 @@ class LeaderboardScreen(QWidget):
         self.back_btn.setIcon(QIcon("assets/icons/back_icon.svg"))
         self.back_btn.setText("Back")
         self.back_btn.setObjectName("backBtn")
-        self.back_btn.setStyleSheet("margin-bottom: 20px;")
         self.back_btn.setIconSize(QSize(50, 50))
         self.back_btn.clicked.connect(self.on_back_button_click)
         self.back_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)

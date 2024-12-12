@@ -2,76 +2,58 @@ import requests
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtGui import QPixmap, QIcon 
 from utils.api_call import api_request
 
 class GameScreen(QWidget):
     def __init__(self, controller, rows=5, cols=6):
         super().__init__()
         self.controller = controller
+
         self.rows = rows
         self.cols = cols
-        self.cell_size = 50  # Fixed cell size in pixels
-        self.clicked_cells = []  # Track clicked cells
-
-        grid_width = self.cols * (self.cell_size-10)
-        grid_height = self.rows * self.cell_size
-        self.setFixedSize(grid_width + 350, grid_height + 350)  # Extra space for centering and button
+        self.cell_size = 100
+        self.clicked_cells = []
 
         self.setWindowTitle("Game Screen")
 
-        self.top_layout = QHBoxLayout()
-        # Main layout setup
+        self.main_layout = QHBoxLayout()
         self.layout = QVBoxLayout()
 
         self.score_label = QLabel("Score: 0", self)
         self.moves_left_label = QLabel("Moves Left: 10", self)
 
-        # Add labels to the top layout with space between them
-        self.top_layout.addWidget(self.score_label)
-        self.top_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum))  # Spacer for space between
-        self.top_layout.addWidget(self.moves_left_label)
-        
-        self.layout.addLayout(self.top_layout)
-        
-        # Spacer at the top for vertical centering
-        spacer_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        self.layout.addItem(spacer_top)
+        spacer = QSpacerItem(0, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.main_layout.addItem(spacer)
 
-        # Horizontal layout for centering the grid layout
-        hbox_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.score_label, alignment=Qt.AlignHCenter)
+        self.main_layout.addWidget(self.moves_left_label, alignment=Qt.AlignHCenter)
+        self.layout.addLayout(self.main_layout)
+
+        space_layout = QHBoxLayout()
         left_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        hbox_layout.addItem(left_spacer)
+        space_layout.addItem(left_spacer)
+
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(0)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        hbox_layout.addLayout(self.grid_layout)
+        space_layout.addLayout(self.grid_layout)
+
         right_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        hbox_layout.addItem(right_spacer)
+        space_layout.addItem(right_spacer)
+        self.layout.addLayout(space_layout)
 
-        self.layout.addLayout(hbox_layout)
-        spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        self.layout.addItem(spacer_bottom)
+        # spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        # self.layout.addItem(spacer_bottom)
 
-        # Back to main menu button
         self.back_button = QPushButton("Back to Main Menu", self)
         self.back_button.clicked.connect(self.on_back_button_click)
         self.layout.addWidget(self.back_button, alignment=Qt.AlignCenter)
 
         self.setLayout(self.layout)
-        self.center()
-
         self.update_grid(self.rows, self.cols, self.generate_sample_items(self.rows, self.cols))
 
-    def center(self):
-        """Center the window on the screen."""
-        screen_geometry = QDesktopWidget().availableGeometry()
-        screen_center = screen_geometry.center()
-        window_geometry = self.frameGeometry()
-        window_geometry.moveCenter(screen_center)
-        self.move(window_geometry.topLeft())
 
     def update_grid(self, rows, cols, items):
-        """Fill the grid with cells based on current state."""
         for i in reversed(range(self.grid_layout.count())):
             widget = self.grid_layout.itemAt(i).widget()
             if widget:
@@ -84,32 +66,38 @@ class GameScreen(QWidget):
                 self.grid_layout.addWidget(grid_item, row, col)
 
     def create_item_widget(self, item_type, row, col):
-        """Create a widget for each grid cell and handle cell clicks."""
         button = QPushButton(self)
-        button.setFixedSize(self.cell_size, self.cell_size)
-        button.setStyleSheet(f"background-color: {self.get_item_color(item_type)};")
+        button.setFixedSize(100, 100)  # Устанавливаем фиксированный размер кнопки
+        icon = self.get_item_icon(item_type)
+        button.setIcon(icon)
+        button.setIconSize(button.size())  # Иконка занимает весь размер кнопки
         button.clicked.connect(lambda _, r=row, c=col: self.cell_clicked(r, c))
         return button
 
-    def get_item_color(self, item_type):
-        """Map item type to color."""
-        color_map = {
-            0: 'pink',
-            1: 'red',
-            2: 'blue',
-            3: 'green',
-            4: 'white',
+
+
+    def get_item_icon(self, item_type):
+        icon_map = {
+            # 0: 'assets/icons/chicken_icon.png',
+            0: 'assets/icons/lemon_icon.svg',
+            # 1: 'assets/icons/chili_icon.png',
+            1: 'assets/icons/donut_icon.png',
+            2: 'assets/icons/cherry_icon.svg',
+            # 4: 'assets/icons/rice_icon.png',
+            4: 'assets/icons/star_icon.png',
+            # 3: 'assets/icons/avo_icon.png',
+            # 3: 'assets/icons/banana_icon.svg',
+            3: 'assets/icons/beer_icon.png',
         }
-        return color_map.get(item_type, 'gray')
+        return QIcon(icon_map.get(item_type, 'assets/icons/banana.svg'))
+
 
     def generate_sample_items(self, rows, cols):
-        """Generate sample grid data for testing without API."""
         import random
         types = [0, 1, 2, 3, 4]
         return [[random.choice(types) for _ in range(cols)] for _ in range(rows)]
 
     def cell_clicked(self, row, col):
-        """Track cell clicks and send data to backend if two cells are selected."""
         self.clicked_cells.append({"x": col, "y": row})
         print(f"Cell clicked at row {row}, column {col}")
 
@@ -117,20 +105,19 @@ class GameScreen(QWidget):
             # Prepare data for backend
             data = {"gems": self.clicked_cells}
             self.send_move_to_backend(data)
-            self.clicked_cells = []  # Reset clicked cells for next move
+            self.clicked_cells = []
 
     def send_move_to_backend(self, data):
-        """Send selected cell coordinates to the backend and update the grid with the response."""
         response = api_request("/board/swap_gems_fullboard", params=data, method="POST")
         print(response)
         self.update_score_and_moves(response["current_score"], response["moves_left"])
         self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
 
     def on_back_button_click(self):
-        """Return to main menu."""
         self.controller.show_main_menu()
     
     def update_score_and_moves(self, score, moves_left):
-        """Update the score and moves left labels."""
         self.score_label.setText(f"Score: {score}")
         self.moves_left_label.setText(f"Moves Left: {moves_left}")
+    
+
