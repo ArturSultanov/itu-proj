@@ -20,7 +20,6 @@ QLabel#nameTextLabel {
     max-height: 50px;
     max-width: 600px;
     margin-left: 100px;
-    margin-top: 310px;
 }
 
 QLineEdit#usernameInput {
@@ -38,10 +37,10 @@ QLabel#underscoreIcon {
 }
 
 QPushButton#confirmBtn {
-    max-width: 260px;
-    margin-bottom: 300px;
-    margin-top: 15px;
+    max-width: 280px;
+
     margin-left: 250px;
+    margin-bottom: 300px;
 }
 
 QPushButton#quitBtn {
@@ -53,18 +52,55 @@ QLabel#loginPic {
     padding-left: 150px;
 }
 
+/* ------------------------------ Main window ------------------------------ */
 
 
-QLabel#mainPic {
-}
 
 QLabel#welcomeTextLabel {
-    margin-bottom: 50px;
-    /* border: 3px solid black;
-    background: #03f72c; */
+    margin: 30px;
     text-align: left;
 }
 
 QPushButton#leaderBtn {
-    margin-bottom: 150px;
+    margin-bottom: 100px;
 }
+
+/* ----------------------------- Settings window --------------------------- */
+
+QPushButton#paletteBtn {
+    margin-top: 280px;
+    margin-left: 80px;
+}
+
+QPushButton#leftBtn {
+    margin-left: 80px;
+}
+
+QPushButton#backBtn {
+    margin-bottom: 25px;
+    margin-left: 30px;
+}
+
+
+/* --------------------------- Leaderboard window -------------------------- */
+
+
+/* ----------------------------- Palette window ---------------------------- */
+
+
+/* ---------------------------- Difficulty window -------------------------- */
+
+
+/* ------------------------------ Change window ---------------------------- */
+
+
+/* ------------------------------- Game window ----------------------------- */
+
+
+/* ------------------------------ Pause window ----------------------------- */
+
+
+
+
+
+

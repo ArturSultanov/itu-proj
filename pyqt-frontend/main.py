@@ -5,6 +5,10 @@ from windows.main_window import MainMenuScreen
 from windows.game_window import GameScreen
 from windows.settings_window import SettingsScreen
 from windows.leaderboard_window import LeaderboardScreen
+from windows.palette_window import PaletteScreen
+from windows.difficulty_window import DifficultyScreen
+from windows.change_window import ChangeScreen
+
 from utils.api_call import api_request
 
 class AppController:
@@ -26,15 +30,21 @@ class AppController:
         self.game_screen = GameScreen(self)
         self.settings_screen = SettingsScreen(self)
         self.leaderboard_screen = LeaderboardScreen(self)
+        self.palette_screen = PaletteScreen(self)
+        self.difficulty_screen = DifficultyScreen(self)
+        self.change_screen = ChangeScreen(self)
 
         self.window.addWidget(self.login_screen)
         self.window.addWidget(self.main_menu_screen)
         self.window.addWidget(self.game_screen)
         self.window.addWidget(self.settings_screen)
         self.window.addWidget(self.leaderboard_screen)
+        self.window.addWidget(self.palette_screen)
+        self.window.addWidget(self.difficulty_screen)
+        self.window.addWidget(self.change_screen)
         
         # window
-        self.window.resize(1280, 960)
+        self.window.setFixedSize(1280, 960)
         self.center_window()
         
     def center_window(self):
@@ -73,6 +83,15 @@ class AppController:
     def show_leaderboard(self):
         self.window.setCurrentWidget(self.leaderboard_screen)
     
+    def show_palette(self):
+        self.window.setCurrentWidget(self.palette_screen)
+
+    def show_difficulty(self):
+        self.window.setCurrentWidget(self.difficulty_screen)
+
+    def show_change(self):
+        self.window.setCurrentWidget(self.change_screen)
+
     def quit_game(self):
         response = api_request("/utils/exit", method="POST")
         if response and isinstance(response, dict) and "detail" in response:

@@ -11,6 +11,7 @@ class LoginScreen(QWidget):
         main_layout = QHBoxLayout()
         left_layout = QVBoxLayout()
 
+        left_layout.setContentsMargins(0, 200, 0, 0)
         self.label = QLabel("Enter your name")
         self.label.setObjectName("nameTextLabel")
         left_layout.addWidget(self.label)
