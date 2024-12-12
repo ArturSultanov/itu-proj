@@ -222,7 +222,7 @@ class GamePage:
             response.raise_for_status()
 
             if response.status_code == 200:
-                self.game_data = response.json()
+                self.game_data["board_status"] = response.json()["board_status"]
                 self.print_board()
             else:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
