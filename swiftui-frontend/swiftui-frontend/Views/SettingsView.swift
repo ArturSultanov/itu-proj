@@ -55,7 +55,12 @@ struct SettingsView: View {
     private var mainContent: some View {
         VStack {
             if isLoading {
+                Color.black.opacity(0.3)
+                    .edgesIgnoringSafeArea(.all)
                 ProgressView("Loading…")
+                    .padding(40)
+                    .background(Color.white)
+                    .cornerRadius(10)
             } else {
                 topInfoView
                 switchColorPaletteButton

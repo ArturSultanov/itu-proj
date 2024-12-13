@@ -7,31 +7,37 @@
 
 import SwiftUI
 
-// MARK: - Gameboard view
+// MARK: - GameBoardView
 struct GameBoardView: View {
     @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data.
     @Environment(NetworkManager.self) var networkManager
     @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
+    @Environment(\.dismiss) var dismiss // For navigation actions if needed
 
     @State private var gems: [Gem] = [] // Array of gems displayed on the board.
-    @State private var swapInProgress = false // Flag to prevent multiple swaps at the same time.
-    
+    @State private var swapInProgress = false // Prevent multiple swaps at once.
+    @State private var showPauseMenu = false // Controls pause menu display
+    @State private var isLoading = false // Loading state for shuffle or other actions
+    @State private var errorMessage: String?
+    @State private var isSettingsActive = false 
+
     private let gemSize: CGFloat = 50 // Size of each gem.
     private let gridSpacing: CGFloat = 2 // Spacing between gems.
 
     var body: some View {
         ZStack {
-            VStack {
+            VStack(spacing: 20) {
                 Spacer()
+
                 // Player metrics
-                if let player = playerDataManager.playerData {
+                if let player = playerDataManager.playerData, let lastGame = player.lastGame {
                     HStack {
-                        Text("Current Score: \(player.lastGame!.currentScore)")
+                        Text("Current Score: \(lastGame.currentScore)")
                             .font(.title2)
                             .fontWeight(.bold)
                             .padding(.trailing)
-                        
-                        Text("Moves Left: \(player.lastGame!.movesLeft)")
+
+                        Text("Moves Left: \(lastGame.movesLeft)")
                             .font(.title2)
                             .fontWeight(.bold)
                     }
@@ -40,34 +46,127 @@ struct GameBoardView: View {
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
                 }
-                    
-                // Game board containing the gems
+                
+                // Top Buttons: Shuffle & Pause
+                HStack {
+                    Button("Shuffle") {
+                        Task {
+                            await shuffleBoard()
+                        }
+                    }
+                    .buttonStyle(MainMenuButtonStyle()) // or custom color if needed
+
+                    Button("Pause") {
+                        showPauseMenu = true
+                    }
+                    .buttonStyle(MainMenuButtonStyle())
+                }
+                .padding(.horizontal, 20)
+
+                // Game board
                 GeometryReader { geometry in
                     ZStack {
                         ForEach(gems) { gem in
                             GemView(
                                 gem: gem,
-                                iconType: IconType.getGemIcon(for: gem.type), // Provide iconType here
+                                iconType: IconType.getGemIcon(for: gem.type),
                                 swapAction: { direction in handleSwapAction(gem: gem, direction: direction) },
                                 clickAction: { gem in handleClickAction(gem: gem) }
                             )
                             .frame(width: gemSize, height: gemSize)
                             .position(position(for: gem, in: geometry.size))
-                            .animation(.easeInOut, value: gems) // Animate gem layout changes
+                            .animation(.easeInOut, value: gems)
                         }
                     }
                     .onAppear {
-                        initializeGems() // Initialize gems after the view appears
+                        initializeGems()
                     }
                 }
+                .padding(.bottom, 20)
             }
-            .padding([.leading, .trailing, .bottom], 20)
+            .padding([.leading, .trailing], 20)
+
+            if isLoading {
+                Color.black.opacity(0.3)
+                    .edgesIgnoringSafeArea(.all)
+                ProgressView("Loading…")
+                    .padding(40)
+                    .background(Color.white)
+                    .cornerRadius(10)
+            }
         }
         .navigationTitle("Game Board")
+        .alert("Error", isPresented: Binding<Bool>(
+            get: { errorMessage != nil },
+            set: { _ in errorMessage = nil }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "")
+        }
+        .navigationDestination(isPresented: $isSettingsActive) {
+            SettingsView() // Navigate to SettingsView
+        }
+        .confirmationDialog("Pause Menu", isPresented: $showPauseMenu) {
+            Button("Resume", role: .cancel) {
+                
+            }
+            Button("Settings") {
+                isSettingsActive = true
+            }
+            Button("Quit Game", role: .destructive) {
+                Task {
+                    await quitGame()
+                }
+            }
+        } message: {
+            Text("Game is paused. What do you want to do?")
+        }
+    }
+
+    // MARK: - Network Actions
+
+    /// Sends request to shuffle the board and updates local state.
+    private func shuffleBoard() async {
+        isLoading = true
+        do {
+            let newBoardStatus = try await networkManager.shuffleBoard()
+            await MainActor.run {
+                // Update player's lastGame boardStatus
+                if let player = playerDataManager.playerData, let lastGame = player.lastGame {
+                    lastGame.boardStatus = newBoardStatus
+                    player.lastGame = lastGame
+                    playerDataManager.playerData = player
+                }
+                withAnimation(.easeInOut) {
+                    initializeGems()
+                }
+                isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = "Failed to shuffle board: \(error.localizedDescription)"
+                isLoading = false
+            }
+        }
+    }
+
+    /// Quits the game by calling network quit request and then dismissing.
+    private func quitGame() async {
+        do {
+            try await networkManager.quitGame()
+            await MainActor.run {
+                // Dismiss current view and possibly go to login or main menu
+                dismiss()
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = "Failed to quit game: \(error.localizedDescription)"
+            }
+        }
     }
 
     // MARK: - Positioning
-    /// Calculates the position for a given gem on the board.
     private func position(for gem: Gem, in size: CGSize) -> CGPoint {
         guard let rows = playerDataManager.playerData?.lastGame?.boardStatus.count,
               let cols = playerDataManager.playerData?.lastGame?.boardStatus.first?.count else {
@@ -87,7 +186,6 @@ struct GameBoardView: View {
     }
 
     // MARK: - Initialization & Updates
-    /// Initializes the gems on the board based on the game's board status.
     private func initializeGems() {
         guard let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus else { return }
 
@@ -102,19 +200,20 @@ struct GameBoardView: View {
     }
 
     // MARK: - Actions
-    /// Handles swapping a gem with an adjacent gem in the specified direction.
     private func handleSwapAction(gem: Gem, direction: Direction) {
-        guard !swapInProgress, // Prevent multiple swaps at once.
+        guard !swapInProgress,
               let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
+        
         swapInProgress = true
-
+        
         withAnimation(.easeInOut) {
             swapPositions(gem, targetGem)
         }
+
         Task {
             do {
                 try await networkManager.swapGems(gem1: gem, gem2: targetGem, playerDataManager: playerDataManager)
-                initializeGems() // Refresh the board
+                initializeGems()
                 swapInProgress = false
             } catch let NetworkError.invalidResponse(statusCode) {
                 handleSwapFailure(gem, targetGem, statusCode: statusCode)
@@ -124,8 +223,7 @@ struct GameBoardView: View {
             }
         }
     }
-    
-    /// Reverts a swap if the server response indicates a failure.
+
     private func handleSwapFailure(_ gem: Gem, _ targetGem: Gem, statusCode: Int) {
         if statusCode == 406 {
             withAnimation(.easeInOut) {
@@ -169,11 +267,10 @@ struct GameBoardView: View {
         Task {
             do {
                 try await networkManager.clickGem(gem: gem, playerDataManager: playerDataManager)
-                initializeGems() // Refresh the board
+                initializeGems()
             } catch {
                 print("Click gem failed: \(error)")
             }
         }
     }
 }
-

@@ -14,7 +14,7 @@ import Combine
     /// Displays an error message in the banner and automatically dismisses it after a delay.
     func showError(message: String) {
         bannerMessage = message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.bannerMessage = nil
         }
     }

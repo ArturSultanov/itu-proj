@@ -409,3 +409,26 @@ extension NetworkManager {
         }
     }
 }
+
+
+extension NetworkManager {
+    func shuffleBoard() async throws -> [[Int]] {
+        guard let url = URL(string: "\(baseURL)/board/shuffle") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+
+        struct ShuffleResponse: Codable {
+            let board_status: [[Int]]
+        }
+        
+        let shuffleResponse = try JSONDecoder().decode(ShuffleResponse.self, from: data)
+        return shuffleResponse.board_status
+    }
+}

@@ -88,6 +88,8 @@ struct LoginView: View {
             try await networkManager.login(with: loginInput, playerDataManager: playerDataManager)
             isLoggedIn = true
         } catch {
+            bannerManager.showError(message: "Login failed: \(error)")
+
             print("Login failed: \(error)")
         }
     }

@@ -10,7 +10,7 @@ import SwiftUI
 struct MainMenuView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
     @Environment(NetworkManager.self) var networkManager
-//    @Environment(BannerManager.self) var bannerManager
+    @Environment(BannerManager.self) var bannerManager
     @Environment(\.colorScheme) var colorScheme
 
     @State private var isNewGameActive: Bool = false
@@ -94,7 +94,7 @@ struct MainMenuView: View {
             }))
             
             HStack {
-                Button("Continue") {
+                Button("                              Continue") { // Adding spaces for better layout
                     Task { await continueGame() }
                 }
                 .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
