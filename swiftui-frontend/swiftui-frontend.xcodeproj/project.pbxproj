@@ -48,16 +48,6 @@
 			path = "swiftui-frontend";
 			sourceTree = "<group>";
 		};
-		7DE724B02CDCE47A00E45E35 /* swiftui-frontendTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "swiftui-frontendTests";
-			sourceTree = "<group>";
-		};
-		7DE724BA2CDCE47B00E45E35 /* swiftui-frontendUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "swiftui-frontendUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,8 +79,6 @@
 			isa = PBXGroup;
 			children = (
 				7DE7249E2CDCE47900E45E35 /* swiftui-frontend */,
-				7DE724B02CDCE47A00E45E35 /* swiftui-frontendTests */,
-				7DE724BA2CDCE47B00E45E35 /* swiftui-frontendUITests */,
 				7DE7249D2CDCE47900E45E35 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -143,9 +131,6 @@
 			dependencies = (
 				7DE724AF2CDCE47A00E45E35 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				7DE724B02CDCE47A00E45E35 /* swiftui-frontendTests */,
-			);
 			name = "swiftui-frontendTests";
 			packageProductDependencies = (
 			);
@@ -165,9 +150,6 @@
 			);
 			dependencies = (
 				7DE724B92CDCE47B00E45E35 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7DE724BA2CDCE47B00E45E35 /* swiftui-frontendUITests */,
 			);
 			name = "swiftui-frontendUITests";
 			packageProductDependencies = (
