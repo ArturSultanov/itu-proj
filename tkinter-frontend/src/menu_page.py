@@ -57,7 +57,7 @@ class MenuPage:
                 self.continue_btn.config(state="normal")
                 self.delete_btn = tk.Button(button_frame, text="Delete",command=self.delete_confirmation, \
                                        font=("Press Start 2P", 14), bg="red", fg="white", bd=0)
-                self.delete_btn.grid(row=1, column=0, padx=(420,0), pady=(0,10))
+                self.delete_btn.grid(row=1, column=0, padx=(460,0), pady=(0,10))
             if response.status_code == 404:
                 self.continue_btn.config(state="disabled")
         except requests.RequestException as e:
