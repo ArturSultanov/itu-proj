@@ -6,18 +6,17 @@
 //
 
 import SwiftUI
-import Combine
 
+
+/// Manager to show error notification
 @Observable class BannerManager {
     var bannerMessage: String? = nil
     
     /// Displays an error message in the banner and automatically dismisses it after a delay.
     func showError(message: String) {
         bannerMessage = message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             self.bannerMessage = nil
         }
     }
 }
-
-

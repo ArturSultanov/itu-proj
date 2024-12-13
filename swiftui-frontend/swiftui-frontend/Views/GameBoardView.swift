@@ -9,27 +9,27 @@ import SwiftUI
 
 // MARK: - GameBoardView
 struct GameBoardView: View {
-    @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data.
-    @Environment(NetworkManager.self) var networkManager
-    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
-    @Environment(\.dismiss) var dismiss // For navigation actions if needed
+    @Environment(PlayerDataManager.self) var playerDataManager  // Shared player data manager
+    @Environment(NetworkManager.self) var networkManager        // Network action manager
+    @Environment(BannerManager.self) var bannerManager          // Error banner manager
+    @Environment(\.colorScheme) var colorScheme                 // Current system theme (light/dark mode)
 
-    @State private var gems: [Gem] = [] // Array of gems displayed on the board.
-    @State private var swapInProgress = false // Prevent multiple swaps at once.
-    @State private var showPauseMenu = false // Controls pause menu display
-    @State private var isLoading = false // Loading state for shuffle or other actions
-    @State private var errorMessage: String?
-    @State private var isSettingsActive = false 
+    @State private var gems: [Gem] = []                         // Array of gems displayed on the board
+    @State private var swapInProgress = false                   // Prevent multiple swaps at once.
+    @State private var showPauseMenu = false                    // Controls pause menu display
+    @State private var isLoading = false                        // State for loading animation while fetching data
+    @State private var isSettingsActive = false                 // State to open Settings View
+    @State private var isShowQuitConfirmation = false           // State to open Quit Game dialog
 
-    private let gemSize: CGFloat = 50 // Size of each gem.
-    private let gridSpacing: CGFloat = 2 // Spacing between gems.
+    private let gemSize: CGFloat = 50                           // Size of each gem.
+    private let gridSpacing: CGFloat = 2                        // Spacing between gems.
 
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
                 Spacer()
 
-                // Player metrics
+                // MARK: - Player metrics
                 if let player = playerDataManager.playerData, let lastGame = player.lastGame {
                     HStack {
                         Text("Current Score: \(lastGame.currentScore)")
@@ -47,81 +47,69 @@ struct GameBoardView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Top Buttons: Shuffle & Pause
+                // MARK: - top buttons: Shuffle and Pause
                 HStack {
-                    Button("Shuffle") {
-                        Task {
-                            await shuffleBoard()
-                        }
-                    }
-                    .buttonStyle(MainMenuButtonStyle()) // or custom color if needed
+                    Button("Shuffle") {Task {await shuffleBoard()}}
+                    .buttonStyle(MainMenuButtonStyle())
 
-                    Button("Pause") {
-                        showPauseMenu = true
-                    }
+                    Button("Pause") {showPauseMenu = true}
                     .buttonStyle(MainMenuButtonStyle())
                 }
                 .padding(.horizontal, 20)
 
-                // Game board
+                // MARK: - Game board with gems
                 GeometryReader { geometry in
                     ZStack {
+                        // Display gems on the board
                         ForEach(gems) { gem in
                             GemView(
                                 gem: gem,
-                                iconType: IconType.getGemIcon(for: gem.type),
+                                iconType: IconType.getGemIcon(for: gem.type),   // Set the icon for gem
                                 swapAction: { direction in handleSwapAction(gem: gem, direction: direction) },
                                 clickAction: { gem in handleClickAction(gem: gem) }
                             )
                             .frame(width: gemSize, height: gemSize)
-                            .position(position(for: gem, in: geometry.size))
-                            .animation(.easeInOut, value: gems)
+                            .position(position(for: gem, in: geometry.size))    // Calculate gem position
+                            .animation(.easeInOut, value: gems)                 // Animate board changes
                         }
                     }
                     .onAppear {
-                        initializeGems()
+                        initializeGems() // Initialize the board with gems
                     }
                 }
                 .padding(.bottom, 20)
             }
             .padding([.leading, .trailing], 20)
-
-            if isLoading {
-                Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
-                ProgressView("Loading…")
-                    .padding(40)
-                    .background(Color.white)
-                    .cornerRadius(10)
-            }
+            if isLoading {ProgressView("Loading…")} // Show loading indicator
         }
         .navigationTitle("Game Board")
-        .alert("Error", isPresented: Binding<Bool>(
-            get: { errorMessage != nil },
-            set: { _ in errorMessage = nil }
-        )) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage ?? "")
-        }
         .navigationDestination(isPresented: $isSettingsActive) {
-            SettingsView() // Navigate to SettingsView
+            SettingsView() // Navigate to Settings View
         }
         .confirmationDialog("Pause Menu", isPresented: $showPauseMenu) {
-            Button("Resume", role: .cancel) {
-                
-            }
+            Button("Resume", role: .cancel) {} // Close the dialog
             Button("Settings") {
                 isSettingsActive = true
             }
             Button("Quit Game", role: .destructive) {
-                Task {
-                    await quitGame()
-                }
+                isShowQuitConfirmation = true
             }
         } message: {
-            Text("Game is paused. What do you want to do?")
+            Text("Game is paused.") // Display a message in the pause dialog
         }
+        .alert("Quit Game?", isPresented: $isShowQuitConfirmation) {
+            VStack {
+                Button("Yes") {
+                    Task {
+                        await quitGame() // Quit the game if the user confirms
+                    }
+                }
+                Button("No", role: .cancel) {}
+            }
+        } message: {
+            Text("Are you sure you want to quit the game?")
+        }
+        
     }
 
     // MARK: - Network Actions
@@ -132,7 +120,7 @@ struct GameBoardView: View {
         do {
             let newBoardStatus = try await networkManager.shuffleBoard()
             await MainActor.run {
-                // Update player's lastGame boardStatus
+                // Update player lastGame boardStatus
                 if let player = playerDataManager.playerData, let lastGame = player.lastGame {
                     lastGame.boardStatus = newBoardStatus
                     player.lastGame = lastGame
@@ -144,29 +132,21 @@ struct GameBoardView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run {
-                errorMessage = "Failed to shuffle board: \(error.localizedDescription)"
-                isLoading = false
-            }
+            isLoading = false
+            bannerManager.showError(message: "Failed to shuffle board: \(error.localizedDescription)")
         }
     }
-
-    /// Quits the game by calling network quit request and then dismissing.
+    
+    // MARK: - Quit game
+    /// Terminates the application
     private func quitGame() async {
-        do {
-            try await networkManager.quitGame()
-            await MainActor.run {
-                // Dismiss current view and possibly go to login or main menu
-                dismiss()
-            }
-        } catch {
-            await MainActor.run {
-                errorMessage = "Failed to quit game: \(error.localizedDescription)"
-            }
+        await MainActor.run {
+            NSApplication.shared.terminate(nil)
         }
     }
 
     // MARK: - Positioning
+    /// Calculates the position of a gem based on its row and column
     private func position(for gem: Gem, in size: CGSize) -> CGPoint {
         guard let rows = playerDataManager.playerData?.lastGame?.boardStatus.count,
               let cols = playerDataManager.playerData?.lastGame?.boardStatus.first?.count else {
@@ -186,6 +166,7 @@ struct GameBoardView: View {
     }
 
     // MARK: - Initialization & Updates
+    /// Initializes the gems on the board based on the current board status
     private func initializeGems() {
         guard let boardStatus = playerDataManager.playerData?.lastGame?.boardStatus else { return }
 
@@ -200,6 +181,7 @@ struct GameBoardView: View {
     }
 
     // MARK: - Actions
+    /// Handles swapping a gem with its adjacent gem in the specified direction
     private func handleSwapAction(gem: Gem, direction: Direction) {
         guard !swapInProgress,
               let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
@@ -218,23 +200,25 @@ struct GameBoardView: View {
             } catch let NetworkError.invalidResponse(statusCode) {
                 handleSwapFailure(gem, targetGem, statusCode: statusCode)
             } catch {
-                print("Swap failed: \(error)")
+                bannerManager.showError(message: "Swap failed: \(error)")
                 swapInProgress = false
             }
         }
     }
-
+    
+    /// Reverts the gem positions if the server reports a failed swap
     private func handleSwapFailure(_ gem: Gem, _ targetGem: Gem, statusCode: Int) {
         if statusCode == 406 {
             withAnimation(.easeInOut) {
                 swapPositions(gem, targetGem)
             }
         } else {
-            print("Swap failed with status code: \(statusCode)")
+            bannerManager.showError(message: "Swap failed with status code: \(statusCode)")
         }
         swapInProgress = false
     }
 
+    /// Swaps the positions of two gems in the array
     private func swapPositions(_ gem1: Gem, _ gem2: Gem) {
         let tempX = gem1.x
         let tempY = gem1.y
@@ -244,6 +228,7 @@ struct GameBoardView: View {
         gem2.y = tempY
     }
 
+    /// Finds the adjacent gem in the specified direction
     private func getAdjacentGem(for gem: Gem, in direction: Direction) -> Gem? {
         let x = gem.x
         let y = gem.y
@@ -260,6 +245,7 @@ struct GameBoardView: View {
         }
     }
 
+    /// Handles the click action for a gem, particularly for hearts
     private func handleClickAction(gem: Gem) {
         let iconType = IconType.getGemIcon(for: gem.type)
         guard iconType == .heart else { return }

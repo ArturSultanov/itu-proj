@@ -7,33 +7,30 @@
 
 import SwiftUI
 
-struct MainMenuView: View {
-    @Environment(PlayerDataManager.self) var playerDataManager
-    @Environment(NetworkManager.self) var networkManager
-    @Environment(BannerManager.self) var bannerManager
-    @Environment(\.colorScheme) var colorScheme
 
+// MARK: - Main menu view
+struct MainMenuView: View {
+    @Environment(PlayerDataManager.self) var playerDataManager  // Shared player data manager
+    @Environment(NetworkManager.self) var networkManager        // Network action manager
+    @Environment(BannerManager.self) var bannerManager          // Error banner manager
+    @Environment(\.colorScheme) var colorScheme                 // Current system theme (light/dark mode)
+
+    // States to track which view should be opened
     @State private var isNewGameActive: Bool = false
     @State private var isContinueGameActive: Bool = false
     @State private var isContunueGameActive: Bool = false
     @State private var isSettingsActive: Bool = false
     @State private var isLeaderboardActive: Bool = false
+    // States to track which dialog should be opened
     @State private var isShowQuitConfirmation = false
-    @State private var isShowErrorAlert = false
     @State private var isShowDeleteGameConfirmation = false
-    @State private var isDisableContinue = true
-    @State private var errorMessage: String?
 
     var body: some View {
         ZStack {
             VStack {
-                // Extracted player info section into a computed property for clarity.
                 playerInfoView
-
-                // Extracted buttons into another computed property.
                 menuButtonsView
             }
-            .padding([.leading, .trailing, .bottom], 20)
         }
         .navigationTitle("Main Menu")
         .navigationDestination(isPresented: $isNewGameActive) {
@@ -54,11 +51,9 @@ struct MainMenuView: View {
         .deleteGameAlert(isPresented: $isShowDeleteGameConfirmation) {
             Task { await deleteLastGame() }
         }
-        .errorAlert(errorMessage: $errorMessage, isShowErrorAlert: $isShowErrorAlert)
     }
     
-    // MARK: - Computed Views
-
+    // MARK: - Welcome banner and user info
     private var playerInfoView: some View {
         // Safely unwrap playerData
         let login = playerDataManager.playerData?.login ?? "Unknown"
@@ -84,6 +79,7 @@ struct MainMenuView: View {
         .padding(.horizontal, 20)
     }
 
+    // MARK: - Buttons of the main menu
     private var menuButtonsView: some View {
         VStack {
             Button("New Game") {
@@ -134,14 +130,13 @@ struct MainMenuView: View {
         }
     }
 
-    // MARK: - Actions
-
+    // MARK: - networkManage functions
     private func newGame() async {
         do {
             try await networkManager.newGame(playerDataManager: playerDataManager)
             isNewGameActive = true
         } catch {
-            showError("Failed to start new game: \(error)")
+            bannerManager.showError(message: "Failed to start new game: \(error)")
         }
     }
     
@@ -150,7 +145,7 @@ struct MainMenuView: View {
             try await networkManager.continue_game(playerDataManager: playerDataManager)
             isContinueGameActive = true
         } catch {
-            showError("Failed to continue game: \(error)")
+            bannerManager.showError(message: "Failed to continue game: \(error)")
         }
     }
     
@@ -161,7 +156,7 @@ struct MainMenuView: View {
                 NSApplication.shared.terminate(nil)
             }
         } catch {
-            showError("Failed to quit game: \(error.localizedDescription)")
+            bannerManager.showError(message: "Failed to quit game: \(error.localizedDescription)")
         }
     }
     
@@ -169,17 +164,12 @@ struct MainMenuView: View {
         do {
             try await networkManager.deleteGame(playerDataManager: playerDataManager)
         } catch {
-            showError("Failed to delete last game: \(error.localizedDescription)")
+            bannerManager.showError(message: "Failed to delete last game: \(error.localizedDescription)")
         }
-    }
-
-    private func showError(_ message: String) {
-        errorMessage = message
-        isShowErrorAlert = true
     }
 }
 
-// MARK: - View Modifiers for Alerts
+// MARK: - View for alerts
 
 private extension View {
     func quitGameAlert(isPresented: Binding<Bool>, quitAction: @escaping () -> Void) -> some View {

@@ -7,27 +7,28 @@
 
 import SwiftUI
 
+// MARK: - Settings view
 struct SettingsView: View {
-    @Environment(PlayerDataManager.self) var playerDataManager
-    @Environment(PaletteManager.self) var paletteManager
-    @Environment(NetworkManager.self) var networkManager
-//    @Environment(BannerManager.self) var bannerManager
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(PlayerDataManager.self) var playerDataManager  // Shared player data manager
+    @Environment(NetworkManager.self) var networkManager        // Network action manager
+    @Environment(BannerManager.self) var bannerManager          // Error banner manager
+    @Environment(PaletteManager.self) var paletteManager        // Color palette manager
+    @Environment(\.colorScheme) var colorScheme                 // Current system theme (light/dark mode)
+    
+    @State private var showChangeLoginSheet = false             // State to show the change login for current user dialog
+    @State private var newLogin: String = ""                    // String to keep a new login
 
-    @State private var showChangeLoginSheet = false
-    @State private var newLogin: String = ""
-    @State private var showSwitchUserConfirmation = false
-    @State private var navigateToLogin = false
-    @State private var showDifficultyOptions = false
-    @State private var currentDifficulty: Int = 1
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    @State private var showSwitchUserConfirmation = false       // State to show the switch user dialog
+    @State private var navigateToLogin = false                  // State to navigate to to Login View
+
+    @State private var showDifficultyOptions = false            // State to open the change difficulty dialog
+    @State private var currentDifficulty: Int = 1               // State to display the current difficulty level
+    @State private var isLoading = false                        // State for loading animation while fetching data
 
     var body: some View {
         ZStack {
             mainContent
         }
-        .applyErrorAlert(errorMessage: $errorMessage)
         .applyChangeLoginSheet(
             isPresented: $showChangeLoginSheet,
             newLogin: $newLogin,
@@ -52,15 +53,10 @@ struct SettingsView: View {
     }
 
     // Extracted main content into a computed property to reduce complexity.
-    private var mainContent: some View {
+    var mainContent: some View {
         VStack {
             if isLoading {
-                Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
                 ProgressView("Loading…")
-                    .padding(40)
-                    .background(Color.white)
-                    .cornerRadius(10)
             } else {
                 topInfoView
                 switchColorPaletteButton
@@ -69,18 +65,14 @@ struct SettingsView: View {
                 switchUserButton
             }
         }
-        .padding([.leading, .trailing, .bottom], 20)
     }
 
-    // Extracted the top info HStack
-    private var topInfoView: some View {
-        // Precompute the background color
+    var topInfoView: some View {
         let backgroundColor = (colorScheme == .dark)
             ? Color.gray.opacity(0.3)
             : Color.gray.opacity(0.2)
 
-        // Safely unwrap login
-        let currentLogin = playerDataManager.playerData?.login ?? "Unknown"
+        let currentLogin = playerDataManager.playerData!.login
 
         return HStack {
             Text("Current Difficulty: \(difficultyDescription(for: currentDifficulty))")
@@ -98,7 +90,7 @@ struct SettingsView: View {
         .padding(.horizontal, 20)
     }
     
-    private var switchColorPaletteButton: some View {
+    var switchColorPaletteButton: some View {
         Button("Switch Color Palette") {
             paletteManager.currentStyle = (paletteManager.currentStyle == .tritanopia) ? .normal : .tritanopia
         }
@@ -107,7 +99,7 @@ struct SettingsView: View {
         }))
     }
 
-    private var changeLoginButton: some View {
+    var changeLoginButton: some View {
         Button("Change Login") {
             newLogin = playerDataManager.playerData?.login ?? ""
             showChangeLoginSheet = true
@@ -115,14 +107,14 @@ struct SettingsView: View {
         .buttonStyle(MainMenuButtonStyle())
     }
 
-    private var changeDifficultyButton: some View {
+    var changeDifficultyButton: some View {
         Button("Change Difficulty") {
             showDifficultyOptions = true
         }
         .buttonStyle(MainMenuButtonStyle())
     }
     
-    private var switchUserButton: some View {
+    var switchUserButton: some View {
         Button("Switch User") {
             showSwitchUserConfirmation = true
         }
@@ -133,7 +125,7 @@ struct SettingsView: View {
     
     // MARK: - Helper Functions
 
-    private func loadCurrentDifficulty() async {
+    func loadCurrentDifficulty() async {
         isLoading = true
         do {
             let difficulty = try await networkManager.getDifficulty()
@@ -142,14 +134,12 @@ struct SettingsView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run {
-                errorMessage = "Failed to load current difficulty: \(error.localizedDescription)"
-                isLoading = false
-            }
+            bannerManager.showError(message: "Failed to load current difficulty: \(error.localizedDescription)")
+            isLoading = false
         }
     }
 
-    private func changeLogin() async {
+    func changeLogin() async {
         isLoading = true
         do {
             try await networkManager.updateLogin(newLogin: newLogin, playerDataManager: playerDataManager)
@@ -157,25 +147,23 @@ struct SettingsView: View {
             showChangeLoginSheet = false
         } catch {
             isLoading = false
-//            errorMessage = "Failed to change login: \(error.localizedDescription)"
-//            bannerManager.showBanner(message: "Failed to change login: \(error.localizedDescription)")
-
+            bannerManager.showError(message: "Failed to change login: \(error.localizedDescription)")
         }
     }
 
-    private func changeDifficulty(to difficulty: Int) async {
+    func changeDifficulty(to difficulty: Int) async {
         isLoading = true
         do {
             try await networkManager.setDifficulty(difficulty, playerDataManager: playerDataManager)
             currentDifficulty = difficulty
             isLoading = false
         } catch {
+            bannerManager.showError(message: "Failed to change difficulty: \(error.localizedDescription)")
             isLoading = false
-            errorMessage = "Failed to change difficulty: \(error.localizedDescription)"
         }
     }
 
-    private func difficultyDescription(for difficulty: Int) -> String {
+    func difficultyDescription(for difficulty: Int) -> String {
         switch difficulty {
         case 1: return "Easy"
         case 2: return "Normal"
@@ -187,7 +175,7 @@ struct SettingsView: View {
 
 // MARK: - View Modifiers for Alerts and Sheets
 
-private extension View {
+extension View {
     func applyErrorAlert(errorMessage: Binding<String?>) -> some View {
         self.alert("Error", isPresented: Binding<Bool>(
             get: { errorMessage.wrappedValue != nil },
@@ -198,6 +186,7 @@ private extension View {
             Text(errorMessage.wrappedValue ?? "")
         }
     }
+    
 
     func applyChangeLoginSheet(isPresented: Binding<Bool>, newLogin: Binding<String>, changeLoginAction: @escaping () async -> Void) -> some View {
         self.sheet(isPresented: isPresented) {

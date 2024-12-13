@@ -7,22 +7,19 @@
 
 import SwiftUI
 
-struct LeaderboardView: View {
-    @Environment(NetworkManager.self) var networkManager
 
-    @State private var topPlayers: [LeaderboardEntry] = [] // Holds the list of top players.
-    @State private var isLoading = true
-    @State private var errorMessage: String?
+// MARK: - Leaderboard view
+struct LeaderboardView: View {
+    @Environment(NetworkManager.self) var networkManager    // Network action manager
+    @Environment(BannerManager.self) var bannerManager      // Error banner manager
+
+    @State private var topPlayers: [LeaderboardEntry] = []  // Holds the list of top players.
+    @State private var isLoading = true                     // State for loading animation while fetching data
     
     var body: some View {
         VStack {
             if isLoading {
-                ProgressView("Loading Leaderboard…")
-            } else if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-                    .padding()
+                ProgressView("Loading…")
             } else {
                 List {
                     ForEach(Array(topPlayers.enumerated()), id: \.element.id) { index, player in
@@ -64,12 +61,8 @@ struct LeaderboardView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run {
-                errorMessage = "Failed to load leaderboard: \(error.localizedDescription)"
-                isLoading = false
-            }
+            bannerManager.showError(message: "Failed to load leaderboard: \(error.localizedDescription)")
+            isLoading = false
         }
     }
 }
-
-

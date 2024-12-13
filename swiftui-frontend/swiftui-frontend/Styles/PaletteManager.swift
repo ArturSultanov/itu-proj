@@ -8,16 +8,17 @@
 import SwiftUI
 import Observation
 
+
+// Manager to switch color palette
 @Observable class PaletteManager {
+
     enum PaletteStyle {
         case tritanopia
         case normal
     }
     
-    var currentStyle: PaletteStyle = .tritanopia // Default to tritanopia
-}
-
-extension PaletteManager {
+    var currentStyle: PaletteStyle = .tritanopia
+    
     var currentPalette: ColorPalette {
         switch currentStyle {
         case .tritanopia:

@@ -15,10 +15,11 @@ struct MainMenuButtonStyle: ButtonStyle {
     var customColorProvider: ((ColorPalette) -> Color)? = nil
     
     func makeBody(configuration: Configuration) -> some View {
-        // Use the custom color if provided, otherwise fall back to the palette.
+        // Use the custom color if provided, otherwise use the palette.
         let activeColor = customColorProvider?(paletteManager.currentPalette)
             ?? paletteManager.currentPalette.primaryButton
         
+        // Set background gray if button is disabled
         let backgroundColor = isEnabled ? activeColor : .gray
 
         return configuration.label
@@ -42,7 +43,6 @@ struct SecondaryMenuButtonStyle: ButtonStyle {
     var customColorProvider: ((ColorPalette) -> Color)? = nil
     
     func makeBody(configuration: Configuration) -> some View {
-        // Use the custom color if provided, otherwise fall back to the palette.
         let activeColor = customColorProvider?(paletteManager.currentPalette)
             ?? paletteManager.currentPalette.primaryButton
         

@@ -5,9 +5,9 @@
 //  Created by Artur Sultanov on 09.11.2024.
 //
 
-import Foundation
 import SwiftUI
 import Observation
+
 
 /// Manages the player's data and updates game sessions in response to server interactions.
 @Observable @MainActor class PlayerDataManager {

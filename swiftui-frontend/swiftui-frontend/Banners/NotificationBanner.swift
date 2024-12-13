@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+/// The notification banner structure
 struct NotificationBanner: View {
     let message: String
 
@@ -21,40 +23,15 @@ struct NotificationBanner: View {
     }
 }
 
-//struct BannerModifier: ViewModifier {
-//    @Binding var isPresented: Bool
-//    let message: String
-//
-//    func body(content: Content) -> some View {
-//        ZStack {
-//            content
-//            if isPresented {
-//                VStack {
-//                    NotificationBanner(message: message)
-//                    Spacer()
-//                }
-//                .transition(.move(edge: .top))
-//                .animation(.easeInOut, value: isPresented)
-//            }
-//        }
-//    }
-//}
-//
-//extension View {
-//    func banner(isPresented: Binding<Bool>, message: String) -> some View {
-//        self.modifier(BannerModifier(isPresented: isPresented, message: message))
-//    }
-//}
 
-
-
+/// View to inject banner into other views
 struct BannerViewModifier: ViewModifier {
     @Environment(BannerManager.self) var bannerManager
 
     func body(content: Content) -> some View {
         ZStack {
             content
-            
+            // Get the current banner message
             if let message = bannerManager.bannerMessage {
                 VStack {
                     NotificationBanner(message: message)
@@ -67,7 +44,7 @@ struct BannerViewModifier: ViewModifier {
     }
 }
 
-
+/// Function to apply modifier easily
 extension View {
     func withBanner() -> some View {
         self.modifier(BannerViewModifier())

@@ -17,10 +17,13 @@ struct GemMatchApp: App {
     var body: some Scene {
         WindowGroup {
             LoginView()
+                .padding([.leading, .trailing, .bottom], 20)
+                .withBanner()
                 .environment(playerDataManager)
                 .environment(paletteManager)
                 .environment(bannerManager)
                 .environment(networkManager)
         }
+        
     }
 }

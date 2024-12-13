@@ -7,29 +7,29 @@
 
 import SwiftUI
 
+// MARK: - Login view
 struct LoginView: View {
-    @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data manager
-    @Environment(NetworkManager.self) var networkManager
-    @Environment(BannerManager.self) var bannerManager
-    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
+    @Environment(PlayerDataManager.self) var playerDataManager  // Shared player data manager
+    @Environment(NetworkManager.self) var networkManager        // Network action manager
+    @Environment(BannerManager.self) var bannerManager          // Error banner manager
+    @Environment(\.colorScheme) var colorScheme                 // Current system theme (light/dark mode)
 
-    @State private var loginInput: String = "" // Holds the user's input for the login
-    @State private var isLoggedIn: Bool = false // Tracks whether the user has logged in
-    @State private var isShowQuitConfirmation = false // Tracks whether the quit confirmation alert is shown
-    
-    @State private var showBanner = false
-    @State private var bannerMessage = ""
+    @State private var loginInput: String = ""                  // User input for the login
+    @State private var isLoggedIn: Bool = false                 // Tracks if user is logged in
+    @State private var isShowQuitConfirmation = false           // Tracks if quit confirmation alert to show
     
     var body: some View {
         ZStack {
             VStack {
                 NavigationStack {
+                    // MARK: Welcome header
                     Text("Enter your name")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(Color.tritanopiaPrimaryButton)
                         .padding(.bottom, 20)
                     
+                    // MARK: Login text filed
                     TextField("Your login", text: $loginInput)
                         .padding()
                         .background(
@@ -39,6 +39,7 @@ struct LoginView: View {
                         .shadow(radius: 5, x: 0, y: 3)
                         .padding(.horizontal, 20)
                     
+                    // MARK: Confirm button
                     Button("Confirm") {
                         Task {
                             await login() // Trigger the login asynchronously
@@ -49,10 +50,7 @@ struct LoginView: View {
                     }))
                     .disabled(loginInput.isEmpty)
                     
-                    .navigationTitle("Welcome")
-                    .navigationDestination(isPresented: $isLoggedIn) {
-                        MainMenuView()}
-                    
+                    // MARK: Quit Game button
                     Button("Quit Game") {
                         isShowQuitConfirmation = true
                     }
@@ -60,22 +58,15 @@ struct LoginView: View {
                         palette.red
                     }))
                     
-                    // Your main content here
-                    Button("Trigger Error") {
-                        bannerManager.showError(message: "An error occurred.")
-                    }
+                    .navigationTitle("Welcome")
+                    .navigationDestination(isPresented: $isLoggedIn) {
+                        MainMenuView()}
                 }
             }
-            .padding([.leading, .trailing, .bottom], 20)
         }
-        .withBanner()
         .alert("Quit Game?", isPresented: $isShowQuitConfirmation) {
             VStack {
-                Button("Yes") {
-                    Task {
-                        await quitGame() // Quit the game if the user confirms
-                    }
-                }
+                Button("Yes") {Task {await quitGame()}}
                 Button("No", role: .cancel) {}
             }
         } message: {
@@ -83,29 +74,20 @@ struct LoginView: View {
         }
     }
     
-    func login() async {
+    // MARK: - Helper functions
+    private func login() async {
         do {
             try await networkManager.login(with: loginInput, playerDataManager: playerDataManager)
             isLoggedIn = true
         } catch {
             bannerManager.showError(message: "Login failed: \(error)")
-
-            print("Login failed: \(error)")
         }
     }
     
-    func quitGame() async {
+    private func quitGame() async {
         await MainActor.run {
             NSApplication.shared.terminate(nil)
         }
     }
-    
-    func showError(message: String) {
-            bannerMessage = message
-            showBanner = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                showBanner = false
-            }
-        }
     
 }

@@ -19,9 +19,6 @@ enum NetworkError: Error {
 
 /// Handles all network interactions for the app
 @MainActor @Observable class NetworkManager {
-//    static let shared = NetworkManager() // Singleton instance.
-//    private init() {}
-
     private let baseURL = "http://127.0.0.1:8000" // Base URL for API requests.
 }
 
@@ -31,7 +28,6 @@ extension NetworkManager {
     /// - Parameters:
     ///   - loginID: The login identifier for the user.
     ///   - playerDataManager: The shared player data manager to update upon successful login.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func login(with loginID: String, playerDataManager: PlayerDataManager) async throws {
         // Construct the URL with query parameters
         var urlComponents = URLComponents(string: "\(baseURL)/login")
@@ -70,7 +66,6 @@ extension NetworkManager {
 extension NetworkManager {
     /// Starts a new game and updates the player's data.
     /// - Parameter playerDataManager: The shared player data manager to update upon successful game initialization.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func newGame(playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/menu/new_game") else {
             throw NetworkError.invalidURL
@@ -107,7 +102,6 @@ extension NetworkManager {
     ///   - gem1: The first gem to swap.
     ///   - gem2: The second gem to swap.
     ///   - playerDataManager: The shared player data manager to update upon successful response.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding is unsuccessful.
     func swapGems(gem1: Gem, gem2: Gem, playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/board/swap_gems") else {
             throw NetworkError.invalidURL
@@ -154,7 +148,6 @@ extension NetworkManager {
     /// - Parameters:
     ///   - gem: The gem that was clicked.
     ///   - playerDataManager: The shared player data manager.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func clickGem(gem: Gem, playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/board/click_gem") else {
             throw NetworkError.invalidURL
@@ -189,6 +182,9 @@ extension NetworkManager {
 
 /// Leaderboard request
 extension NetworkManager {
+    /// Fetches the top leaderboard entries from the server.
+    /// - Parameter limit: The maximum number of leaderboard entries to retrieve.
+    /// - Returns: An array of `LeaderboardEntry` objects containing player login and highest scores.
     func fetchLeaderboard(with limit: Int) async throws -> [LeaderboardEntry] {
         // Construct the URL with query parameters
         var urlComponents = URLComponents(string: "\(baseURL)/menu/leaderboard")
@@ -221,7 +217,6 @@ extension NetworkManager {
     /// - Parameters:
     ///   - newLogin: The new login name to be updated.
     ///   - playerDataManager: The shared player data manager.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func updateLogin(newLogin: String, playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/update_login")
         
@@ -259,7 +254,6 @@ extension NetworkManager {
     /// - Parameters:
     ///   - difficulty: The new difficulty level to be set.
     ///   - playerDataManager: The shared player data manager.
-    /// - Throws: Throws a `NetworkError` if the request fails.
     func setDifficulty(_ difficulty: Int, playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/set_difficulty")
         
@@ -295,7 +289,6 @@ extension NetworkManager {
 extension NetworkManager {
     /// Fetches the current difficulty level from the backend.
     /// - Returns: The current difficulty level.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func getDifficulty() async throws -> Int {
         let urlComponents = URLComponents(string: "\(baseURL)/settings/get_difficulty")
         
@@ -328,7 +321,6 @@ extension NetworkManager {
 extension NetworkManager {
     /// Continues the last game session and updates the local player data.
     /// - Parameter playerDataManager: The shared player data manager.
-    /// - Throws: Throws a `NetworkError` if the request fails or decoding fails.
     func continue_game(playerDataManager: PlayerDataManager) async throws {
         guard let url = URL(string: "\(baseURL)/menu/continue") else {
             throw NetworkError.invalidURL
@@ -357,7 +349,6 @@ extension NetworkManager {
 /// Quit game handling (syncronization)
 extension NetworkManager {
     /// Sends a quit request to the backend.
-    /// - Throws: Throws a `NetworkError` if the request fails.
     func quitGame() async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/utils/exit")
         
@@ -383,7 +374,6 @@ extension NetworkManager {
 extension NetworkManager {
     /// Deletes the last game session and updates the local player data.
     /// - Parameter playerDataManager: The shared player data manager.
-    /// - Throws: Throws a `NetworkError` if the request fails.
     func deleteGame(playerDataManager: PlayerDataManager) async throws {
         let urlComponents = URLComponents(string: "\(baseURL)/menu/delete_game")
         
@@ -410,8 +400,10 @@ extension NetworkManager {
     }
 }
 
-
+/// Shuffle board request
 extension NetworkManager {
+    /// Requests the server to shuffle the game board and returns the updated board status.
+    /// - Returns: A two-dimensional array representing the shuffled board, where each integer corresponds to a gem type.
     func shuffleBoard() async throws -> [[Int]] {
         guard let url = URL(string: "\(baseURL)/board/shuffle") else {
             throw NetworkError.invalidURL
