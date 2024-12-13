@@ -55,9 +55,9 @@ class MenuPage:
             response = requests.get(f"{self.api_url}/menu/continue")
             if response.status_code == 200:
                 self.continue_btn.config(state="normal")
-                self.delete_btn = tk.Button(button_frame, text="x",command=self.delete_current_game, \
+                self.delete_btn = tk.Button(button_frame, text="Delete",command=self.delete_confirmation, \
                                        font=("Press Start 2P", 14), bg="red", fg="white", bd=0)
-                self.delete_btn.grid(row=1, column=0, padx=(360,0), pady=(0,10))
+                self.delete_btn.grid(row=1, column=0, padx=(420,0), pady=(0,10))
             if response.status_code == 404:
                 self.continue_btn.config(state="disabled")
         except requests.RequestException as e:
@@ -138,7 +138,8 @@ class MenuPage:
         leader_page.run()
 
     # Deletes an existing game on the backend and configures the buttons.
-    def delete_current_game(self):
+    def delete_current_game(self, overlay):
+        overlay.destroy()
         try:
             response = requests.delete(f"{self.api_url}/menu/delete_game")
             response.raise_for_status()
@@ -178,6 +179,29 @@ player?""", **self.button_label_options)
         no_button = tk.Button(button_frame, text="No", command=overlay.destroy, **self.second_button_label_options)
         no_button.grid(row=0, column=1, padx=260)
     
+    def delete_confirmation(self):
+        rect_width = 700
+        rect_height = 400
+        rect_x0 = (self.master.winfo_width() - rect_width) // 2
+        rect_y0 = (self.master.winfo_height() - rect_height) // 2
+
+        overlay = tk.Frame(self.master, bg=self.background_color, relief="solid", bd=6)
+        overlay.place(x=rect_x0, y=rect_y0, width=rect_width, height=rect_height)
+
+        text_label = tk.Label(overlay,text="""Are you sure you
+want to delete 
+current game?""", **self.button_label_options)
+        text_label.pack(pady=60)
+
+        button_frame = tk.Frame(overlay, bg=self.background_color)
+        button_frame.pack(pady=10)
+
+        yes_button = tk.Button(button_frame, text="Yes", command=lambda: self.delete_current_game(overlay), **self.second_button_label_options)
+        yes_button.grid(row=0, column=0, padx=60)
+
+        no_button = tk.Button(button_frame, text="No", command=overlay.destroy, **self.second_button_label_options)
+        no_button.grid(row=0, column=1, padx=260)
+
     # Creates the login page in case of the user switch.
     def open_login(self):
         for widget in self.master.winfo_children():
