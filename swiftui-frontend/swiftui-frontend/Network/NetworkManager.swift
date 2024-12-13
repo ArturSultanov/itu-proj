@@ -17,11 +17,10 @@ enum NetworkError: Error {
     case noData
 }
 
-/// Handles all network interactions for the app.
-@MainActor
-class NetworkManager: ObservableObject {
-    static let shared = NetworkManager() // Singleton instance.
-    private init() {}
+/// Handles all network interactions for the app
+@MainActor @Observable class NetworkManager {
+//    static let shared = NetworkManager() // Singleton instance.
+//    private init() {}
 
     private let baseURL = "http://127.0.0.1:8000" // Base URL for API requests.
 }
@@ -247,7 +246,7 @@ extension NetworkManager {
         }
         
         // Update local player data
-        if var player = playerDataManager.playerData {
+        if let player = playerDataManager.playerData {
             player.login = newLogin
             playerDataManager.playerData = player
         }
@@ -285,7 +284,7 @@ extension NetworkManager {
         }
 
         // Update local player data
-        if var player = playerDataManager.playerData {
+        if let player = playerDataManager.playerData {
             player.difficulty = difficulty
             playerDataManager.playerData = player
         }
@@ -404,7 +403,7 @@ extension NetworkManager {
         }
         
         // Update local player data
-        if var player = playerDataManager.playerData {
+        if let player = playerDataManager.playerData {
             player.lastGame = nil
             playerDataManager.playerData = player
         }

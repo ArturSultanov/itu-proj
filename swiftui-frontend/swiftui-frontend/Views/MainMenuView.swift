@@ -9,9 +9,10 @@ import SwiftUI
 
 struct MainMenuView: View {
     @Environment(PlayerDataManager.self) var playerDataManager
-    @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
+    @Environment(NetworkManager.self) var networkManager
+//    @Environment(BannerManager.self) var bannerManager
+    @Environment(\.colorScheme) var colorScheme
 
-    // State variables to track view navigation and alerts.
     @State private var isNewGameActive: Bool = false
     @State private var isContinueGameActive: Bool = false
     @State private var isContunueGameActive: Bool = false
@@ -23,77 +24,14 @@ struct MainMenuView: View {
     @State private var isDisableContinue = true
     @State private var errorMessage: String?
 
-    
     var body: some View {
-        ZStack{
-            VStack{
-                if let player = playerDataManager.playerData {
-                    VStack {
-                        Text("Hi, \(player.login)!")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.bottom, 20)
-                        
-                        Text("Your highest score: \(playerDataManager.playerData!.highestScore)")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
-                    .background(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2))
-                    .cornerRadius(10)
-                    .padding(.horizontal, 20)
-                    
-                }
-                VStack(){
-                    Button("New Game") {
-                        Task {
-                            await newGame()
-                        }
-                    }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaBlue))
-                    
-                    HStack {
-                        Button("Continue") {
-                            Task {
-                                await continueGame()
-                            }
-                        }
-                        .buttonStyle(MainMenuButtonStyle(mainColor: playerDataManager.playerData?.lastGame == nil ? .gray : Color.tritanopiaBlue))
-                        .disabled(playerDataManager.playerData?.lastGame == nil)
+        ZStack {
+            VStack {
+                // Extracted player info section into a computed property for clarity.
+                playerInfoView
 
-                        // Trash Icon
-                        Button(action: {
-                            isShowDeleteGameConfirmation = true
-                        }) {
-                            Image(systemName: "trash")
-                        }
-                        .buttonStyle(SecondaryMenuButtonStyle(mainColor: playerDataManager.playerData?.lastGame == nil ? .gray : Color.tritanopiaRed))
-                        .disabled(playerDataManager.playerData?.lastGame == nil)
-
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 1)
-
-                    Button(action: {
-                        isSettingsActive = true
-                    }) {
-                        Text("Settings")
-                    }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
-                    
-                    Button(action: {
-                        isLeaderboardActive = true
-                    }) {
-                        Text("Leader board")
-                    }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaPrimaryButton))
-                    
-                    Button("Quit Game") {
-                        isShowQuitConfirmation = true
-                    }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaRed))
-                }
+                // Extracted buttons into another computed property.
+                menuButtonsView
             }
             .padding([.leading, .trailing, .bottom], 20)
         }
@@ -110,74 +48,167 @@ struct MainMenuView: View {
         .navigationDestination(isPresented: $isSettingsActive) {
             SettingsView()
         }
-        .alert("Quit Game?", isPresented: $isShowQuitConfirmation) {
-            VStack {
-                Button("Yes") {
-                    Task {
-                        await quitGame()
-                    }
+        .quitGameAlert(isPresented: $isShowQuitConfirmation) {
+            Task { await quitGame() }
+        }
+        .deleteGameAlert(isPresented: $isShowDeleteGameConfirmation) {
+            Task { await deleteLastGame() }
+        }
+        .errorAlert(errorMessage: $errorMessage, isShowErrorAlert: $isShowErrorAlert)
+    }
+    
+    // MARK: - Computed Views
+
+    private var playerInfoView: some View {
+        // Safely unwrap playerData
+        let login = playerDataManager.playerData?.login ?? "Unknown"
+        let highestScore = playerDataManager.playerData?.highestScore ?? 0
+        
+        let backgroundColor = (colorScheme == .dark)
+            ? Color.gray.opacity(0.3)
+            : Color.gray.opacity(0.2)
+        
+        return VStack {
+            Text("Hi, \(login)!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding(.bottom, 20)
+            
+            Text("Your highest score: \(highestScore)")
+                .font(.title2)
+                .fontWeight(.semibold)
+        }
+        .frame(maxWidth: .infinity, minHeight: 100, idealHeight: 200)
+        .background(backgroundColor)
+        .cornerRadius(10)
+        .padding(.horizontal, 20)
+    }
+
+    private var menuButtonsView: some View {
+        VStack {
+            Button("New Game") {
+                Task { await newGame() }
+            }
+            .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
+                palette.teal
+            }))
+            
+            HStack {
+                Button("Continue") {
+                    Task { await continueGame() }
                 }
+                .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
+                    palette.teal
+                }))
+                .disabled(playerDataManager.playerData?.lastGame == nil)
+                
+                Button(action: {
+                    isShowDeleteGameConfirmation = true
+                }) {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(SecondaryMenuButtonStyle(customColorProvider: { palette in
+                    palette.red
+                }))
+                .disabled(playerDataManager.playerData?.lastGame == nil)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 1)
+            
+            Button("Settings") {
+                isSettingsActive = true
+            }
+            .buttonStyle(MainMenuButtonStyle())
+            
+            Button("Leader board") {
+                isLeaderboardActive = true
+            }
+            .buttonStyle(MainMenuButtonStyle())
+            
+            Button("Quit Game") {
+                isShowQuitConfirmation = true
+            }
+            .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
+                palette.red
+            }))
+        }
+    }
+
+    // MARK: - Actions
+
+    private func newGame() async {
+        do {
+            try await networkManager.newGame(playerDataManager: playerDataManager)
+            isNewGameActive = true
+        } catch {
+            showError("Failed to start new game: \(error)")
+        }
+    }
+    
+    private func continueGame() async {
+        do {
+            try await networkManager.continue_game(playerDataManager: playerDataManager)
+            isContinueGameActive = true
+        } catch {
+            showError("Failed to continue game: \(error)")
+        }
+    }
+    
+    private func quitGame() async {
+        do {
+            try await networkManager.quitGame()
+            await MainActor.run {
+                NSApplication.shared.terminate(nil)
+            }
+        } catch {
+            showError("Failed to quit game: \(error.localizedDescription)")
+        }
+    }
+    
+    private func deleteLastGame() async {
+        do {
+            try await networkManager.deleteGame(playerDataManager: playerDataManager)
+        } catch {
+            showError("Failed to delete last game: \(error.localizedDescription)")
+        }
+    }
+
+    private func showError(_ message: String) {
+        errorMessage = message
+        isShowErrorAlert = true
+    }
+}
+
+// MARK: - View Modifiers for Alerts
+
+private extension View {
+    func quitGameAlert(isPresented: Binding<Bool>, quitAction: @escaping () -> Void) -> some View {
+        self.alert("Quit Game?", isPresented: isPresented) {
+            VStack {
+                Button("Yes", action: quitAction)
                 Button("No", role: .cancel) {}
             }
         } message: {
             Text("Are you sure you want to quit the game?")
         }
-        .alert("Delete Last Game?", isPresented: $isShowDeleteGameConfirmation) {
+    }
+
+    func deleteGameAlert(isPresented: Binding<Bool>, deleteAction: @escaping () -> Void) -> some View {
+        self.alert("Delete Last Game?", isPresented: isPresented) {
             VStack {
-                Button("Yes") {
-                    Task {
-                        await deleteLastGame()
-                    }
-                }
+                Button("Yes", action: deleteAction)
                 Button("No", role: .cancel) {}
             }
         } message: {
             Text("Are you sure you want to delete the last game?")
         }
     }
-    
-    // MARK: - Actions
 
-    /// Starts a new game and navigates to the game board
-    func newGame() async {
-        do {
-            try await NetworkManager.shared.newGame(playerDataManager: playerDataManager)
-            isNewGameActive = true
-        } catch {
-            print("Failed to start new game: \(error)")
-        }
-    }
-    
-    /// Continues the last game and navigates to the game board
-    func continueGame() async {
-        do {
-            try await NetworkManager.shared.continue_game(playerDataManager: playerDataManager)
-            isContinueGameActive = true
-        } catch {
-            print("Failed to start new game: \(error)")
-        }
-    }
-    
-    /// Quits the game by sending a request to the backend and terminating the app
-    func quitGame() async {
-        do {
-            try await NetworkManager.shared.quitGame()
-            await MainActor.run {
-                NSApplication.shared.terminate(nil)
-            }
-        } catch {
-            errorMessage = "Failed to quit game: \(error.localizedDescription)"
-            isShowErrorAlert = true
-        }
-    }
-    
-    /// Deletes the last game session
-    func deleteLastGame() async {
-        do {
-            try await NetworkManager.shared.deleteGame(playerDataManager: playerDataManager)
-        } catch {
-            errorMessage = "Failed to delete last game: \(error.localizedDescription)"
-            isShowErrorAlert = true
+    func errorAlert(errorMessage: Binding<String?>, isShowErrorAlert: Binding<Bool>) -> some View {
+        self.alert("Error", isPresented: isShowErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage.wrappedValue ?? "Unknown Error")
         }
     }
 }

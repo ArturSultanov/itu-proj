@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct LeaderboardView: View {
+    @Environment(NetworkManager.self) var networkManager
+
     @State private var topPlayers: [LeaderboardEntry] = [] // Holds the list of top players.
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -56,7 +58,7 @@ struct LeaderboardView: View {
     /// Fetches the leaderboard data asynchronously and updates the UI
     private func loadLeaderboard() async {
         do {
-            let players = try await NetworkManager.shared.fetchLeaderboard(with: 15)
+            let players = try await networkManager.fetchLeaderboard(with: 15)
             await MainActor.run {
                 topPlayers = players
                 isLoading = false

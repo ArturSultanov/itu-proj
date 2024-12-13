@@ -7,33 +7,56 @@
 
 import SwiftUI
 
+
 struct MainMenuButtonStyle: ButtonStyle {
-    var mainColor : Color
+    @Environment(PaletteManager.self) var paletteManager
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
+    var customColorProvider: ((ColorPalette) -> Color)? = nil
+    
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+        // Use the custom color if provided, otherwise fall back to the palette.
+        let activeColor = customColorProvider?(paletteManager.currentPalette)
+            ?? paletteManager.currentPalette.primaryButton
+        
+        let backgroundColor = isEnabled ? activeColor : .gray
+
+        return configuration.label
             .frame(maxWidth: .infinity, minHeight: 50)
-            .background(mainColor)
+            .background(backgroundColor)
             .foregroundColor(.white)
             .font(.headline)
             .cornerRadius(10)
-            .shadow(radius: configuration.isPressed ? 2 : 5, x: 0, y: configuration.isPressed ? 1 : 3)
+            .shadow(radius: configuration.isPressed ? 2 : 5,
+                    x: 0, y: configuration.isPressed ? 1 : 3)
             .padding(.horizontal, 20)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 }
+
 
 struct SecondaryMenuButtonStyle: ButtonStyle {
-    var mainColor : Color
+    @Environment(PaletteManager.self) var paletteManager
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
+    var customColorProvider: ((ColorPalette) -> Color)? = nil
+    
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+        // Use the custom color if provided, otherwise fall back to the palette.
+        let activeColor = customColorProvider?(paletteManager.currentPalette)
+            ?? paletteManager.currentPalette.primaryButton
+        
+        let backgroundColor = isEnabled ? activeColor : .gray
+
+        return configuration.label
             .frame(maxWidth: 50, minHeight: 50)
-            .background(mainColor)
+            .background(backgroundColor)
             .foregroundColor(.white)
             .font(.headline)
             .cornerRadius(10)
-            .shadow(radius: configuration.isPressed ? 2 : 5, x: 0, y: configuration.isPressed ? 1 : 3)
+            .shadow(radius: configuration.isPressed ? 2 : 5,
+                    x: 0, y: configuration.isPressed ? 1 : 3)
             .padding(.horizontal, 20)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 }
-

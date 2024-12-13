@@ -9,11 +9,16 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data manager
+    @Environment(NetworkManager.self) var networkManager
+    @Environment(BannerManager.self) var bannerManager
     @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
 
     @State private var loginInput: String = "" // Holds the user's input for the login
     @State private var isLoggedIn: Bool = false // Tracks whether the user has logged in
     @State private var isShowQuitConfirmation = false // Tracks whether the quit confirmation alert is shown
+    
+    @State private var showBanner = false
+    @State private var bannerMessage = ""
     
     var body: some View {
         ZStack {
@@ -39,8 +44,10 @@ struct LoginView: View {
                             await login() // Trigger the login asynchronously
                         }
                     }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: loginInput == "" ? .gray : Color.tritanopiaBlue))
-                    .disabled(loginInput == "")
+                    .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
+                        palette.teal
+                    }))
+                    .disabled(loginInput.isEmpty)
                     
                     .navigationTitle("Welcome")
                     .navigationDestination(isPresented: $isLoggedIn) {
@@ -49,11 +56,19 @@ struct LoginView: View {
                     Button("Quit Game") {
                         isShowQuitConfirmation = true
                     }
-                    .buttonStyle(MainMenuButtonStyle(mainColor: Color.tritanopiaRed))
+                    .buttonStyle(MainMenuButtonStyle(customColorProvider: { palette in
+                        palette.red
+                    }))
+                    
+                    // Your main content here
+                    Button("Trigger Error") {
+                        bannerManager.showError(message: "An error occurred.")
+                    }
                 }
             }
             .padding([.leading, .trailing, .bottom], 20)
         }
+        .withBanner()
         .alert("Quit Game?", isPresented: $isShowQuitConfirmation) {
             VStack {
                 Button("Yes") {
@@ -70,7 +85,7 @@ struct LoginView: View {
     
     func login() async {
         do {
-            try await NetworkManager.shared.login(with: loginInput, playerDataManager: playerDataManager)
+            try await networkManager.login(with: loginInput, playerDataManager: playerDataManager)
             isLoggedIn = true
         } catch {
             print("Login failed: \(error)")
@@ -82,4 +97,13 @@ struct LoginView: View {
             NSApplication.shared.terminate(nil)
         }
     }
+    
+    func showError(message: String) {
+            bannerMessage = message
+            showBanner = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                showBanner = false
+            }
+        }
+    
 }

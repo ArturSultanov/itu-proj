@@ -10,6 +10,7 @@ import SwiftUI
 // MARK: - Gameboard view
 struct GameBoardView: View {
     @Environment(PlayerDataManager.self) var playerDataManager // Access shared player data.
+    @Environment(NetworkManager.self) var networkManager
     @Environment(\.colorScheme) var colorScheme // Access current system theme (light/dark mode)
 
     @State private var gems: [Gem] = [] // Array of gems displayed on the board.
@@ -46,6 +47,7 @@ struct GameBoardView: View {
                         ForEach(gems) { gem in
                             GemView(
                                 gem: gem,
+                                iconType: IconType.getGemIcon(for: gem.type), // Provide iconType here
                                 swapAction: { direction in handleSwapAction(gem: gem, direction: direction) },
                                 clickAction: { gem in handleClickAction(gem: gem) }
                             )
@@ -55,7 +57,7 @@ struct GameBoardView: View {
                         }
                     }
                     .onAppear {
-                        initializeGems() // Initialize the gems when the view appears.
+                        initializeGems() // Initialize gems after the view appears
                     }
                 }
             }
@@ -96,10 +98,7 @@ struct GameBoardView: View {
                 updatedGems.append(gem)
             }
         }
-
-        withAnimation(.easeInOut) {
-            gems = updatedGems
-        }
+        gems = updatedGems
     }
 
     // MARK: - Actions
@@ -114,10 +113,8 @@ struct GameBoardView: View {
         }
         Task {
             do {
-                try await NetworkManager.shared.swapGems(gem1: gem, gem2: targetGem, playerDataManager: playerDataManager)
-                withAnimation(.easeInOut) {
-                    initializeGems() // Refresh the board
-                }
+                try await networkManager.swapGems(gem1: gem, gem2: targetGem, playerDataManager: playerDataManager)
+                initializeGems() // Refresh the board
                 swapInProgress = false
             } catch let NetworkError.invalidResponse(statusCode) {
                 handleSwapFailure(gem, targetGem, statusCode: statusCode)
@@ -171,10 +168,8 @@ struct GameBoardView: View {
         
         Task {
             do {
-                try await NetworkManager.shared.clickGem(gem: gem, playerDataManager: playerDataManager)
-                withAnimation(.easeInOut) {
-                    initializeGems() // Refresh the board
-                }
+                try await networkManager.clickGem(gem: gem, playerDataManager: playerDataManager)
+                initializeGems() // Refresh the board
             } catch {
                 print("Click gem failed: \(error)")
             }
