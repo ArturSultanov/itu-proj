@@ -183,6 +183,13 @@ struct GameBoardView: View {
     // MARK: - Actions
     /// Handles swapping a gem with its adjacent gem in the specified direction
     private func handleSwapAction(gem: Gem, direction: Direction) {
+        
+        // Check moves left before proceeding with swapping
+        if playerDataManager.playerData!.lastGame!.movesLeft <= 0 {
+            bannerManager.showError(message: "No moves left. Please, restart the game.")
+            return
+        }
+        
         guard !swapInProgress,
               let targetGem = getAdjacentGem(for: gem, in: direction) else { return }
         
@@ -200,7 +207,7 @@ struct GameBoardView: View {
             } catch let NetworkError.invalidResponse(statusCode) {
                 handleSwapFailure(gem, targetGem, statusCode: statusCode)
             } catch {
-                bannerManager.showError(message: "Swap failed: \(error)")
+                bannerManager.showError(message: "Swap failed: \(error.localizedDescription)")
                 swapInProgress = false
             }
         }
@@ -247,6 +254,13 @@ struct GameBoardView: View {
 
     /// Handles the click action for a gem, particularly for hearts
     private func handleClickAction(gem: Gem) {
+        
+        // Check moves left before proceeding with swapping
+        if playerDataManager.playerData!.lastGame!.movesLeft <= 0 {
+            bannerManager.showError(message: "No moves left. Please, restart the game.")
+            return
+        }
+        
         let iconType = IconType.getGemIcon(for: gem.type)
         guard iconType == .heart else { return }
         
@@ -255,7 +269,7 @@ struct GameBoardView: View {
                 try await networkManager.clickGem(gem: gem, playerDataManager: playerDataManager)
                 initializeGems()
             } catch {
-                print("Click gem failed: \(error)")
+                print("Click gem failed: \(error.localizedDescription)")
             }
         }
     }
