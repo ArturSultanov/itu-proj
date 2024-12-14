@@ -11,9 +11,30 @@ settings_router = APIRouter(
     responses={404: {"description": "Not Found"}},  # Custom response descriptions
 )
 
+# @settings_router.patch("/update_login", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
+# async def update_login(player: PlayerLoginDTO, cp: cp_dependency, db: db_dependency):
+#     cp.data.login = player.login  # Update the login of the current player
+#     await synchronize_player(cp.data, db)
+#     return UpdateMessageDTO(detail=f"Player login updated to {cp.data.login}")
+
+
 @settings_router.patch("/update_login", response_model=UpdateMessageDTO, status_code=status.HTTP_200_OK)
 async def update_login(player: PlayerLoginDTO, cp: cp_dependency, db: db_dependency):
-    cp.data.login = player.login  # Update the login of the current player
+    # Check if another player with the same login already exists in the database
+    result = await db.execute(
+        select(PlayerOrm).where(PlayerOrm.login == player.login)
+    )
+    existing_player = result.scalars().first()
+
+    if existing_player is not None:
+        # If a player with this login exists, return an error
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Login already in use"
+        )
+
+    # If no player with this login exists, proceed to update
+    cp.data.login = player.login
     await synchronize_player(cp.data, db)
     return UpdateMessageDTO(detail=f"Player login updated to {cp.data.login}")
 
