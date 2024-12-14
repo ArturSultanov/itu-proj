@@ -27,4 +27,33 @@ Tile Match Game
 │       └── images/
 │           └── ...
 ├── swiftui_frontend/ Author: xsulta01
-    ├──
+    ├── Assets.xcassets
+    │   ├── AccentColor.colorset    
+    │   └── AppIcon.appiconset
+    │       ├── 1024.png
+    │       ├── 128.png
+    │       ├── 16.png
+    │       ├── 256.png
+    │       └── ...
+    ├── Banners
+    │   ├── BannerManager.swift
+    │   └── NotificationBanner.swift
+    ├── Info.plist
+    ├── Models
+    │   └── ModelsManager.swift
+    ├── Network
+    │   └── NetworkManager.swift
+    ├── Preview Content
+    ├── Styles
+    │   ├── ButtonStyle.swift
+    │   ├── ColorPalette.swift
+    │   └── PaletteManager.swift
+    ├── Views
+    │   ├── GameBoardView.swift
+    │   ├── GemView.swift
+    │   ├── LeaderBoardView.swift
+    │   ├── LoginView.swift
+    │   ├── MainMenuView.swift
+    │   └── SettingsView.swift
+    ├── swiftui_frontend.entitlements
+    └── swiftui_frontendApp.swift
