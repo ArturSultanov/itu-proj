@@ -140,8 +140,13 @@ struct GameBoardView: View {
     // MARK: - Quit game
     /// Terminates the application
     private func quitGame() async {
-        await MainActor.run {
-            NSApplication.shared.terminate(nil)
+        do {
+            try await networkManager.quitGame()
+            await MainActor.run {
+                NSApplication.shared.terminate(nil)
+            }
+        } catch {
+            bannerManager.showError(message: "Failed to quit game: \(error.localizedDescription)")
         }
     }
 
