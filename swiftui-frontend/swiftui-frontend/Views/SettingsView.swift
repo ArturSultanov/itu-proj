@@ -7,7 +7,13 @@
 
 import SwiftUI
 
+
 // MARK: - Settings view
+/// This view displays the settings screen, allowing:
+/// - Change login
+/// - Switch between users
+/// - Adjust the game difficulty
+/// - Toggle the color palette between normal and tritanopia
 struct SettingsView: View {
     @Environment(PlayerDataManager.self) var playerDataManager  // Shared player data manager
     @Environment(NetworkManager.self) var networkManager        // Network action manager
@@ -29,19 +35,23 @@ struct SettingsView: View {
         ZStack {
             mainContent
         }
+        // Apply the change login sheet
         .applyChangeLoginSheet(
             isPresented: $showChangeLoginSheet,
             newLogin: $newLogin,
             changeLoginAction: { await changeLogin() }
         )
+        // Apply the difficulty selection dialog
         .applyDifficultyConfirmationDialog(
             isPresented: $showDifficultyOptions,
             changeDifficultyAction: { difficulty in Task { await changeDifficulty(to: difficulty) } }
         )
+        // Apply the switch user confirmation alert
         .applySwitchUserAlert(
             isPresented: $showSwitchUserConfirmation,
             navigateToLogin: $navigateToLogin
         )
+        // Navigation destination for switching to LoginView
         .navigationDestination(isPresented: $navigateToLogin) {
             LoginView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -52,7 +62,8 @@ struct SettingsView: View {
         }
     }
 
-    // Extracted main content into a computed property to reduce complexity.
+    // MARK: - Main Content
+    // Contains the main UI elements for the settings view
     var mainContent: some View {
         VStack {
             if isLoading {
@@ -67,10 +78,12 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Top Information View
+    /// Displays the current login and difficulty information at the top
     var topInfoView: some View {
         let backgroundColor = (colorScheme == .dark)
-            ? Color.gray.opacity(0.3)
-            : Color.gray.opacity(0.2)
+            ? Color.gray.opacity(0.3) // Dark mode background
+            : Color.gray.opacity(0.2) // Light mode background
 
         let currentLogin = playerDataManager.playerData!.login
 
@@ -90,6 +103,8 @@ struct SettingsView: View {
         .padding(.horizontal, 20)
     }
     
+    // MARK: - Buttons
+    /// Button to toggle the color palette
     var switchColorPaletteButton: some View {
         Button("Switch Color Palette") {
             paletteManager.currentStyle = (paletteManager.currentStyle == .tritanopia) ? .normal : .tritanopia
@@ -99,14 +114,16 @@ struct SettingsView: View {
         }))
     }
 
+    /// Button to change the user login
     var changeLoginButton: some View {
         Button("Change Login") {
-            newLogin = playerDataManager.playerData?.login ?? ""
+            newLogin = playerDataManager.playerData!.login
             showChangeLoginSheet = true
         }
         .buttonStyle(MainMenuButtonStyle())
     }
 
+    /// Button to display the difficulty selection dialog
     var changeDifficultyButton: some View {
         Button("Change Difficulty") {
             showDifficultyOptions = true
@@ -114,6 +131,7 @@ struct SettingsView: View {
         .buttonStyle(MainMenuButtonStyle())
     }
     
+    /// Button to switch to a different user
     var switchUserButton: some View {
         Button("Switch User") {
             showSwitchUserConfirmation = true
@@ -139,18 +157,6 @@ struct SettingsView: View {
         }
     }
 
-    func changeLogin() async {
-        isLoading = true
-        do {
-            try await networkManager.updateLogin(newLogin: newLogin, playerDataManager: playerDataManager)
-            isLoading = false
-            showChangeLoginSheet = false
-        } catch {
-            isLoading = false
-            bannerManager.showError(message: "Failed to change login: \(error.localizedDescription)")
-        }
-    }
-
     func changeDifficulty(to difficulty: Int) async {
         isLoading = true
         do {
@@ -169,6 +175,18 @@ struct SettingsView: View {
         case 2: return "Normal"
         case 3: return "Hard"
         default: return "Unknown"
+        }
+    }
+    
+    func changeLogin() async {
+        isLoading = true
+        do {
+            try await networkManager.updateLogin(newLogin: newLogin, playerDataManager: playerDataManager)
+            isLoading = false
+            showChangeLoginSheet = false
+        } catch {
+            isLoading = false
+            bannerManager.showError(message: "Failed to change login: \(error.localizedDescription)")
         }
     }
 }

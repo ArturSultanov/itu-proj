@@ -136,7 +136,7 @@ struct MainMenuView: View {
             try await networkManager.newGame(playerDataManager: playerDataManager)
             isNewGameActive = true
         } catch {
-            bannerManager.showError(message: "Failed to start new game: \(error)")
+            bannerManager.showError(message: "Failed to start new game: \(error.localizedDescription)")
         }
     }
     
@@ -145,7 +145,7 @@ struct MainMenuView: View {
             try await networkManager.continue_game(playerDataManager: playerDataManager)
             isContinueGameActive = true
         } catch {
-            bannerManager.showError(message: "Failed to continue game: \(error)")
+            bannerManager.showError(message: "Failed to continue game: \(error.localizedDescription)")
         }
     }
     
