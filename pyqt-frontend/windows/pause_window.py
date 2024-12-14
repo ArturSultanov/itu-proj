@@ -19,7 +19,6 @@ class PauseScreen(QWidget):
 
         self.icon.setFixedSize(80, 70)
         score_top_layout.addWidget(self.icon, alignment=Qt.AlignVCenter )
-        # Вместо "0" подставляем аргумент score
         self.score_text_label = QLabel(str(score), self)
         self.score_text_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         score_top_layout.addWidget(self.score_text_label)
@@ -40,7 +39,6 @@ class PauseScreen(QWidget):
         self.energy_icon = QSvgWidget("assets/icons/energy_icon.svg", self)
         self.energy_icon.setFixedSize(40, 70)
         energy_top_layout.addWidget(self.energy_icon)
-        # Вместо "0" подставляем аргумент moves_left
         self.energy_text_label = QLabel(str(moves_left), self)
         self.energy_text_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         energy_top_layout.addWidget(self.energy_text_label)
@@ -63,7 +61,7 @@ class PauseScreen(QWidget):
         self.img.setPixmap(scaled_img)
         self.img.setObjectName("pausePic")
         self.layout.addWidget(self.img, alignment=Qt.AlignHCenter)
-        self.layout.addStretch()  # Остаток пространства снизу, приподнимает картинку
+        self.layout.addStretch()
 
         play_layout = QHBoxLayout()
         self.play_btn = QPushButton(self)

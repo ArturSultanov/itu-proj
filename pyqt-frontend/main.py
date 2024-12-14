@@ -11,6 +11,8 @@ from windows.change_window import ChangeScreen
 from windows.pause_window import PauseScreen
 
 from utils.api_call import api_request
+import requests
+
 
 class AppController:
     def __init__(self):
@@ -45,8 +47,7 @@ class AppController:
         self.window.addWidget(self.palette_screen)
         self.window.addWidget(self.difficulty_screen)
         self.window.addWidget(self.change_screen)
-        
-        # window
+    
         self.window.setFixedSize(1280, 960)
         self.center_window()
     
@@ -86,6 +87,8 @@ class AppController:
         self.window.setCurrentWidget(self.settings_screen)
     
     def show_leaderboard(self):
+        api_request("/utils/sync", method="POST")
+        self.leaderboard_screen.update_leaderboard()
         self.window.setCurrentWidget(self.leaderboard_screen)
     
     def show_palette(self):
@@ -105,13 +108,20 @@ class AppController:
         self.window.addWidget(self.pause_screen)
         self.window.setCurrentWidget(self.pause_screen)
 
+    def get_leaderboard_data(self, limit=5):
+        # print(api_request("/utils/sync", method="POST"))
+        url = f"http://localhost:8000/menu/leaderboard?limit={limit}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json() if not isinstance(response.json(), dict) else []
+        return []
 
     def quit_game(self):
-        response = api_request("/utils/exit", method="POST")
-        if response and isinstance(response, dict) and "detail" in response:
-            print(response["detail"])
-        else:
-            print("No 'detail' key in the response or the response is invalid:", response)
+        # response = api_request("/utils/exit", method="POST")
+        # if response and isinstance(response, dict) and "detail" in response:
+        #     print(response["detail"])
+        # else:
+        #     print("No 'detail' key in the response or the response is invalid:", response)
         self.app.quit()
 
 if __name__ == "__main__":

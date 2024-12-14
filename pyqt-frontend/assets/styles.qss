@@ -29,6 +29,7 @@ QLineEdit#usernameInput {
     font-size: 35px;
     text-align: left;
     letter-spacing: 2px;
+    margin-left: 30px;
 }
 
 QLabel#underscoreIcon {
@@ -84,6 +85,14 @@ QPushButton#backBtn {
 
 /* --------------------------- Leaderboard window -------------------------- */
 
+QLabel#userNameLabel {
+    /* margin-left: 15px; */
+    /* margin-top: 120px; */
+}
+
+QLabel#underscoreIcon {
+    margin-left: 30px;
+}
 
 /* ----------------------------- Palette window ---------------------------- */
 

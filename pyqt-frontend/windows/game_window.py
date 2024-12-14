@@ -1,10 +1,11 @@
 import requests
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
+from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtGui import QPixmap, QIcon 
 from utils.api_call import api_request
 from PyQt5.QtSvg import QSvgWidget
+import time
 
 class GameScreen(QWidget):
     def __init__(self, controller, rows=5, cols=6):
@@ -161,8 +162,12 @@ class GameScreen(QWidget):
     def send_move_to_backend(self, data):
         response = api_request("/board/swap_gems_fullboard", params=data, method="POST")
         print(response)
-        self.update_score_and_moves(response["current_score"], response["moves_left"])
-        self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+
+        if "current_score" not in response or "moves_left" not in response:
+            self.show_end_game_dialog()
+        else:
+            self.update_score_and_moves(response["current_score"], response["moves_left"])
+            self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
 
     def on_pause_button_click(self):
         score = self.score_text_label.text()
@@ -172,5 +177,56 @@ class GameScreen(QWidget):
     def update_score_and_moves(self, score, moves_left):
         self.score_text_label.setText(f"{score}")
         self.energy_text_label.setText(f"{moves_left}")
-    
 
+        if moves_left == 0:
+            # api_request("/utils/sync", method="POST")
+            self.show_end_game_dialog()
+
+    def show_end_game_dialog(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Game Over")
+
+
+        vbox = QVBoxLayout(dialog)
+        label = QLabel("No moves left. Game Over!", dialog)
+        label.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(label)
+
+        hbox = QHBoxLayout()
+        new_game_btn = QPushButton("New Game", dialog)
+        leaderboard_btn = QPushButton("Leaderboard", dialog)
+
+        new_game_btn.clicked.connect(lambda: self.start_new_game(dialog))
+        leaderboard_btn.clicked.connect(lambda: self.open_leaderboard(dialog))
+
+        hbox.addWidget(new_game_btn)
+        hbox.addWidget(leaderboard_btn)
+        vbox.addLayout(hbox)
+
+        dialog.setLayout(vbox)
+        dialog.exec_()
+
+    def sync_player_state(self):
+
+        url = "http://localhost:8000/utils/sync"
+        headers = {"accept": "application/json"}
+        
+        try:
+            response = requests.post(url, headers=headers)
+            
+            if response.status_code == 200:
+                print("Синхронизация успешна:", response.json())
+            elif response.status_code == 404:
+                print("Ошибка: Текущий игрок не найден:", response.json())
+            else:
+                print(f"Ошибка синхронизации: {response.status_code}", response.json())
+        except requests.RequestException as e:
+            print(f"Ошибка при выполнении запроса синхронизации: {e}")
+
+    def start_new_game(self, dialog):
+        dialog.close()
+        self.controller.show_game_screen()
+
+    def open_leaderboard(self, dialog):
+        dialog.close()
+        self.controller.show_leaderboard()
