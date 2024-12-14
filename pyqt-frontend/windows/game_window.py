@@ -114,7 +114,7 @@ class GameScreen(QWidget):
         return button
 
     def get_item_icon(self, item_type):
-        icon_map = {
+        normal_icon_map = {
             # 0: 'assets/icons/chicken_icon.png',
             0: 'assets/icons/lemon_icon.svg',
             # 1: 'assets/icons/chili_icon.png',
@@ -127,7 +127,20 @@ class GameScreen(QWidget):
             # 3: 'assets/icons/banana_icon.svg',
             3: 'assets/icons/beer_icon.png',
         }
-        return QIcon(icon_map.get(item_type, 'assets/icons/banana.svg'))
+        mono_icon_map = {
+            0: 'assets/icons/chili_icon.png',
+            1: 'assets/icons/chili_icon.png',
+            2: 'assets/icons/chili_icon.png',
+            3: 'assets/icons/chili_icon.png',
+            4: 'assets/icons/chili_icon.png',
+        }
+
+        if self.controller.current_theme == "monochromacy":
+            icon_path = mono_icon_map.get(item_type, 'assets/icons/banana.svg')
+        else:
+            icon_path = normal_icon_map.get(item_type, 'assets/icons/banana.svg')
+
+        return QIcon(icon_path)
 
 
     def generate_sample_items(self, rows, cols):

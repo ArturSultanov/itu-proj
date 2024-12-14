@@ -22,7 +22,9 @@ class AppController:
             font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
 
         with open("assets/styles.qss", "r") as style_file:
-            self.app.setStyleSheet(style_file.read())
+            self.original_qss = style_file.read()
+        self.app.setStyleSheet(self.original_qss)
+        self.current_theme = "normal"
 
         self.window = QStackedWidget()
 
@@ -47,9 +49,12 @@ class AppController:
         # window
         self.window.setFixedSize(1280, 960)
         self.center_window()
+    
+    def apply_global_style(self, qss_string: str):
+        self.app.setStyleSheet(qss_string)
+
         
     def center_window(self):
-        # window centering
         screen_geometry = QDesktopWidget().availableGeometry()
         screen_center = screen_geometry.center() 
         window_geometry = self.window.frameGeometry()
@@ -57,7 +62,6 @@ class AppController:
         self.window.move(window_geometry.topLeft())
 
     def run(self):
-        # login screen
         self.window.setCurrentWidget(self.login_screen)
         self.window.show()
         self.app.exec_()
