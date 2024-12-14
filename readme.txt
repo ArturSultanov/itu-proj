@@ -3,13 +3,14 @@ Tile Match Game
 Each member of the team build the own FE in the individual technogoly.
 The directories are named by technogoly that was used for implementation.
 
-tkinter-frontend    Author: Lilit Movsesian (xmovse00)
-swiftui-frontend    Author: Artur Sultanov (xsutla01)
-pyqt-frontend       Author: Tatiana Fedorova (xfedor14)
+tkinter-frontend/   Author: Lilit Movsesian (xmovse00)
+swiftui-frontend/   Author: Artur Sultanov (xsutla01)
+pyqt-frontend/      Author: Tatiana Fedorova (xfedor14)
 
 01_xfedor14_xmovse00_xshche05_xsulta01_source/
 │
 ├── backend/...                         Unified BE for all FEs
+│
 ├── readme.txt
 ├── tkinter-frontend/                   Author: xmovse00
 │   ├── src/
