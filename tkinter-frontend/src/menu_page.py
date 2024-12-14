@@ -61,7 +61,13 @@ class MenuPage:
             if response.status_code == 404:
                 self.continue_btn.config(state="disabled")
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                if "NewConnectionError" in str(e):
+                    self.show_error_message("Server Error!")
+                else:
+                    messagebox.showerror("Request Error", f"An error occurred: {e}")
 
         settings_btn = tk.Button(button_frame, text="Settings", command=self.open_settings, **self.button_label_options)
         settings_btn.grid(row=2, column=0)
@@ -69,7 +75,7 @@ class MenuPage:
         leaderboard_btn = tk.Button(button_frame, text="Leaderboard", command=self.get_leaderboard, **self.button_label_options)
         leaderboard_btn.grid(row=3, column=0)
 
-        quit_btn = tk.Button(self.master, text="Quit Game", command=self.quit_game, **self.button_label_options)
+        quit_btn = tk.Button(self.master, text="Quit Game", command=self.quit_confirmation, **self.button_label_options)
         quit_btn.place(relx=0.05, rely=0.95, anchor="sw")
 
     # Requests the backend for the new game.
@@ -85,7 +91,10 @@ class MenuPage:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
 
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
 
     # Creates the game page.
     def open_new_game(self, game_data):
@@ -106,7 +115,10 @@ class MenuPage:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
 
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
 
     # Created settings page.
     def open_settings(self):
@@ -128,7 +140,10 @@ class MenuPage:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
 
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
 
     # Creates the leaderboard page.
     def open_leaderboard(self, leader_data):
@@ -150,7 +165,33 @@ class MenuPage:
             else:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
+
+    def quit_confirmation(self):
+        rect_width = 700
+        rect_height = 400
+        rect_x0 = (self.master.winfo_width() - rect_width) // 2
+        rect_y0 = (self.master.winfo_height() - rect_height) // 2
+
+        overlay = tk.Frame(self.master, bg=self.background_color, relief="solid", bd=6)
+        overlay.place(x=rect_x0, y=rect_y0, width=rect_width, height=rect_height)
+
+        text_label = tk.Label(overlay,text="""Are you sure you
+want to quit 
+the game?""", **self.button_label_options)
+        text_label.pack(pady=60)
+
+        button_frame = tk.Frame(overlay, bg=self.background_color)
+        button_frame.pack(pady=10)
+
+        yes_button = tk.Button(button_frame, text="Yes", command=self.quit_game, **self.second_button_label_options)
+        yes_button.grid(row=0, column=0, padx=60)
+
+        no_button = tk.Button(button_frame, text="No", command=overlay.destroy, **self.second_button_label_options)
+        no_button.grid(row=0, column=1, padx=260)
 
     def quit_game(self):
         self.master.destroy()
@@ -210,6 +251,12 @@ current game?""", **self.button_label_options)
         login_page = LoginPage(self.master)
         login_page.run()
 
-
+    # Shows error message.
+    def show_error_message(self, message):
+        error_label = tk.Label(self.master, text=message, font=("Press Start 2P", 14), fg="black", bg="white", \
+                               highlightbackground="red", highlightthickness=3, padx=10, pady=10)
+        error_label.place(relx=0.5, rely=0.9, anchor="center")
+        self.master.after(3000, error_label.destroy)
+        
     def run(self):
         self.create_widgets()

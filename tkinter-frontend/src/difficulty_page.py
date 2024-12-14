@@ -76,7 +76,10 @@ class DifficultyPage:
             else:
                 messagebox.showerror("Error", f"Failed to fetch difficulty: {response.status_code}")
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
 
     # Configures the buttons based on the current level.
     def update_button_states(self):
@@ -104,7 +107,17 @@ class DifficultyPage:
             else:
                 messagebox.showerror("Error", f"Response code: {response.status_code}")
         except requests.RequestException as e:
-            messagebox.showerror("Request Error", f"An error occurred: {e}")
+            if "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
+            else:
+                messagebox.showerror("Request Error", f"An error occurred: {e}")
+
+    # Shows error message.
+    def show_error_message(self, message):
+        error_label = tk.Label(self.master, text=message, font=("Press Start 2P", 14), fg="black", bg="white", \
+                               highlightbackground="red", highlightthickness=3, padx=10, pady=10)
+        error_label.place(relx=0.5, rely=0.9, anchor="center")
+        self.master.after(3000, error_label.destroy)
 
     def run(self):
         self.create_widgets()

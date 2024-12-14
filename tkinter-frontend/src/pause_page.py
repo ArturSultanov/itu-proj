@@ -70,8 +70,31 @@ class PausePage:
         img_play_btn = tk.Button(main_frame, image=self.img_play, command=self.play_pressed, **self.button_label_options)
         img_play_btn.grid()
 
-        quit_btn = tk.Button(self.master, text="Quit Game", command=self.quit_game, **self.button_label_options)
+        quit_btn = tk.Button(self.master, text="Quit Game", command=self.quit_confirmation, **self.button_label_options)
         quit_btn.place(relx=0.05, rely=0.95, anchor="sw")
+
+    def quit_confirmation(self):
+        rect_width = 700
+        rect_height = 400
+        rect_x0 = (self.master.winfo_width() - rect_width) // 2
+        rect_y0 = (self.master.winfo_height() - rect_height) // 2
+
+        overlay = tk.Frame(self.master, bg=self.background_color, relief="solid", bd=6)
+        overlay.place(x=rect_x0, y=rect_y0, width=rect_width, height=rect_height)
+
+        text_label = tk.Label(overlay,text="""Are you sure you
+want to quit 
+the game?""", **self.button_label_options)
+        text_label.pack(pady=60)
+
+        button_frame = tk.Frame(overlay, bg=self.background_color)
+        button_frame.pack(pady=10)
+
+        yes_button = tk.Button(button_frame, text="Yes", command=self.quit_game, **self.second_button_label_options)
+        yes_button.grid(row=0, column=0, padx=60)
+
+        no_button = tk.Button(button_frame, text="No", command=overlay.destroy, **self.second_button_label_options)
+        no_button.grid(row=0, column=1, padx=260)
 
     def quit_game(self):
         self.master.destroy()

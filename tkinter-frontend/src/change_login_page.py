@@ -76,7 +76,7 @@ class ChangeLoginPage:
     def change_login(self):
         new_login = self.entry_login.get()
         if not new_login:
-            messagebox.showerror("Error", "Login name cannot be empty!")
+            self.show_error_message("Login name cannot be empty!")
             return
         try:
             response = requests.patch(f"{self.api_url}/settings/update_login", json={"login": new_login})
@@ -89,6 +89,8 @@ class ChangeLoginPage:
         except requests.RequestException as e:
             if "500" in str(e):
                 self.show_error_message("This login name already exists!")
+            elif "NewConnectionError" in str(e):
+                self.show_error_message("Server Error!")
             else:
                 messagebox.showerror("Request Error", f"An error occurred: {e}")
 
@@ -112,14 +114,14 @@ class ChangeLoginPage:
         menu_page = MenuPage(self.master, self.player_data)
         menu_page.run()
 
-    # Shows error message, is used in case of existing login in the database.
+    # Shows error message.
     def show_error_message(self, message):
         error_label = tk.Label(self.master, text=message, font=("Press Start 2P", 14), fg="black", bg="white", \
                                highlightbackground="red", highlightthickness=3, padx=10, pady=10)
         error_label.place(relx=0.5, rely=0.9, anchor="center")
         self.master.after(3000, error_label.destroy)
 
-
+    
     def on_enter(self, event):
         self.change_login()
 
