@@ -1,9 +1,10 @@
 import requests
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtGui import QPixmap, QIcon 
 from utils.api_call import api_request
+from PyQt5.QtSvg import QSvgWidget
 
 class GameScreen(QWidget):
     def __init__(self, controller, rows=5, cols=6):
@@ -20,14 +21,47 @@ class GameScreen(QWidget):
         self.main_layout = QHBoxLayout()
         self.layout = QVBoxLayout()
 
-        self.score_label = QLabel("Score: 0", self)
-        self.moves_left_label = QLabel("Moves Left: 10", self)
+        score_layout = QVBoxLayout()
+        score_top_layout = QHBoxLayout()
+        self.main_layout.addSpacing(350)
+        self.icon = QSvgWidget("assets/icons/coin_icon.svg", self)
 
-        spacer = QSpacerItem(0, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.main_layout.addItem(spacer)
+        self.icon.setFixedSize(80, 70)
+        score_top_layout.addWidget(self.icon, alignment=Qt.AlignVCenter )
+        self.score_text_label = QLabel("0", self)
+        self.score_text_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        score_top_layout.addWidget(self.score_text_label)
+        score_layout.addLayout(score_top_layout)
 
-        self.main_layout.addWidget(self.score_label, alignment=Qt.AlignHCenter)
-        self.main_layout.addWidget(self.moves_left_label, alignment=Qt.AlignHCenter)
+        self.underpic = QLabel(self)
+        self.underpic.setPixmap(QPixmap("assets/icons/underscore_small_icon.png"))
+        self.underpic.setAlignment(Qt.AlignHCenter | Qt.AlignRight)
+        self.underpic.setContentsMargins(20, 0, 0, 0)
+        score_layout.addWidget(self.underpic)
+        score_layout.setContentsMargins(0, 20, 0, 0)
+        self.main_layout.addLayout(score_layout)
+
+        self.main_layout.addSpacing(150)
+
+        energy_layout = QVBoxLayout()
+        energy_top_layout = QHBoxLayout()
+        self.energy_icon = QSvgWidget("assets/icons/energy_icon.svg", self)
+        self.energy_icon.setFixedSize(40, 70)
+        energy_top_layout.addWidget(self.energy_icon)
+        self.energy_text_label = QLabel("0", self)
+        self.energy_text_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        energy_top_layout.addWidget(self.energy_text_label)
+        energy_layout.addLayout(energy_top_layout)
+        self.en_underpic = QLabel(self)
+        self.en_underpic.setPixmap(QPixmap("assets/icons/underscore_small_icon.png"))
+        self.en_underpic.setAlignment(Qt.AlignHCenter | Qt.AlignRight)
+        energy_layout.addWidget(self.en_underpic)
+        energy_layout.setContentsMargins(0, 20, 0, 0)
+        self.main_layout.addLayout(energy_layout)
+
+        self.main_layout.addWidget(self.score_text_label)
+        self.main_layout.addWidget(self.energy_text_label)
+
         self.layout.addLayout(self.main_layout)
 
         space_layout = QHBoxLayout()
@@ -42,16 +76,20 @@ class GameScreen(QWidget):
         space_layout.addItem(right_spacer)
         self.layout.addLayout(space_layout)
 
-        # spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        # self.layout.addItem(spacer_bottom)
-
-        self.back_button = QPushButton("Back to Main Menu", self)
-        self.back_button.clicked.connect(self.on_back_button_click)
-        self.layout.addWidget(self.back_button, alignment=Qt.AlignCenter)
+        pause_layout = QHBoxLayout()
+        self.pause_btn = QPushButton(self)
+        self.pause_btn.setIcon(QIcon("assets/icons/pause_icon.svg"))
+        self.pause_btn.setText("Pause")
+        self.pause_btn.setObjectName("pauseBtn")
+        self.pause_btn.setIconSize(QSize(50, 50))
+        self.pause_btn.clicked.connect(self.on_pause_button_click)
+        self.pause_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        pause_layout.addWidget(self.pause_btn, alignment=Qt.AlignHCenter)
+        pause_layout.setContentsMargins(0, 30, 0, 20)
+        self.layout.addLayout(pause_layout)
 
         self.setLayout(self.layout)
         self.update_grid(self.rows, self.cols, self.generate_sample_items(self.rows, self.cols))
-
 
     def update_grid(self, rows, cols, items):
         for i in reversed(range(self.grid_layout.count())):
@@ -67,14 +105,13 @@ class GameScreen(QWidget):
 
     def create_item_widget(self, item_type, row, col):
         button = QPushButton(self)
-        button.setFixedSize(100, 100)  # Устанавливаем фиксированный размер кнопки
+
+        button.setFixedSize(100, 100)
         icon = self.get_item_icon(item_type)
         button.setIcon(icon)
-        button.setIconSize(button.size())  # Иконка занимает весь размер кнопки
+        button.setIconSize(button.size())
         button.clicked.connect(lambda _, r=row, c=col: self.cell_clicked(r, c))
         return button
-
-
 
     def get_item_icon(self, item_type):
         icon_map = {
@@ -84,7 +121,8 @@ class GameScreen(QWidget):
             1: 'assets/icons/donut_icon.png',
             2: 'assets/icons/cherry_icon.svg',
             # 4: 'assets/icons/rice_icon.png',
-            4: 'assets/icons/star_icon.png',
+            # 4: 'assets/icons/star_icon.png',
+            4: 'assets/icons/heart_icon.png',
             # 3: 'assets/icons/avo_icon.png',
             # 3: 'assets/icons/banana_icon.svg',
             3: 'assets/icons/beer_icon.png',
@@ -99,7 +137,7 @@ class GameScreen(QWidget):
 
     def cell_clicked(self, row, col):
         self.clicked_cells.append({"x": col, "y": row})
-        print(f"Cell clicked at row {row}, column {col}")
+        # print(f"Cell clicked at row {row}, column {col}")
 
         if len(self.clicked_cells) == 2:
             # Prepare data for backend
@@ -113,11 +151,13 @@ class GameScreen(QWidget):
         self.update_score_and_moves(response["current_score"], response["moves_left"])
         self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
 
-    def on_back_button_click(self):
-        self.controller.show_main_menu()
+    def on_pause_button_click(self):
+        score = self.score_text_label.text()
+        moves_left = self.energy_text_label.text()
+        self.controller.show_pause(score, moves_left)
     
     def update_score_and_moves(self, score, moves_left):
-        self.score_label.setText(f"Score: {score}")
-        self.moves_left_label.setText(f"Moves Left: {moves_left}")
+        self.score_text_label.setText(f"{score}")
+        self.energy_text_label.setText(f"{moves_left}")
     
 

@@ -8,6 +8,7 @@ from windows.leaderboard_window import LeaderboardScreen
 from windows.palette_window import PaletteScreen
 from windows.difficulty_window import DifficultyScreen
 from windows.change_window import ChangeScreen
+from windows.pause_window import PauseScreen
 
 from utils.api_call import api_request
 
@@ -91,6 +92,15 @@ class AppController:
 
     def show_change(self):
         self.window.setCurrentWidget(self.change_screen)
+
+    def show_pause(self, score, moves_left):
+        self.pause_screen = PauseScreen(self, score, moves_left)
+        index = self.window.indexOf(self.pause_screen)
+        if index != -1:
+            self.window.removeWidget(self.pause_screen)
+        self.window.addWidget(self.pause_screen)
+        self.window.setCurrentWidget(self.pause_screen)
+
 
     def quit_game(self):
         response = api_request("/utils/exit", method="POST")

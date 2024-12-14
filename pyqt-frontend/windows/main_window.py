@@ -55,7 +55,7 @@ class MainMenuScreen(QWidget):
         self.controller.show_game_screen()
 
     def on_continue_button_click(self):
-        print("Continue button cliked...")
+        self.controller.window.setCurrentWidget(self.controller.game_screen)
 
     def on_settings_button_click(self):
         self.controller.show_settings()

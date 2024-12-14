@@ -96,7 +96,13 @@ QPushButton#backBtn {
 
 /* ------------------------------- Game window ----------------------------- */
 
+/* QSvgWidget#coinIcon {
+    margin-right: 50px;
+}
 
+QPixmap#underIcon {
+    margin-left: 50px;
+} */
 /* ------------------------------ Pause window ----------------------------- */
 
 
