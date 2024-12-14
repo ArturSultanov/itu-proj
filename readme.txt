@@ -35,27 +35,25 @@ pyqt-frontend       Author: Tatiana Fedorova (xfedor14)
 │   │   └── AppIcon.appiconset
 │   │       ├── 1024.png
 │   │       ├── 128.png
-│   │       ├── 16.png
-│   │       ├── 256.png
 │   │       └── ...
-│   ├── Banners                         In-app notifications logic
-│   │   ├── BannerManager.swift
-│   │   └── NotificationBanner.swift
-│   ├── Models                          Models for BE API requests
-│   │   └── ModelsManager.swift
-│   ├── Network                         Methofs for BE API interaction
-│   │   └── NetworkManager.swift
-│   ├── Styles                          Styles for GUI parts
-│   │   ├── ButtonStyle.swift
-│   │   ├── ColorPalette.swift
-│   │   └── PaletteManager.swift
-│   ├── Views                           Screens of application
-│   │   ├── GameBoardView.swift
-│   │   ├── GemView.swift
-│   │   ├── LeaderBoardView.swift
-│   │   ├── LoginView.swift
-│   │   ├── MainMenuView.swift
-│   │   └── SettingsView.swift
+│   ├── Banners
+│   │   ├── BannerManager.swift         Manages to display in-app notification
+│   │   └── NotificationBanner.swift    Predefined view for notification
+│   ├── Models                          
+│   │   └── ModelsManager.swift         Models for BE API requests
+│   ├── Network                         
+│   │   └── NetworkManager.swift        Methods for BE API interaction
+│   ├── Styles
+│   │   ├── ButtonStyle.swift           Predefined buttons styles
+│   │   ├── ColorPalette.swift          Normal and adaptive color palettes
+│   │   └── PaletteManager.swift        Manager to switch palettes
+│   ├── Views
+│   │   ├── GameBoardView.swift         Game board with the grid of gems view
+│   │   ├── GemView.swift               Represents individual gem
+│   │   ├── LeaderBoardView.swift       Top players leaderboard view
+│   │   ├── LoginView.swift             User login view
+│   │   ├── MainMenuView.swift          Main navigation menu view
+│   │   └── SettingsView.swift          App settings view
 │   ├── swiftui_frontendApp.swift       The entry point of the app
 │   └── README.md
 │
