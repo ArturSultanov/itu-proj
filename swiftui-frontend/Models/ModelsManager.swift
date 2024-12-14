@@ -34,6 +34,8 @@ import Observation
                 }
             }
         }
+        
+        self.playerData = playerData
     }
 }
 
