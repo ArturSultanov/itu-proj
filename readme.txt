@@ -12,6 +12,7 @@ pyqt-frontend/      Author: Tatiana Fedorova (xfedor14)
 ├── backend/...                         Unified BE for all FEs
 │
 ├── readme.txt
+│
 ├── tkinter-frontend/                   Author: xmovse00
 │   ├── src/
 │   │   ├── __init__.py
