@@ -129,11 +129,14 @@ class GameScreen(QWidget):
             3: 'assets/icons/beer_icon.png',
         }
         mono_icon_map = {
-            0: 'assets/icons/chili_icon.png',
-            1: 'assets/icons/chili_icon.png',
-            2: 'assets/icons/chili_icon.png',
-            3: 'assets/icons/chili_icon.png',
-            4: 'assets/icons/chili_icon.png',
+            0: 'assets/icons/mono/bomb_icon.png',
+            # 1: 'assets/icons/mono/dice_icon.png',
+            1: 'assets/icons/mono/what_icon.png',
+            2: 'assets/icons/mono/pill_icon.png',
+            3: 'assets/icons/mono/diamond_icon.png',
+            # 3: 'assets/icons/mono/poison_icon.png',
+            # 3: 'assets/icons/mono/what_icon.png',
+            4: 'assets/icons/mono/health_icon.png',
         }
 
         if self.controller.current_theme == "monochromacy":
@@ -151,10 +154,8 @@ class GameScreen(QWidget):
 
     def cell_clicked(self, row, col):
         self.clicked_cells.append({"x": col, "y": row})
-        # print(f"Cell clicked at row {row}, column {col}")
 
         if len(self.clicked_cells) == 2:
-            # Prepare data for backend
             data = {"gems": self.clicked_cells}
             self.send_move_to_backend(data)
             self.clicked_cells = []
@@ -179,7 +180,6 @@ class GameScreen(QWidget):
         self.energy_text_label.setText(f"{moves_left}")
 
         if moves_left == 0:
-            # api_request("/utils/sync", method="POST")
             self.show_end_game_dialog()
 
     def show_end_game_dialog(self):
@@ -212,16 +212,10 @@ class GameScreen(QWidget):
         headers = {"accept": "application/json"}
         
         try:
-            response = requests.post(url, headers=headers)
-            
-            if response.status_code == 200:
-                print("Синхронизация успешна:", response.json())
-            elif response.status_code == 404:
-                print("Ошибка: Текущий игрок не найден:", response.json())
-            else:
-                print(f"Ошибка синхронизации: {response.status_code}", response.json())
+            requests.post(url, headers=headers)
+        
         except requests.RequestException as e:
-            print(f"Ошибка при выполнении запроса синхронизации: {e}")
+            print(f"Sync error {e}")
 
     def start_new_game(self, dialog):
         dialog.close()

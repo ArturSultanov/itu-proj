@@ -38,10 +38,9 @@ QLabel#underscoreIcon {
 }
 
 QPushButton#confirmBtn {
-    max-width: 280px;
-
+    max-width: 300px;
     margin-left: 250px;
-    margin-bottom: 300px;
+    margin-bottom: 280px;
 }
 
 QPushButton#quitBtn {

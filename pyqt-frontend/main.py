@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QStackedWidget, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QStackedWidget, QDesktopWidget, QMessageBox
 from PyQt5.QtGui import QFontDatabase
 from windows.login_window import LoginScreen
 from windows.main_window import MainMenuScreen
@@ -47,7 +47,7 @@ class AppController:
         self.window.addWidget(self.palette_screen)
         self.window.addWidget(self.difficulty_screen)
         self.window.addWidget(self.change_screen)
-    
+        
         self.window.setFixedSize(1280, 960)
         self.center_window()
     
@@ -117,12 +117,39 @@ class AppController:
         return []
 
     def quit_game(self):
-        # response = api_request("/utils/exit", method="POST")
-        # if response and isinstance(response, dict) and "detail" in response:
-        #     print(response["detail"])
-        # else:
-        #     print("No 'detail' key in the response or the response is invalid:", response)
-        self.app.quit()
+        parent_widget = self.window.window()
+        message_box = QMessageBox(parent_widget)
+        message_box.setWindowTitle("Quit Game")
+        message_box.setText("Are you sure you want to quit?")
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        message_box.setDefaultButton(QMessageBox.No)
+
+        font = message_box.font()
+        font.setPointSize(18)
+        message_box.setFont(font)
+        
+        message_box.setStyleSheet("""
+            QLabel {
+                font-size: 18pt;
+            }
+            QPushButton {
+                min-width: 200px;
+                min-height: 60px;
+                font-size: 20pt;
+            }
+        """)
+        
+        main_geometry = parent_widget.geometry()
+        message_box.move(
+            main_geometry.x() + 200,
+            main_geometry.y() + 400
+        )
+        
+        reply = message_box.exec_()
+        if reply == QMessageBox.Yes:
+            self.app.quit()
+
+            
 
 if __name__ == "__main__":
     controller = AppController()

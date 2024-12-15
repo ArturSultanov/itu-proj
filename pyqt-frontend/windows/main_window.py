@@ -42,6 +42,7 @@ class MainMenuScreen(QWidget):
         self.quit_btn.clicked.connect(self.controller.quit_game)
         main_layout.addWidget(self.quit_btn)
 
+        # spacer to push the buttons towards the top + centering them
         spacer_bottom = QSpacerItem(20, 140, QSizePolicy.Minimum, QSizePolicy.Expanding)
         main_layout.addItem(spacer_bottom)
 
