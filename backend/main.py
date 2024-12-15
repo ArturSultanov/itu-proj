@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from backend.config import settings
-from backend.database import create_tables, async_engine
-from backend.routers import board_router, login_router, menu_router, settings_router, utils_router
+from config import settings
+from database import create_tables, async_engine
+from routers import board_router, login_router, menu_router, settings_router, utils_router
 
 
 @asynccontextmanager
@@ -38,3 +38,6 @@ async def read_root():
     and perform game actions like clicking on gems or swapping them on the game board. 
     The backend uses SQLAlchemy with an SQLite database for persistence and supports various 
     levels of game difficulty."""}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost", port=8000)

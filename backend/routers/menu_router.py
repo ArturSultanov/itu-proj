@@ -4,10 +4,10 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.future import select
 
-from backend.config import get_start_moves
-from backend.database import PlayerOrm, cp_dependency, db_dependency
-from backend.models import GameDTO, LeaderboardTDO, UpdateMessageDTO
-from backend.utils import generate_game_board, synchronize_player
+from config import get_start_moves
+from database import PlayerOrm, cp_dependency, db_dependency
+from models import GameDTO, LeaderboardTDO, UpdateMessageDTO
+from utils import generate_game_board, synchronize_player
 
 menu_router = APIRouter(
     prefix="/menu",

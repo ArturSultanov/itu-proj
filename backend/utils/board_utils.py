@@ -2,8 +2,8 @@ import random
 from enum import Enum
 from typing import Tuple, Set, List, Optional
 
-from backend.config import get_heart_recovery_moves
-from backend.models import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO, GameDTO
+from config import get_heart_recovery_moves
+from models import GemPositionDTO, GameUpdateDTO, GemBase, PlayerDTO, SwapGemsDTO, GameDTO
 
 
 class GemType(Enum):

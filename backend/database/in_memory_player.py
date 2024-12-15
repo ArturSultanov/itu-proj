@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import HTTPException, Depends, status
 
-from backend.models import PlayerDTO
+from models import PlayerDTO
 
 
 class CurrentPlayer:

@@ -2,9 +2,9 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
 
-from backend.database import cp_dependency, db_dependency, create_tables, delete_tables, current_player
-from backend.models import PlayerDTO, UpdateMessageDTO
-from backend.utils import synchronize_player
+from database import cp_dependency, db_dependency, create_tables, delete_tables, current_player
+from models import PlayerDTO, UpdateMessageDTO
+from utils import synchronize_player
 
 utils_router = APIRouter(
     prefix="/utils",

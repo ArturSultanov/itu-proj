@@ -2,7 +2,7 @@ from typing import List, Optional, Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, NonNegativeInt, conlist, conint
 
-from backend.config import Difficulty
+from config import Difficulty
 
 
 class DifficultyDTO(BaseModel):

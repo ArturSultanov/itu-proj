@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status, HTTPException
 from sqlalchemy.future import select
 
-from backend.config import Difficulty, set_difficulty, get_difficulty
-from backend.database import cp_dependency, db_dependency, PlayerOrm
-from backend.models import PlayerLoginDTO, DifficultyDTO, UpdateMessageDTO
-from backend.utils import synchronize_player
+from config import Difficulty, set_difficulty, get_difficulty
+from database import cp_dependency, db_dependency, PlayerOrm
+from models import PlayerLoginDTO, DifficultyDTO, UpdateMessageDTO
+from utils import synchronize_player
 
 settings_router = APIRouter(
     prefix="/settings",

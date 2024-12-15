@@ -4,10 +4,10 @@ from sqlalchemy.future import select
 
 from pydantic import constr
 
-from backend.database import PlayerOrm
-from backend.database import current_player
-from backend.database import db_dependency
-from backend.models import PlayerDTO
+from database import PlayerOrm
+from database import current_player
+from database import db_dependency
+from models import PlayerDTO
 
 login_router = APIRouter(
     prefix="/login",

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from backend.database import cp_dependency, db_dependency
-from backend.models import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO, UpdateMessageDTO, GameDTO
-from backend.utils import swap_gems, generate_game_board, click_gem, synchronize_player, swap_gems_fullboard, \
+from database import cp_dependency, db_dependency
+from models import GameUpdateDTO, SwapGemsDTO, GemPositionDTO, BordStatusDTO, UpdateMessageDTO, GameDTO
+from utils import swap_gems, generate_game_board, click_gem, synchronize_player, swap_gems_fullboard, \
     click_gem_fullboard
 
 # from backend.utils.board_generator import generate_game_board

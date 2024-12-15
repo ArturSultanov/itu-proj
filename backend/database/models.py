@@ -3,7 +3,7 @@ from typing import Annotated, Optional, Dict
 from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.database import Base, Str256
+from database import Base, Str256
 
 intpk = Annotated[int, mapped_column(primary_key=True, index=True)]
 
