@@ -39,6 +39,7 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │   │       ├── 1024.png
 │   │       ├── 128.png
 │   │       └── ...
+|   ├── Info.plist                                                  Metadata for the app
 │   ├── Banners
 │   │   ├── BannerManager.swift                                     Manages to display in-app notification
 │   │   └── NotificationBanner.swift                                Predefined view for notification
@@ -57,7 +58,12 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │   │   ├── LoginView.swift                                         User login view
 │   │   ├── MainMenuView.swift                                      Main navigation menu view
 │   │   └── SettingsView.swift                                      App settings view
+|   ├── swiftui_frontend.entitlements                               Defines the app permissions and capabilities 
 │   ├── swiftui_frontendApp.swift                                   The entry point of the app
+|   ├── swiftui-frontend.xcodeproj                                  App build settings, dependencies, and target definitions
+|   │   ├── project.pbxproj
+|   │   ├── project.xcworkspace
+│   │   └── ...
 │   └── README.md
 │
 ├── kotlin-frontend                                                 Author: xshche05
