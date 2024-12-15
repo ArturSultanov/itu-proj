@@ -1,3 +1,9 @@
+# ------------------------------------------------------------
+# Author: Tatiana Fedorova (xfedor14)
+# Subject: ITU
+# Year: 2024
+# ------------------------------------------------------------
+
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QIcon
@@ -12,14 +18,15 @@ class PaletteScreen(QWidget):
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(80, 280, 0, 0)
-
         difficulty_layout = QVBoxLayout()
 
+        # create monochromacy button
         self.mono_btn = QPushButton("Monochromacy")
         self.mono_btn.setIconSize(QSize(50, 50))
         self.mono_btn.clicked.connect(lambda: self.set_palette("monochromacy"))
         difficulty_layout.addWidget(self.mono_btn, alignment=Qt.AlignLeft)
 
+        # create normal button
         self.normal_btn = QPushButton("Normal")
         self.normal_btn.setIconSize(QSize(50, 50))
         self.normal_btn.clicked.connect(lambda: self.set_palette("normal"))
@@ -27,11 +34,13 @@ class PaletteScreen(QWidget):
 
         main_layout.addLayout(difficulty_layout)
 
+        # add right side image
         self.right_img = QLabel(self)
         self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/palette_pic.png"))
         self.right_img.setObjectName("difficultyPic")
         main_layout.addWidget(self.right_img, alignment=Qt.AlignRight)
 
+        # create back button
         back_layout = QHBoxLayout()
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(QIcon("assets/icons/back_icon.svg"))
@@ -45,15 +54,19 @@ class PaletteScreen(QWidget):
 
         self.setLayout(main_layout)
 
+        # clear icons initially
         self.clear_all_icons()
 
+    # go back to settings screen
     def on_back_button_click(self):
         self.controller.show_settings()
 
+    # remove all icons from buttons
     def clear_all_icons(self):
         self.mono_btn.setIcon(QIcon())
         self.normal_btn.setIcon(QIcon())
 
+    # set the selected palette
     def set_palette(self, palette_value: str):
         self.clear_all_icons()
         if palette_value == "monochromacy":
@@ -70,7 +83,7 @@ class PaletteScreen(QWidget):
                     self.controller.game_screen.cols
                 )
             )
-
+        # apply normal stylesheet
         elif palette_value == "normal":
             self.controller.apply_global_style(self.controller.original_qss)
             self.controller.current_theme = "normal"
@@ -84,4 +97,3 @@ class PaletteScreen(QWidget):
                     self.controller.game_screen.cols
                 )
             )
-

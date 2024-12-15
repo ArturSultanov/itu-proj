@@ -1,3 +1,10 @@
+/* ------------------------------------------------------------
+    Author: Tatiana Fedorova (xfedor14)
+    Subject: ITU
+    Year: 2024
+    ------------------------------------------------------------
+*/
+
 QMainWindow, QWidget {
     background-color: #FFE500;
     font-family: 'Press Start 2P';

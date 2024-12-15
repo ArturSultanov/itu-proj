@@ -1,3 +1,9 @@
+# ------------------------------------------------------------
+# Author: Tatiana Fedorova (xfedor14)
+# Subject: ITU
+# Year: 2024
+# ------------------------------------------------------------
+
 import requests
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy, QHBoxLayout, QLineEdit
 from PyQt5.QtCore import Qt, QSize
@@ -11,14 +17,15 @@ class LeaderboardScreen(QWidget):
         self.setWindowTitle("Leaderboard")
 
         self.main_layout = QHBoxLayout()
-
         self.tmp_layout = QVBoxLayout()
         self.leader_layout = QVBoxLayout()
         self.leader_layout.setContentsMargins(100, 200, 0, 0)
         
+        # update leaderboard with data
         self.update_leaderboard()
         self.tmp_layout.addLayout(self.leader_layout)
         
+        # create back button
         back_layout = QHBoxLayout()
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(QIcon("assets/icons/back_icon.svg"))
@@ -31,15 +38,19 @@ class LeaderboardScreen(QWidget):
         back_layout.addWidget(self.back_btn, alignment=Qt.AlignLeft | Qt.AlignBottom)
         self.tmp_layout.addLayout(back_layout)
         self.main_layout.addLayout(self.tmp_layout)
+
+        # add right side image
         self.right_img = QLabel(self)
         self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/leaderboard_pic.png"))
         self.right_img.setObjectName("difficultyPic")
         self.main_layout.addWidget(self.right_img, alignment=Qt.AlignRight | Qt.AlignBottom)
         self.setLayout(self.main_layout)
 
+    # go back to main menu
     def on_back_button_click(self):
         self.controller.show_main_menu()
 
+    # clear all widgets from layout
     def clear_layout(self, layout):
         while layout.count():
             item = layout.takeAt(0)
@@ -52,6 +63,7 @@ class LeaderboardScreen(QWidget):
                     self.clear_layout(nested_layout)
 
     def update_leaderboard(self):
+        # get top players
         players = self.controller.get_leaderboard_data(limit=5)
         self.clear_layout(self.leader_layout)
         
@@ -59,6 +71,7 @@ class LeaderboardScreen(QWidget):
             user_layout = QHBoxLayout()
             user_layout.setAlignment(Qt.AlignLeft)
 
+            # add user icon
             icon = QSvgWidget("assets/icons/user_icon.svg")
             icon.setObjectName("userIcon")
             icon.setFixedSize(70, 80)
@@ -67,11 +80,13 @@ class LeaderboardScreen(QWidget):
             user_input_layout = QVBoxLayout()
             user_input_layout.setContentsMargins(40,0,0,0)
 
+            # add player name
             name_score_layout = QHBoxLayout()
             name_label = QLabel(player['login'])
             name_label.setFixedHeight(50)
             name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
+            # add player score
             score_label = QLabel(str(player['highest_score']))
             score_label.setFixedHeight(50)
             score_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -80,6 +95,7 @@ class LeaderboardScreen(QWidget):
             name_score_layout.addWidget(score_label)
             user_input_layout.addLayout(name_score_layout)
 
+            # add underscore image
             userpic = QLabel()
             userpic.setPixmap(QPixmap("assets/icons/underscore.png"))
             userpic.setFixedHeight(10)

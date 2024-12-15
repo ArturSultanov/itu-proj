@@ -1,3 +1,9 @@
+# ------------------------------------------------------------
+# Author: Tatiana Fedorova (xfedor14)
+# Subject: ITU
+# Year: 2024
+# ------------------------------------------------------------
+
 import requests
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 from PyQt5.QtCore import Qt, QSize
@@ -20,6 +26,7 @@ class GameScreen(QWidget):
         self.main_layout = QHBoxLayout()
         self.layout = QVBoxLayout()
 
+        # setup score layout
         score_layout = QVBoxLayout()
         score_top_layout = QHBoxLayout()
         self.main_layout.addSpacing(350)
@@ -32,6 +39,7 @@ class GameScreen(QWidget):
         score_top_layout.addWidget(self.score_text_label)
         score_layout.addLayout(score_top_layout)
 
+        # add underscore image
         self.underpic = QLabel(self)
         self.underpic.setPixmap(QPixmap("assets/icons/underscore_small_icon.png"))
         self.underpic.setAlignment(Qt.AlignHCenter | Qt.AlignRight)
@@ -42,6 +50,7 @@ class GameScreen(QWidget):
 
         self.main_layout.addSpacing(150)
 
+        # setup energy layout (moves)
         energy_layout = QVBoxLayout()
         energy_top_layout = QHBoxLayout()
         self.energy_icon = QSvgWidget("assets/icons/energy_icon.svg", self)
@@ -63,6 +72,7 @@ class GameScreen(QWidget):
 
         self.layout.addLayout(self.main_layout)
 
+        # setup grid layout with spacers
         space_layout = QHBoxLayout()
         left_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         space_layout.addItem(left_spacer)
@@ -74,7 +84,8 @@ class GameScreen(QWidget):
         right_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         space_layout.addItem(right_spacer)
         self.layout.addLayout(space_layout)
-
+        
+        # add pause button
         pause_layout = QHBoxLayout()
         self.pause_btn = QPushButton(self)
         self.pause_btn.setIcon(QIcon("assets/icons/pause_icon.svg"))
@@ -90,18 +101,20 @@ class GameScreen(QWidget):
         self.setLayout(self.layout)
         self.update_grid(self.rows, self.cols, self.generate_sample_items(self.rows, self.cols))
 
+    # clear existing grid
     def update_grid(self, rows, cols, items):
         for i in reversed(range(self.grid_layout.count())):
             widget = self.grid_layout.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
-
+        # populate grid with new items
         for row in range(rows):
             for col in range(cols):
                 item_type = items[row][col] if row < len(items) and col < len(items[row]) else 0
                 grid_item = self.create_item_widget(item_type, row, col)
                 self.grid_layout.addWidget(grid_item, row, col)
 
+    # create a button for each grid cell
     def create_item_widget(self, item_type, row, col):
         button = QPushButton(self)
         button.setFixedSize(100, 100)
@@ -114,6 +127,7 @@ class GameScreen(QWidget):
         return button
 
     def get_item_icon(self, item_type):
+        # map item types to icons
         normal_icon_map = {
             # 0: 'assets/icons/normal/chicken_icon.png',
             0: 'assets/icons/normal/lemon_icon.svg',
@@ -136,7 +150,7 @@ class GameScreen(QWidget):
             # 3: 'assets/icons/mono/what_icon.png',
             4: 'assets/icons/mono/health_icon.png',
         }
-
+        # choose icon based on theme
         if self.controller.current_theme == "monochromacy":
             icon_path = mono_icon_map.get(item_type, 'assets/icons/banana.svg')
         else:
@@ -144,19 +158,20 @@ class GameScreen(QWidget):
 
         return QIcon(icon_path)
 
-
+    # generate random items for the grid
     def generate_sample_items(self, rows, cols):
         import random
         types = [0, 1, 2, 3, 4]
         return [[random.choice(types) for _ in range(cols)] for _ in range(rows)]
-
+    
+    # handle cell click events
     def cell_clicked(self, row, col):
         button = self.grid_layout.itemAtPosition(row, col).widget()
 
         if not button:
             return
-        print(f"Clicked cells: {self.clicked_cells}")
-
+        # print(f"Clicked cells: {self.clicked_cells}")
+        item_type = button.property('item_type')
 
         if len(self.clicked_cells) == 0:
             self.clear_item_selection()
@@ -168,8 +183,16 @@ class GameScreen(QWidget):
             button.setStyleSheet("border: 5px solid black;")
             self.clicked_cells.append({"x": col, "y": row})
             data = {"gems": self.clicked_cells}
-            self.send_move_to_backend(data)
 
+            first_gem = self.clicked_cells[0]
+            first_button = self.grid_layout.itemAtPosition(first_gem["y"], first_gem["x"]).widget()
+            first_type = first_button.property('item_type')
+
+            heart_involved = first_type == 4 or item_type == 4
+
+            self.send_move_to_backend(data, heart_involved)
+
+    # remove selection from all items
     def clear_item_selection(self):
         for row in range(self.rows):
             for col in range(self.cols):
@@ -177,9 +200,16 @@ class GameScreen(QWidget):
                 if button:
                     button.setStyleSheet("")
 
-    def send_move_to_backend(self, data):
-        response = api_request("/board/swap_gems_fullboard", params=data, method="POST")
-        print(response)
+    # send the move data to the backend
+    def send_move_to_backend(self, data, heart_involved):
+        if not api_request("/board/click_gem", params=data["gems"][0], method="POST").get("message", None):
+            # send first gem
+            response = api_request('/board/click_gem_fullboard', params=data['gems'][0], method='POST')
+            # send second gem
+            response = api_request('/board/click_gem_fullboard', params=data['gems'][1], method='POST')
+        else:
+            # swap gems on backend
+            response = api_request("/board/swap_gems_fullboard", params=data, method="POST")
 
         self.clear_item_selection()
 
@@ -188,16 +218,28 @@ class GameScreen(QWidget):
             return
 
         if "board_status" in response:
-            self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
-            self.update_score_and_moves(response["current_score"], response["moves_left"])
+            if heart_involved:
+                self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+                # print(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+                self.update_score_and_moves(response["current_score"], response["moves_left"])
+                # print((response["current_score"], response["moves_left"]))
+                # print("HEART: YES")
+            else:
+                self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+                
+                self.update_score_and_moves(response["current_score"], response["moves_left"])
+                # print((response["current_score"], response["moves_left"]))
+                # print("HEART: NO")
 
         self.clicked_cells = []
 
+    # handle pause button click
     def on_pause_button_click(self):
         score = self.score_text_label.text()
         moves_left = self.energy_text_label.text()
         self.controller.show_pause(score, moves_left)
     
+    # update score and moves labels
     def update_score_and_moves(self, score, moves_left):
         self.score_text_label.setText(f"{score}")
         self.energy_text_label.setText(f"{moves_left}")
@@ -205,6 +247,7 @@ class GameScreen(QWidget):
         if moves_left == 0:
             self.show_end_game_dialog()
 
+    # show game over dialog
     def show_end_game_dialog(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("Game Over")
@@ -228,21 +271,22 @@ class GameScreen(QWidget):
         dialog.setLayout(vbox)
         dialog.exec_()
 
+    # sync player state with backend
     def sync_player_state(self):
-
         url = "http://localhost:8000/utils/sync"
         headers = {"accept": "application/json"}
-        
         try:
             requests.post(url, headers=headers)
         
         except requests.RequestException as e:
             print(f"Sync error {e}")
 
+    # start a new game
     def start_new_game(self, dialog):
         dialog.close()
         self.controller.show_game_screen()
-
+        
+    # open leaderboard screen
     def open_leaderboard(self, dialog):
         dialog.close()
         self.controller.show_leaderboard()

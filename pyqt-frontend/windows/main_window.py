@@ -1,3 +1,9 @@
+# ------------------------------------------------------------
+# Author: Tatiana Fedorova (xfedor14)
+# Subject: ITU
+# Year: 2024
+# ------------------------------------------------------------
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
@@ -7,20 +13,22 @@ class MainMenuScreen(QWidget):
         super().__init__()
         self.controller = controller
         self.setWindowTitle("Main Menu")
-
         main_layout = QVBoxLayout()
 
+        # add side image
         self.right_img = QLabel(self)
         self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/main_pic.png")) 
         self.right_img.setObjectName("mainPic")
         main_layout.addWidget(self.right_img, alignment=Qt.AlignHCenter)
 
+        # add welcome label
         self.label = QLabel("Hi, Player!", self)
         self.label.setObjectName("welcomeTextLabel")
         self.label.setAlignment(Qt.AlignCenter)
         self.label.mousePressEvent = self.on_username_label_click
         main_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
 
+        # add menu buttons
         self.new_game_btn = QPushButton("New Game", self)
         self.new_game_btn.clicked.connect(self.on_new_game_button_click)
         main_layout.addWidget(self.new_game_btn)
@@ -38,6 +46,7 @@ class MainMenuScreen(QWidget):
         self.leaderboard_btn.clicked.connect(self.on_leaderboard_button_click)
         main_layout.addWidget(self.leaderboard_btn)
 
+        # add quit button
         self.quit_btn = QPushButton("Quit Game", self)
         self.quit_btn.setObjectName("quitBtn")
         self.quit_btn.clicked.connect(self.controller.quit_game)
@@ -49,21 +58,27 @@ class MainMenuScreen(QWidget):
 
         self.setLayout(main_layout)
 
+    # update welcome message with player name
     def update_player_info(self, player_name):
         self.label.setText(f"Hi, {player_name}!")
 
+    # start a new game
     def on_new_game_button_click(self):
         self.controller.show_game_screen()
 
+    # continue the current game
     def on_continue_button_click(self):
         self.controller.window.setCurrentWidget(self.controller.game_screen)
 
+    # go to settings screen
     def on_settings_button_click(self):
         self.controller.show_settings()
 
+    # show leaderboard
     def on_leaderboard_button_click(self):
         self.controller.show_leaderboard()
 
+    # ask to switch players
     def on_username_label_click(self, event):
         parent_widget = self.window().window()
         msg = QMessageBox(parent_widget)
@@ -83,6 +98,7 @@ class MainMenuScreen(QWidget):
             }
         """)
 
+        # position the message box
         main_geometry = parent_widget.geometry()
         msg.move(
             main_geometry.x() + 380,
@@ -92,4 +108,3 @@ class MainMenuScreen(QWidget):
         reply = msg.exec_()
         if reply == QMessageBox.Yes:
             self.controller.show_login_screen()
-

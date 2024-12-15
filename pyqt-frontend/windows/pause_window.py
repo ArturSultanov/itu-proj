@@ -1,3 +1,9 @@
+# ------------------------------------------------------------
+# Author: Tatiana Fedorova (xfedor14)
+# Subject: ITU
+# Year: 2024
+# ------------------------------------------------------------
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtCore import Qt, QSize
@@ -12,6 +18,7 @@ class PauseScreen(QWidget):
         self.main_layout = QHBoxLayout()
         self.layout = QVBoxLayout()
 
+        # setup main display
         score_layout = QVBoxLayout()
         score_top_layout = QHBoxLayout()
         self.main_layout.addSpacing(350)
@@ -24,6 +31,7 @@ class PauseScreen(QWidget):
         score_top_layout.addWidget(self.score_text_label)
         score_layout.addLayout(score_top_layout)
 
+        # add underscore image below score
         self.underpic = QLabel(self)
         self.underpic.setPixmap(QPixmap("assets/icons/underscore_small_icon.png"))
         self.underpic.setAlignment(Qt.AlignHCenter | Qt.AlignRight)
@@ -34,6 +42,7 @@ class PauseScreen(QWidget):
 
         self.main_layout.addSpacing(150)
 
+        # setup moves left display
         energy_layout = QVBoxLayout()
         energy_top_layout = QHBoxLayout()
         self.energy_icon = QSvgWidget("assets/icons/energy_icon.svg", self)
@@ -55,6 +64,7 @@ class PauseScreen(QWidget):
 
         self.layout.addLayout(self.main_layout)
 
+        # add pause image
         img = QPixmap("assets/icons/screen_pic/pause_pic.png")
         scaled_img = img.scaled(600, 600, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.img = QLabel(self)
@@ -63,6 +73,7 @@ class PauseScreen(QWidget):
         self.layout.addWidget(self.img, alignment=Qt.AlignHCenter)
         self.layout.addStretch()
 
+        # add play button
         play_layout = QHBoxLayout()
         self.play_btn = QPushButton(self)
         self.play_btn.setIcon(QIcon("assets/icons/play_icon.svg"))
@@ -75,6 +86,7 @@ class PauseScreen(QWidget):
         play_layout.setContentsMargins(0, 30, 0, 20)
         self.layout.addLayout(play_layout)
 
+        # add back button
         back_layout = QHBoxLayout()
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(QIcon("assets/icons/back_icon.svg"))
@@ -82,16 +94,16 @@ class PauseScreen(QWidget):
         self.back_btn.setObjectName("backBtn")
         self.back_btn.setIconSize(QSize(50, 50))
         self.back_btn.clicked.connect(self.on_back_button_click)
-        
         self.back_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
         back_layout.addWidget(self.back_btn, alignment=Qt.AlignLeft)
         self.layout.addLayout(back_layout)
 
         self.setLayout(self.layout)
 
+    # go back to game screen
     def on_play_button_click(self):
         self.controller.window.setCurrentWidget(self.controller.game_screen)
 
+    # go back to main menu
     def on_back_button_click(self):
         self.controller.show_main_menu()
