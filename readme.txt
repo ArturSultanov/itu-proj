@@ -106,3 +106,24 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │   │                   └── network_security_config.xml
 │   └── ...
 │
+└── pyqt-frontend                                         Author: xfedor14
+    ├── assets                                            Assets used in the application
+    │    ├── icons                                        Icons used in the application
+    │    ├── PressStart2P.ttf                             Custom font
+    │    └── styles.qss                                   Stylesheet
+    ├── utils                                             Utility modules
+    │    └── api_call.py                                  Utility for making API requests
+    ├── windows                                           All window screens
+    │   ├── __init__.py                                   Initialize windows package
+    │   ├── change_window.py                              Screen for changing user name
+    │   ├── difficulty_window.py                          Screen for selecting difficulty level
+    │   ├── game_window.py                                Screen where the game is played
+    │   ├── leaderboard_window.py                         Screen displaying the leaderboard
+    │   ├── login_window.py                               Login screen
+    │   ├── main_window.py                                Main menu screen
+    │   ├── palette_window.py                             Screen for selecting color palette
+    │   ├── pause_window.py                               Screen displayed when the game is paused
+    │   └── settings_window.py                            Settings screen
+    └── main.py                                           Main entry point of the application (controller)
+
+    
