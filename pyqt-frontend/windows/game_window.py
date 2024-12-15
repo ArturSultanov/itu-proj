@@ -1,11 +1,9 @@
 import requests
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtGui import QPixmap, QIcon 
 from utils.api_call import api_request
 from PyQt5.QtSvg import QSvgWidget
-import time
 
 class GameScreen(QWidget):
     def __init__(self, controller, rows=5, cols=6):
@@ -106,31 +104,31 @@ class GameScreen(QWidget):
 
     def create_item_widget(self, item_type, row, col):
         button = QPushButton(self)
-
         button.setFixedSize(100, 100)
+        button.setProperty('item_type', item_type)
         icon = self.get_item_icon(item_type)
         button.setIcon(icon)
-        button.setIconSize(button.size())
+        button.setIconSize(QSize(90, 90))  # Размер иконки меньше кнопки
+        button.setStyleSheet("border: none;")
         button.clicked.connect(lambda _, r=row, c=col: self.cell_clicked(r, c))
         return button
 
     def get_item_icon(self, item_type):
         normal_icon_map = {
-            # 0: 'assets/icons/chicken_icon.png',
-            0: 'assets/icons/lemon_icon.svg',
-            # 1: 'assets/icons/chili_icon.png',
-            1: 'assets/icons/donut_icon.png',
-            2: 'assets/icons/cherry_icon.svg',
-            # 4: 'assets/icons/rice_icon.png',
-            # 4: 'assets/icons/star_icon.png',
-            4: 'assets/icons/heart_icon.png',
-            # 3: 'assets/icons/avo_icon.png',
-            # 3: 'assets/icons/banana_icon.svg',
-            3: 'assets/icons/beer_icon.png',
+            # 0: 'assets/icons/normal/chicken_icon.png',
+            0: 'assets/icons/normal/lemon_icon.svg',
+            # 1: 'assets/icons/normal/chili_icon.png',
+            1: 'assets/icons/normal/donut_icon.png',
+            2: 'assets/icons/normal/cherry_icon.svg',
+            # 4: 'assets/icons/normal/rice_icon.png',
+            # 4: 'assets/icons/normal/star_icon.png',
+            4: 'assets/icons/normal/heart_icon.png',
+            # 3: 'assets/icons/normal/avo_icon.png',
+            # 3: 'assets/icons/normal/banana_icon.svg',
+            3: 'assets/icons/normal/beer_icon.png',
         }
         mono_icon_map = {
             0: 'assets/icons/mono/bomb_icon.png',
-            # 1: 'assets/icons/mono/dice_icon.png',
             1: 'assets/icons/mono/what_icon.png',
             2: 'assets/icons/mono/pill_icon.png',
             3: 'assets/icons/mono/diamond_icon.png',
@@ -153,22 +151,47 @@ class GameScreen(QWidget):
         return [[random.choice(types) for _ in range(cols)] for _ in range(rows)]
 
     def cell_clicked(self, row, col):
-        self.clicked_cells.append({"x": col, "y": row})
+        button = self.grid_layout.itemAtPosition(row, col).widget()
 
-        if len(self.clicked_cells) == 2:
+        if not button:
+            return
+        print(f"Clicked cells: {self.clicked_cells}")
+
+
+        if len(self.clicked_cells) == 0:
+            self.clear_item_selection()
+            button.setStyleSheet("border: 5px solid black;")
+            self.clicked_cells.append({"x": col, "y": row})
+            return
+
+        if len(self.clicked_cells) == 1:
+            button.setStyleSheet("border: 5px solid black;")
+            self.clicked_cells.append({"x": col, "y": row})
             data = {"gems": self.clicked_cells}
             self.send_move_to_backend(data)
-            self.clicked_cells = []
+
+    def clear_item_selection(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                button = self.grid_layout.itemAtPosition(row, col).widget()
+                if button:
+                    button.setStyleSheet("")
 
     def send_move_to_backend(self, data):
         response = api_request("/board/swap_gems_fullboard", params=data, method="POST")
         print(response)
 
+        self.clear_item_selection()
+
         if "current_score" not in response or "moves_left" not in response:
             self.show_end_game_dialog()
-        else:
-            self.update_score_and_moves(response["current_score"], response["moves_left"])
+            return
+
+        if "board_status" in response:
             self.update_grid(len(response["board_status"]), len(response["board_status"][0]), response["board_status"])
+            self.update_score_and_moves(response["current_score"], response["moves_left"])
+
+        self.clicked_cells = []
 
     def on_pause_button_click(self):
         score = self.score_text_label.text()
@@ -185,7 +208,6 @@ class GameScreen(QWidget):
     def show_end_game_dialog(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("Game Over")
-
 
         vbox = QVBoxLayout(dialog)
         label = QLabel("No moves left. Game Over!", dialog)

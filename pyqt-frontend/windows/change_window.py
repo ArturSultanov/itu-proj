@@ -59,7 +59,7 @@ class ChangeScreen(QWidget):
         main_layout.addLayout(left_layout)
 
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/change_pic.png")) 
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/change_pic.png")) 
         main_layout.addWidget(self.right_img, alignment=Qt.AlignRight | Qt.AlignBottom)
 
         self.setLayout(main_layout)

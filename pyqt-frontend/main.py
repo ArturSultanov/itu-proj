@@ -54,6 +54,8 @@ class AppController:
     def apply_global_style(self, qss_string: str):
         self.app.setStyleSheet(qss_string)
 
+    def show_login_screen(self):
+        self.window.setCurrentWidget(self.login_screen)
         
     def center_window(self):
         screen_geometry = QDesktopWidget().availableGeometry()

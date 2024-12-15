@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 
@@ -11,13 +11,14 @@ class MainMenuScreen(QWidget):
         main_layout = QVBoxLayout()
 
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/main_pic.png")) 
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/main_pic.png")) 
         self.right_img.setObjectName("mainPic")
         main_layout.addWidget(self.right_img, alignment=Qt.AlignHCenter)
 
         self.label = QLabel("Hi, Player!", self)
         self.label.setObjectName("welcomeTextLabel")
         self.label.setAlignment(Qt.AlignCenter)
+        self.label.mousePressEvent = self.on_username_label_click
         main_layout.addWidget(self.label, alignment=Qt.AlignHCenter)
 
         self.new_game_btn = QPushButton("New Game", self)
@@ -62,4 +63,33 @@ class MainMenuScreen(QWidget):
 
     def on_leaderboard_button_click(self):
         self.controller.show_leaderboard()
+
+    def on_username_label_click(self, event):
+        parent_widget = self.window().window()
+        msg = QMessageBox(parent_widget)
+        msg.setWindowTitle("Switch Player")
+        msg.setText("Do you really want to switch players?")
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg.setDefaultButton(QMessageBox.No)
+
+        msg.setStyleSheet("""
+            QLabel {
+                font-size: 18pt;
+            }
+            QPushButton {
+                min-width: 200px;
+                min-height: 60px;
+                font-size: 20pt;
+            }
+        """)
+
+        main_geometry = parent_widget.geometry()
+        msg.move(
+            main_geometry.x() + 380,
+            main_geometry.y() + 400
+        )
+
+        reply = msg.exec_()
+        if reply == QMessageBox.Yes:
+            self.controller.show_login_screen()
 

@@ -43,7 +43,7 @@ class DifficultyScreen(QWidget):
         main_layout.addLayout(difficulty_layout)
 
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/difficulty_pic.png")) 
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/difficulty_pic.png")) 
         self.right_img.setObjectName("difficultyPic")
         main_layout.addWidget(self.right_img, alignment=Qt.AlignRight)
 

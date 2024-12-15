@@ -32,7 +32,7 @@ class LeaderboardScreen(QWidget):
         self.tmp_layout.addLayout(back_layout)
         self.main_layout.addLayout(self.tmp_layout)
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/leaderboard_pic.png"))
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/leaderboard_pic.png"))
         self.right_img.setObjectName("difficultyPic")
         self.main_layout.addWidget(self.right_img, alignment=Qt.AlignRight | Qt.AlignBottom)
         self.setLayout(self.main_layout)

@@ -54,8 +54,6 @@ QLabel#loginPic {
 
 /* ------------------------------ Main window ------------------------------ */
 
-
-
 QLabel#welcomeTextLabel {
     margin: 30px;
     text-align: left;
@@ -78,44 +76,8 @@ QPushButton#leftBtn {
 
 QPushButton#backBtn {
     margin-bottom: 25px;
-    /* margin-left: 30px; */
-}
-
-
-/* --------------------------- Leaderboard window -------------------------- */
-
-QLabel#userNameLabel {
-    /* margin-left: 15px; */
-    /* margin-top: 120px; */
 }
 
 QLabel#underscoreIcon {
     margin-left: 30px;
 }
-
-/* ----------------------------- Palette window ---------------------------- */
-
-
-/* ---------------------------- Difficulty window -------------------------- */
-
-
-
-/* ------------------------------ Change window ---------------------------- */
-
-
-/* ------------------------------- Game window ----------------------------- */
-
-/* QSvgWidget#coinIcon {
-    margin-right: 50px;
-}
-
-QPixmap#underIcon {
-    margin-left: 50px;
-} */
-/* ------------------------------ Pause window ----------------------------- */
-
-
-
-
-
-

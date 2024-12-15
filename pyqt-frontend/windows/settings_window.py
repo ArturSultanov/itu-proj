@@ -29,7 +29,7 @@ class SettingsScreen(QWidget):
 
         image_layout = QVBoxLayout()
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/settings_pic.png")) 
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/settings_pic.png")) 
         self.right_img.setObjectName("settingPic")
         image_layout.addWidget(self.right_img, alignment=Qt.AlignRight)
         main_layout.addLayout(image_layout)

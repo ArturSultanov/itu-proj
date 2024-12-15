@@ -55,7 +55,7 @@ class PauseScreen(QWidget):
 
         self.layout.addLayout(self.main_layout)
 
-        img = QPixmap("assets/icons/pause_pic.png")
+        img = QPixmap("assets/icons/screen_pic/pause_pic.png")
         scaled_img = img.scaled(600, 600, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.img = QLabel(self)
         self.img.setPixmap(scaled_img)

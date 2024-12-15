@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, QMessageBox
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtGui import QPixmap
 
@@ -27,6 +27,7 @@ class LoginScreen(QWidget):
         user_input = QVBoxLayout()
         self.username = QLineEdit(self)
         self.username.setObjectName("usernameInput")
+        self.username.textChanged.connect(self.check_username_length)
         user_input.addWidget(self.username)
         self.userpic = QLabel(self)
         self.userpic.setPixmap(QPixmap("assets/icons/underscore.png"))
@@ -51,14 +52,48 @@ class LoginScreen(QWidget):
         main_layout.addLayout(left_layout)
 
         self.right_img = QLabel(self)
-        self.right_img.setPixmap(QPixmap("assets/icons/login_pic.png")) 
+        self.right_img.setPixmap(QPixmap("assets/icons/screen_pic/login_pic.png")) 
         self.right_img.setObjectName("loginPic")
         main_layout.addWidget(self.right_img)
 
         self.setLayout(main_layout)
 
+    def check_username_length(self):
+        if len(self.username.text()) > 10:
+            self.username.setText(self.username.text()[:10])
+            self.show_warning("The login must contain 10 or fewer characters")
+
+    def show_warning(self, message):
+        parent_widget = self.window().window()
+        msg = QMessageBox(parent_widget)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Warning")
+        msg.setText(message)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setStyleSheet("""
+            QLabel {
+                font-size: 18pt;
+            }
+            QPushButton {
+                min-width: 200px;
+                min-height: 60px;
+                font-size: 20pt;
+            }
+        """)
+
+        main_geometry = parent_widget.geometry()
+        msg.move(
+            main_geometry.x() + 200,
+            main_geometry.y() + 400
+        )
+        msg.exec_()
+
     def on_login_button_click(self):
         username = self.username.text()
+        if not username.strip():
+            self.show_warning("Username cannot be empty.")
+            return
+        
         response = self.controller.login(username)
         if response:
             self.controller.show_main_menu()
