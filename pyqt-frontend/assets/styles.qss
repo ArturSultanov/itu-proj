@@ -1,0 +1,90 @@
+/* ------------------------------------------------------------
+    Author: Tatiana Fedorova (xfedor14)
+    Subject: ITU
+    Year: 2024
+    ------------------------------------------------------------
+*/
+
+QMainWindow, QWidget {
+    background-color: #FFE500;
+    font-family: 'Press Start 2P';
+    font-size: 38px;
+    color: black;
+}
+
+QPushButton {
+    color: black;
+    border: 3px solid #FFE500;
+    padding: 10px;
+    font-size: 35px;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+/* ------------------------------ Login window ----------------------------- */
+
+QLabel#nameTextLabel {
+    max-height: 50px;
+    max-width: 600px;
+    margin-left: 100px;
+}
+
+QLineEdit#usernameInput {
+    max-width: 480px;
+    color: black;
+    border: 3px solid #FFE500;
+    font-size: 35px;
+    text-align: left;
+    letter-spacing: 2px;
+    margin-left: 30px;
+}
+
+QLabel#underscoreIcon {
+    max-width: 480px;
+    max-height: 10px;
+}
+
+QPushButton#confirmBtn {
+    max-width: 300px;
+    margin-left: 250px;
+    margin-bottom: 280px;
+}
+
+QPushButton#quitBtn {
+    max-width: 350px;
+    margin: 30px;
+}
+
+QLabel#loginPic {
+    padding-left: 150px;
+}
+
+/* ------------------------------ Main window ------------------------------ */
+
+QLabel#welcomeTextLabel {
+    margin: 30px;
+    text-align: left;
+}
+
+QPushButton#leaderBtn {
+    margin-bottom: 100px;
+}
+
+/* ----------------------------- Settings window --------------------------- */
+
+QPushButton#paletteBtn {
+    margin-top: 280px;
+    margin-left: 80px;
+}
+
+QPushButton#leftBtn {
+    margin-left: 80px;
+}
+
+QPushButton#backBtn {
+    margin-bottom: 25px;
+}
+
+QLabel#underscoreIcon {
+    margin-left: 30px;
+}
