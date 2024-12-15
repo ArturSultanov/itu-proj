@@ -14,59 +14,59 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │
 ├── readme.txt
 │
-├── tkinter-frontend/                                               Author: xmovse00
-│   ├── src/
-│   │   ├── __init__.py
-│   │   ├── login_page.py
-│   │   ├── menu_page.py
-│   │   ├── game_page.py
-│   │   ├── change_login_page.py
-│   │   ├── difficulty_page.py
-│   │   ├── leader_page.py
-│   │   ├── pause_page.py
-│   │   └── settings_page.py
-│   ├── main.py
-│   ├── README.md
-│   ├── requirements.txt
-│   └── assets/
-│       └── images/
-│           └── ...
+├── tkinter-frontend/                                   Author: xmovse00
+│   ├── src/                                            Application source code
+│   │   ├── __init__.py                                 
+│   │   ├── login_page.py                               login page for user authentication
+│   │   ├── menu_page.py                                Main menu page with navigation buttons
+│   │   ├── game_page.py                                Gameplay page, including grid and game logic
+│   │   ├── change_login_page.py                        Page for changing the user login
+│   │   ├── difficulty_page.py                          Page for selecting the game difficulty
+│   │   ├── leader_page.py                              Leaderboard page, displaying the top players
+│   │   ├── pause_page.py                               Page when user pauses the game
+│   │   └── settings_page.py                            Settings page with navigation
+│   ├── main.py                                         Entry point of the application
+│   ├── README.md                                       
+│   ├── requirements.txt                                Python dependencies
+│   └── assets/                                         Stores images used for the app
+│       └── images/                                                 
+│           └── ...                                                 
 │
-├── swiftui-frontend/                                               Author: xsulta01
-│   ├── Assets.xcassets                                             Application assests
+├── swiftui-frontend/                                   Author: xsulta01
+│   ├── Assets.xcassets                                 Application assests
 │   │   ├── AccentColor.colorset    
 │   │   └── AppIcon.appiconset
 │   │       ├── 1024.png
 │   │       ├── 128.png
 │   │       └── ...
-|   ├── Info.plist                                                  Metadata for the app
+|   ├── Info.plist                                      Metadata for the app
 │   ├── Banners
-│   │   ├── BannerManager.swift                                     Manages to display in-app notification
-│   │   └── NotificationBanner.swift                                Predefined view for notification
+│   │   ├── BannerManager.swift                         Manages to display in-app notification
+│   │   └── NotificationBanner.swift                    Predefined view for notification
 │   ├── Models                          
-│   │   └── ModelsManager.swift                                     Models for BE API requests
+│   │   └── ModelsManager.swift                         Models for BE API requests
 │   ├── Network                         
-│   │   └── NetworkManager.swift                                    Methods for BE API interaction
+│   │   └── NetworkManager.swift                        Methods for BE API interaction
 │   ├── Styles
-│   │   ├── ButtonStyle.swift                                       Predefined buttons styles
-│   │   ├── ColorPalette.swift                                      Normal and adaptive color palettes
-│   │   └── PaletteManager.swift                                    Manager to switch palettes
+│   │   ├── ButtonStyle.swift                           Predefined buttons styles
+│   │   ├── ColorPalette.swift                          Normal and adaptive color palettes
+│   │   └── PaletteManager.swift                        Manager to switch palettes
 │   ├── Views
-│   │   ├── GameBoardView.swift                                     Game board with the grid of gems view
-│   │   ├── GemView.swift                                           Represents individual gem
-│   │   ├── LeaderBoardView.swift                                   Top players leaderboard view
-│   │   ├── LoginView.swift                                         User login view
-│   │   ├── MainMenuView.swift                                      Main navigation menu view
-│   │   └── SettingsView.swift                                      App settings view
-|   ├── swiftui_frontend.entitlements                               Defines the app permissions and capabilities 
-│   ├── swiftui_frontendApp.swift                                   The entry point of the app
-|   ├── swiftui-frontend.xcodeproj                                  App build settings, dependencies, and target definitions
+│   │   ├── GameBoardView.swift                         Game board with the grid of gems view
+│   │   ├── GemView.swift                               Represents individual gem
+│   │   ├── LeaderBoardView.swift                       Top players leaderboard view
+│   │   ├── LoginView.swift                             User login view
+│   │   ├── MainMenuView.swift                          Main navigation menu view
+│   │   └── SettingsView.swift                          App settings view
+|   ├── swiftui_frontend.entitlements                   Defines the app permissions and capabilities 
+│   ├── swiftui_frontendApp.swift                       The entry point of the app
+|   ├── swiftui-frontend.xcodeproj                      App build settings, dependencies, and target definitions
 |   │   ├── project.pbxproj
 |   │   ├── project.xcworkspace
 │   │   └── ...
 │   └── README.md
 │
-├── kotlin-frontend                                                 Author: xshche05
+├── kotlin-frontend                                     Author: xshche05
 │   ├── androidApp
 │   │   ├── build.gradle.kts
 │   │   └── src
@@ -99,7 +99,7 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │   │           │       ├── PlaygroundScreen.kt         Playground Screen, to play the game
 │   │           │       ├── SettingsScreen.kt           Settings Screen, to change the settings of the game
 │   │           │       └── UserProfileScreen.kt        User Profile, to show the user profile
-│   │           └── res                                                 Resources for the App
+│   │           └── res                                 Resources for the App
 │   │               ├── values
 │   │               │   └── styles.xml
 │   │               └── xml
