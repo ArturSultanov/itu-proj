@@ -96,7 +96,7 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 │           │                       ├── PauseScreen.kt              Pause Screen, to pause the game
 │           │                       ├── PlaygroundScreen.kt         Playground Screen, to play the game
 │           │                       ├── SettingsScreen.kt           Settings Screen, to change the settings of the game
-│           │                       └── UserProfile.kt              User Profile, to show the user profile
+│           │                       └── UserProfileScreen.kt        User Profile, to show the user profile
 │           └── res                                                 Resources for the App
 │               ├── values
 │               │   └── styles.xml
