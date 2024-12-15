@@ -93,7 +93,7 @@ This SwiftUI application is a dynamic gem-matching game featuring user authentic
 #### **NetworkManager**
 - **Purpose**: Manages all backend interactions.
 - **Key Features**:
-  - Singleton instance (`NetworkManager.shared`) for centralized networking.
+  - `NetworkManager` for centralized networking.
   - Divided into functional extensions:
     - Login (`login()`)
     - Game management (`newGame()`, `continue_game()`, `deleteGame()`)
