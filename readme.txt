@@ -1,4 +1,4 @@
-Tile Match Game 
+Team xsulta01: MatchGame
 
 Each member of the team build the own FE in the individual technogoly.
 The directories are named by technogoly that was used for implementation.
@@ -10,7 +10,7 @@ kotlin-frontend/    Author: Kirill Shchetiniuk (xshche05)
 
 01_xfedor14_xmovse00_xshche05_xsulta01_source/
 │
-├── backend/...                                                     Unified BE for all FEs
+├── backend/...                                         Unified BE for all FEs
 │
 ├── readme.txt
 │
