@@ -43,3 +43,9 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Documentation for API
 Documentation can be found at [http://0.0.0.0:8000/docs#](http://0.0.0.0:8000/docs#) after application startup.
+
+
+## Final score
+
+**50/55**
+Miron penalization due to partially unclear gui documentation preprodaction.
